@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "profile_image")
+@Table(name = "tbl_profile_image")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProfileImage {
 	@Id
