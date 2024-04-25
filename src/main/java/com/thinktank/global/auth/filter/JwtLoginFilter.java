@@ -1,6 +1,7 @@
 package com.thinktank.global.auth.filter;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.thinktank.api.entity.TokenSave;
+import com.thinktank.api.repository.auth.TokenRepository;
 import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.common.util.CookieUtils;
 
@@ -34,6 +37,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 	private final AuthenticationManager authenticationManager;
 
 	private final JwtProviderService jwtProviderService;
+
+	private final TokenRepository tokenRepository;
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws
@@ -67,6 +72,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 			REFRESH_TOKEN_EXPIRATION_TIME_MS
 		);
 
+		addRefreshToken(username, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME_MS);
+
 		response.setHeader(ACCESS_TOKEN_HEADER, accessToken);
 		response.addCookie(CookieUtils.createCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken));
 		response.setStatus(HttpStatus.OK.value());
@@ -77,5 +84,18 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		AuthenticationException failed) throws IOException, ServletException {
 
 		response.setStatus(HTTP_STATUS_UNAUTHORIZED);
+	}
+
+	private void addRefreshToken(String username, String refresh, Long expiredMs) {
+
+		Date date = new Date(System.currentTimeMillis() + expiredMs);
+
+		TokenSave tokenSave = TokenSave.builder()
+			.username(username)
+			.refreshToken(refresh)
+			.expiration(date.toString())
+			.build();
+
+		tokenRepository.save(tokenSave);
 	}
 }
