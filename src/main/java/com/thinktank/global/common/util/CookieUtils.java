@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,7 @@ public class CookieUtils {
 
 	private static final int COOKIE_MAX_AGE_ONE_DAY = 24 * 60 * 60;
 
-	public static Cookie createCookie(String key, String value) {
+	public static Cookie tokenCookie(String key, String value) {
 
 		Cookie cookie = new Cookie(key, value);
 		cookie.setMaxAge(COOKIE_MAX_AGE_ONE_DAY);
@@ -32,5 +33,13 @@ public class CookieUtils {
 			.filter(cookie -> cookie.getName().equals(cookieName))
 			.findFirst()
 			.map(Cookie::getValue);
+	}
+
+	public static void deleteCookie(String cookieName, HttpServletResponse response) {
+
+		Cookie cookie = new Cookie(cookieName, null);
+		cookie.setMaxAge(0);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 	}
 }
