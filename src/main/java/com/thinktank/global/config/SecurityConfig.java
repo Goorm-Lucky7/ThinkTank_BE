@@ -13,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.thinktank.global.auth.filter.AuthenticationFilter;
+import com.thinktank.global.auth.jwt.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final AuthenticationConfiguration authenticationConfiguration;
+
+	private final JwtTokenProvider jwtTokenProvider;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws
@@ -51,7 +54,7 @@ public class SecurityConfig {
 		);
 
 		httpSecurity.addFilterAt(
-			new AuthenticationFilter(authenticationManager(authenticationConfiguration)),
+			new AuthenticationFilter(authenticationManager(authenticationConfiguration), jwtTokenProvider),
 			UsernamePasswordAuthenticationFilter.class
 		);
 
