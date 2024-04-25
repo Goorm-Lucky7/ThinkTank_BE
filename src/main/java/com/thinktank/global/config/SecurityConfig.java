@@ -13,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.thinktank.global.auth.filter.JWTLoginFilter;
+import com.thinktank.global.auth.jwt.JWTAuthenticationFilter;
 import com.thinktank.global.auth.jwt.JWTTokenProvider;
 
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,11 @@ public class SecurityConfig {
 		httpSecurity.authorizeHttpRequests((auth) -> auth
 			.requestMatchers("/login", "/api/signup").permitAll()
 			.anyRequest().authenticated()
+		);
+
+		httpSecurity.addFilterBefore(
+			new JWTAuthenticationFilter(jwtTokenProvider),
+			JWTLoginFilter.class
 		);
 
 		httpSecurity.addFilterAt(
