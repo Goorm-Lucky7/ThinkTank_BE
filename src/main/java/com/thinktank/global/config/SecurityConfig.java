@@ -12,9 +12,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.thinktank.global.auth.filter.JwtLoginFilter;
-import com.thinktank.global.auth.filter.JwtAuthenticationFilter;
+import com.thinktank.api.repository.auth.TokenRepository;
 import com.thinktank.api.service.auth.JwtProviderService;
+import com.thinktank.global.auth.filter.JwtAuthenticationFilter;
+import com.thinktank.global.auth.filter.JwtLoginFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +27,8 @@ public class SecurityConfig {
 	private final AuthenticationConfiguration authenticationConfiguration;
 
 	private final JwtProviderService jwtProviderService;
+
+	private final TokenRepository tokenRepository;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws
@@ -61,7 +64,7 @@ public class SecurityConfig {
 		);
 
 		httpSecurity.addFilterAt(
-			new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtProviderService),
+			new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtProviderService, tokenRepository),
 			UsernamePasswordAuthenticationFilter.class
 		);
 
