@@ -55,11 +55,10 @@ public class JwtTokenProvider {
 			.before(new Date());
 	}
 
-	public String createJwt(String email, String role, Long expiredMs) {
+	public String createJwt(String email, Long expiredMs) {
 
 		return Jwts.builder()
 			.claim("email", email)
-			.claim("role", role)
 			.issuedAt(new Date(System.currentTimeMillis()))
 			.expiration(new Date(System.currentTimeMillis() + expiredMs))
 			.compact();
