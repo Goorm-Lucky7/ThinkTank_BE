@@ -48,7 +48,7 @@ public class UserService {
 
 	private void validatePasswordMatch(String password, String checkPassword) {
 
-		if (password == null || !password.equals(checkPassword)) {
+		if (password.isBlank() || !password.equals(checkPassword)) {
 			throw new BadRequestException(ErrorCode.FAIL_WRONG_PASSWORD);
 		}
 	}
