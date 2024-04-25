@@ -1,14 +1,34 @@
 package com.thinktank.api.dto.user.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
 public record SignupDTO(
-	@NotBlank(message = "이메일을 입력해주세요.") String email,
-	@NotBlank(message = "닉네임을 입력해주세요.") String nickname,
-	@NotBlank(message = "비밀번호를 입력해주세요.") String password,
-	@NotBlank(message = "확인 비밀번호를 입력해주세요") String checkPassword,
+	@NotBlank(message = "이메일을 입력해주세요.")
+	@Email(message = "올바른 이메일 형식이 아닙니다.")
+	@Size(max = 30, message = "이메일은 최대 30자까지 가능합니다.")
+	String email,
+
+	@NotBlank(message = "닉네임을 입력해주세요.")
+	@Size(min = 2, max = 10, message = "닉네임은 2글자에서 10글자 사이여야 합니다.")
+	@Pattern(regexp = "^[A-Za-z\\d]+$", message = "닉네임은 영문과 숫자만 사용가능합니다.")
+	String nickname,
+
+	@NotBlank(message = "비밀번호를 입력해주세요.")
+	@Size(min = 6, max = 20, message = "비밀번호는 6글자에서 20글자 사이여야 합니다.")
+	@Pattern(
+		regexp = "^[A-Za-z\\d~!@#$%^&*\\-_+=`|\\\\(){}\\[\\]:;\"'<>,.?/]+$",
+		message = "비밀번호는 영문, 숫자, 특정 특수문자(~!@#$%^&*\\-_+=`|\\(){}[]:;\"'<>,.?/)만 포함할 수 있습니다."
+	)
+	String password,
+
+	@NotBlank(message = "확인 비밀번호를 입력해주세요.")
+	String checkPassword,
+
 	String github,
 	String blog,
 	String introduce
