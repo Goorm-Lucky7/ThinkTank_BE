@@ -1,5 +1,6 @@
 package com.thinktank.api.entity;
 
+import com.thinktank.api.dto.user.request.SignupDTO;
 import com.thinktank.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -56,5 +57,17 @@ public class User extends BaseTimeEntity {
 		this.github = github;
 		this.blog = blog;
 		this.introduce = introduce;
+	}
+
+	public static User signup(SignupDTO signupDTO, String password) {
+
+		return User.builder()
+			.email(signupDTO.email())
+			.nickname(signupDTO.nickname())
+			.password(password)
+			.github(signupDTO.github())
+			.blog(signupDTO.blog())
+			.introduce(signupDTO.introduce())
+			.build();
 	}
 }
