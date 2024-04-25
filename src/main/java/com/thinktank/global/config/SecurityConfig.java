@@ -49,7 +49,7 @@ public class SecurityConfig {
 		httpSecurity.httpBasic(AbstractHttpConfigurer::disable);
 
 		httpSecurity.authorizeHttpRequests((auth) -> auth
-			.requestMatchers("/api/login", "/api/signup").permitAll()
+			.requestMatchers("/login", "/api/signup").permitAll()
 			.anyRequest().authenticated()
 		);
 
