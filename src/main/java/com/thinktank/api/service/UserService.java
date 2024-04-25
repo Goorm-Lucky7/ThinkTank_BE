@@ -35,21 +35,21 @@ public class UserService {
 	private void validateEmailNotExists(String email) {
 
 		if (userRepository.existsByEmail(email)) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_EMAIL_CONFLICT);
 		}
 	}
 
 	private void validateNicknameNotExists(String nickname) {
 
 		if (userRepository.existsByNickname(nickname)) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_NICKNAME_CONFLICT);
 		}
 	}
 
 	private void validatePasswordMatch(String password, String checkPassword) {
 
 		if (password == null || !password.equals(checkPassword)) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_WRONG_PASSWORD);
 		}
 	}
 }
