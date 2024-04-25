@@ -27,7 +27,10 @@ public class UserService {
 		validateNicknameNotExists(signupDTO.nickname());
 		validatePasswordMatch(signupDTO.password(), signupDTO.checkPassword());
 
-		User user = User.signup(signupDTO, bCryptPasswordEncoder.encode(signupDTO.password()));
+		final User user = User.signup(
+			signupDTO,
+			bCryptPasswordEncoder.encode(signupDTO.password())
+		);
 
 		userRepository.save(user);
 	}
