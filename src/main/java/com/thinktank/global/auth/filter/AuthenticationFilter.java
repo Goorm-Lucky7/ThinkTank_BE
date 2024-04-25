@@ -52,8 +52,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
 		ClientDetails clientDetails = (ClientDetails)authResult.getPrincipal();
 
-		String email = clientDetails.getUsername();
-		String token = jwtTokenProvider.createJwt(email, TOKEN_EXPIRATION_TIME_MS);
+		String username = clientDetails.getUsername();
+		String token = jwtTokenProvider.createJwt(username, TOKEN_EXPIRATION_TIME_MS);
 
 		response.addHeader(AUTHORIZATION_HEADER, TOKEN_PREFIX + token);
 	}
