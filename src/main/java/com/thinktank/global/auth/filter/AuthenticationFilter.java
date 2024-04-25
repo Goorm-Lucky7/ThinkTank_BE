@@ -8,6 +8,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.thinktank.global.auth.jwt.JwtTokenProvider;
+import com.thinktank.global.auth.service.ClientDetails;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +20,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
+	private static final int HTTP_STATUS_UNAUTHORIZED = 401;
+
+	private static final long TOKEN_EXPIRATION_TIME_MS = 60 * 60 * 10L;
+
+	private static final String AUTHORIZATION_HEADER = "Authorization";
+
+	private static final String TOKEN_PREFIX = "Bearer ";
+
 	private final AuthenticationManager authenticationManager;
+
+	private final JwtTokenProvider jwtTokenProvider;
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws
@@ -37,11 +50,18 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 		Authentication authResult) throws IOException, ServletException {
 
+		ClientDetails clientDetails = (ClientDetails)authResult.getPrincipal();
+
+		String email = clientDetails.getUsername();
+		String token = jwtTokenProvider.createJwt(email, TOKEN_EXPIRATION_TIME_MS);
+
+		response.addHeader(AUTHORIZATION_HEADER, TOKEN_PREFIX + token);
 	}
 
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException failed) throws IOException, ServletException {
 
+		response.setStatus(HTTP_STATUS_UNAUTHORIZED);
 	}
 }
