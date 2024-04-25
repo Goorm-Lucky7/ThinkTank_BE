@@ -75,7 +75,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		addRefreshToken(username, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME_MS);
 
 		response.setHeader(ACCESS_TOKEN_HEADER, accessToken);
-		response.addCookie(CookieUtils.createCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken));
+		response.addCookie(CookieUtils.tokenCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken));
 		response.setStatus(HttpStatus.OK.value());
 	}
 
