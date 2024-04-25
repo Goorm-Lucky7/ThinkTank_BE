@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 	private static final int HTTP_STATUS_UNAUTHORIZED = 401;
 
