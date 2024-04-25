@@ -55,7 +55,7 @@ public class AuthorizationService {
 		addRefreshToken(username, refreshToken, REFRESH_TOKEN_EXPIRY_DURATION);
 
 		response.setHeader(ACCESS_TOKEN_TYPE, newAccessToken);
-		response.addCookie(CookieUtils.createCookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken));
+		response.addCookie(CookieUtils.tokenCookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken));
 	}
 
 	private void validateTokenNotExpired(String refreshToken) {
