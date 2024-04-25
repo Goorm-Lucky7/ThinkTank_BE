@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.thinktank.global.auth.jwt.JwtTokenProvider;
+import com.thinktank.global.auth.jwt.JWTTokenProvider;
 import com.thinktank.global.auth.service.ClientDetails;
 
 import jakarta.servlet.FilterChain;
@@ -30,7 +30,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 	private final AuthenticationManager authenticationManager;
 
-	private final JwtTokenProvider jwtTokenProvider;
+	private final JWTTokenProvider jwtTokenProvider;
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws

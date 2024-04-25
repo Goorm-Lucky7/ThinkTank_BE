@@ -13,7 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.thinktank.global.auth.filter.JWTLoginFilter;
-import com.thinktank.global.auth.jwt.JwtTokenProvider;
+import com.thinktank.global.auth.jwt.JWTTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +24,7 @@ public class SecurityConfig {
 
 	private final AuthenticationConfiguration authenticationConfiguration;
 
-	private final JwtTokenProvider jwtTokenProvider;
+	private final JWTTokenProvider jwtTokenProvider;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws
