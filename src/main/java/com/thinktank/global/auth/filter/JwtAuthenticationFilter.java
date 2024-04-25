@@ -11,6 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.thinktank.api.entity.User;
 import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.auth.service.ClientDetails;
+import com.thinktank.global.error.model.ErrorCode;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -24,8 +25,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private static final String ACCESS_TOKEN_HEADER = "access";
 
-	private static final String REFRESH_TOKEN_COOKIE_NAME = "refresh";
-
 	private final JwtProviderService jwtProviderService;
 
 	@Override
@@ -35,7 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String accessToken = request.getHeader(ACCESS_TOKEN_HEADER);
 
 		if (accessToken == null) {
-
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -43,22 +41,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			jwtProviderService.isExpired(accessToken);
 		} catch (ExpiredJwtException e) {
-
-			PrintWriter writer = response.getWriter();
-			writer.print("ACCESS TOKEN EXPIRED");
-
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			setUnauthorizedResponse(response, ErrorCode.FAIL_TOKEN_EXPIRE_EXCEPTION.getMessage());
 			return;
 		}
 
 		String category = jwtProviderService.getCategory(accessToken);
-
 		if (!category.equals(ACCESS_TOKEN_HEADER)) {
-
-			PrintWriter writer = response.getWriter();
-			writer.print("INVALID ACCESS TOKEN");
-
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			setUnauthorizedResponse(response, ErrorCode.FAIL_NOT_TOKEN_FOUND_EXCEPTION.getMessage());
 			return;
 		}
 
@@ -79,5 +68,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		SecurityContextHolder.getContext().setAuthentication(authToken);
 
 		filterChain.doFilter(request, response);
+	}
+
+	private void setUnauthorizedResponse(HttpServletResponse response, String errorMessage) throws IOException {
+
+		PrintWriter writer = response.getWriter();
+		writer.print(errorMessage);
+		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 }
