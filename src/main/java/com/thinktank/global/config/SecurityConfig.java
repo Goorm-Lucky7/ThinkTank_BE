@@ -51,6 +51,7 @@ public class SecurityConfig {
 
 		httpSecurity.authorizeHttpRequests((auth) -> auth
 			.requestMatchers("/login", "/api/signup").permitAll()
+			.requestMatchers("/api/reissue").permitAll()
 			.anyRequest().authenticated()
 		);
 
