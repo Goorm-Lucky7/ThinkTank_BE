@@ -10,10 +10,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.thinktank.global.auth.jwt.JWTTokenProvider;
+import com.thinktank.global.common.util.CookieUtils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +26,6 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 	private static final long ACCESS_TOKEN_EXPIRATION_TIME_MS = 60 * 60 * 10L;
 
 	private static final long REFRESH_TOKEN_EXPIRATION_TIME_MS = 60 * 60 * 24 * 1000L;
-
-	private static final int COOKIE_MAX_AGE_ONE_DAY = 24 * 60 * 60;
 
 	private static final String ACCESS_TOKEN_HEADER = "access";
 
@@ -70,7 +68,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 		);
 
 		response.setHeader(ACCESS_TOKEN_HEADER, accessToken);
-		response.addCookie(createCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken));
+		response.addCookie(CookieUtils.createCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken));
 		response.setStatus(HttpStatus.OK.value());
 	}
 
@@ -79,14 +77,5 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 		AuthenticationException failed) throws IOException, ServletException {
 
 		response.setStatus(HTTP_STATUS_UNAUTHORIZED);
-	}
-
-	private Cookie createCookie(String key, String value) {
-
-		Cookie cookie = new Cookie(key, value);
-		cookie.setMaxAge(24 * 60 * 60);
-		cookie.setHttpOnly(true);
-
-		return cookie;
 	}
 }
