@@ -32,7 +32,8 @@ public class SecurityConfig {
 		httpSecurity.httpBasic(AbstractHttpConfigurer::disable);
 
 		httpSecurity.authorizeHttpRequests((auth) -> auth
-			.anyRequest().permitAll()
+			.requestMatchers("/api/login", "/api/signup").permitAll()
+			.anyRequest().authenticated()
 		);
 
 		httpSecurity.sessionManagement((session) -> session
