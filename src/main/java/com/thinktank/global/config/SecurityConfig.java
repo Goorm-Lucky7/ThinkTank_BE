@@ -12,7 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.thinktank.global.auth.filter.JWTLoginFilter;
+import com.thinktank.global.auth.filter.JwtLoginFilter;
 import com.thinktank.global.auth.filter.JwtAuthenticationFilter;
 import com.thinktank.api.service.auth.JwtProviderService;
 
@@ -56,11 +56,11 @@ public class SecurityConfig {
 
 		httpSecurity.addFilterBefore(
 			new JwtAuthenticationFilter(jwtProviderService),
-			JWTLoginFilter.class
+			JwtLoginFilter.class
 		);
 
 		httpSecurity.addFilterAt(
-			new JWTLoginFilter(authenticationManager(authenticationConfiguration), jwtProviderService),
+			new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtProviderService),
 			UsernamePasswordAuthenticationFilter.class
 		);
 
