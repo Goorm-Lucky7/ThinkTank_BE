@@ -1,6 +1,10 @@
 package com.thinktank.global.common.util;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -16,5 +20,17 @@ public class CookieUtils {
 		cookie.setHttpOnly(true);
 
 		return cookie;
+	}
+
+	public static Optional<String> findCookieValue(HttpServletRequest request, String cookieName) {
+
+		if (request.getCookies() == null) {
+			return Optional.empty();
+		}
+
+		return Arrays.stream(request.getCookies())
+			.filter(cookie -> cookie.getName().equals(cookieName))
+			.findFirst()
+			.map(Cookie::getValue);
 	}
 }
