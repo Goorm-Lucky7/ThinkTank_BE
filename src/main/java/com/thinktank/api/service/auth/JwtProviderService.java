@@ -44,7 +44,7 @@ public class JwtProviderService {
 			.get("category", String.class);
 	}
 
-	public Boolean isExpired(String token) {
+	public boolean isExpired(String token) {
 
 		return Jwts.parser()
 			.verifyWith(secretKey)
