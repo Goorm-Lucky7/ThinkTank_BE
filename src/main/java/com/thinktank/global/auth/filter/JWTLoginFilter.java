@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.thinktank.global.auth.jwt.JWTTokenProvider;
+import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.common.util.CookieUtils;
 
 import jakarta.servlet.FilterChain;
@@ -33,7 +33,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 	private final AuthenticationManager authenticationManager;
 
-	private final JWTTokenProvider jwtTokenProvider;
+	private final JwtProviderService jwtProviderService;
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws
@@ -55,13 +55,13 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 		String username = authResult.getName();
 
-		String accessToken = jwtTokenProvider.createJwt(
+		String accessToken = jwtProviderService.createJwt(
 			ACCESS_TOKEN_HEADER,
 			username,
 			ACCESS_TOKEN_EXPIRATION_TIME_MS
 		);
 
-		String refreshToken = jwtTokenProvider.createJwt(
+		String refreshToken = jwtProviderService.createJwt(
 			REFRESH_TOKEN_COOKIE_NAME,
 			username,
 			REFRESH_TOKEN_EXPIRATION_TIME_MS

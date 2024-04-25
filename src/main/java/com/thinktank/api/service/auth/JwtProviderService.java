@@ -1,4 +1,4 @@
-package com.thinktank.global.auth.jwt;
+package com.thinktank.api.service.auth;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Jwts;
 
 @Component
-public class JWTTokenProvider {
+public class JwtProviderService {
 
 	private SecretKey secretKey;
 
-	public JWTTokenProvider(@Value("${spring.jwt.secret}") String secret) {
+	public JwtProviderService(@Value("${spring.jwt.secret}") String secret) {
 
 		secretKey = new SecretKeySpec(
 			secret.getBytes(StandardCharsets.UTF_8),

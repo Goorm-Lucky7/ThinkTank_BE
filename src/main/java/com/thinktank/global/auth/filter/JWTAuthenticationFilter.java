@@ -1,6 +1,7 @@
-package com.thinktank.global.auth.jwt;
+package com.thinktank.global.auth.filter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -8,8 +9,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.thinktank.api.entity.User;
+import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.auth.service.ClientDetails;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,33 +22,50 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
-	private final JWTTokenProvider jwtTokenProvider;
+	private static final String ACCESS_TOKEN_HEADER = "access";
+
+	private static final String REFRESH_TOKEN_COOKIE_NAME = "refresh";
+
+	private final JwtProviderService jwtProviderService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-		String authorization = request.getHeader("Authorization");
+		String accessToken = request.getHeader(ACCESS_TOKEN_HEADER);
 
-		if (authorization == null || !authorization.startsWith("Bearer ")) {
-
-			filterChain.doFilter(request, response);
-			return;
-		}
-
-		String token = authorization.split(" ")[1];
-
-		if (jwtTokenProvider.isExpired(token)) {
+		if (accessToken == null) {
 
 			filterChain.doFilter(request, response);
 			return;
 		}
 
-		String username = jwtTokenProvider.getUsername(token);
+		try {
+			jwtProviderService.isExpired(accessToken);
+		} catch (ExpiredJwtException e) {
+
+			PrintWriter writer = response.getWriter();
+			writer.print("ACCESS TOKEN EXPIRED");
+
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			return;
+		}
+
+		String category = jwtProviderService.getCategory(accessToken);
+
+		if (!category.equals(ACCESS_TOKEN_HEADER)) {
+
+			PrintWriter writer = response.getWriter();
+			writer.print("INVALID ACCESS TOKEN");
+
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			return;
+		}
+
+		String username = jwtProviderService.getUsername(accessToken);
 
 		User user = User.builder()
 			.email(username)
-			.password("temppassword")
 			.build();
 
 		ClientDetails clientDetails = new ClientDetails(user);
