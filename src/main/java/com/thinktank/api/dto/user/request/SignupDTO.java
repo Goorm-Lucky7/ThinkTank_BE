@@ -8,14 +8,17 @@ import lombok.Builder;
 
 @Builder
 public record SignupDTO(
+	@NotBlank(message = "[❎ ERROR] 이메일을 입력해주세요.")
 	@Email(message = "[❎ ERROR] 올바른 이메일 형식이 아닙니다.")
 	@Size(max = 30, message = "[❎ ERROR] 이메일은 최대 30자까지 가능합니다.")
 	String email,
 
+	@NotBlank(message = "[❎ ERROR] 닉네임을 입력해주세요.")
 	@Size(min = 2, max = 10, message = "[❎ ERROR] 닉네임은 2글자에서 10글자 사이여야 합니다.")
 	@Pattern(regexp = "^[A-Za-z\\d]+$", message = "[❎ ERROR] 닉네임은 영문과 숫자만 사용가능합니다.")
 	String nickname,
 
+	@NotBlank(message = "[❎ ERROR] 비밀번호를 입력해주세요.")
 	@Size(min = 6, max = 20, message = "[❎ ERROR] 비밀번호는 6글자에서 20글자 사이여야 합니다.")
 	@Pattern(
 		regexp = "^[A-Za-z\\d~!@#$%^&*\\-_+=`|\\\\(){}\\[\\]:;\"'<>,.?/]+$",
