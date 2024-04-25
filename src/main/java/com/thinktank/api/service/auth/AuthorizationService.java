@@ -20,6 +20,8 @@ public class AuthorizationService {
 
 	private static final long ACCESS_TOKEN_EXPIRY_DURATION = 600000L;
 
+	private static final long REFRESH_TOKEN_EXPIRY_DURATION = 86400000L;
+
 	private final JwtProviderService jwtProviderService;
 
 	public void refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
@@ -31,13 +33,20 @@ public class AuthorizationService {
 		validateTokenIsRefresh(refreshToken);
 
 		String username = jwtProviderService.getUsername(refreshToken);
-		String newAccess = jwtProviderService.createJwt(
+
+		String newAccessToken = jwtProviderService.createJwt(
 			ACCESS_TOKEN_TYPE,
 			username,
 			ACCESS_TOKEN_EXPIRY_DURATION
 		);
+		String newRefreshToken = jwtProviderService.createJwt(
+			REFRESH_TOKEN_COOKIE_NAME,
+			username,
+			REFRESH_TOKEN_EXPIRY_DURATION
+		);
 
-		response.setHeader(ACCESS_TOKEN_TYPE, newAccess);
+		response.setHeader(ACCESS_TOKEN_TYPE, newAccessToken);
+		response.addCookie(CookieUtils.createCookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken));
 	}
 
 	private void validateTokenNotExpired(String refreshToken) {
