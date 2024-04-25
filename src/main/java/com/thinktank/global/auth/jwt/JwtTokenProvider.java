@@ -24,14 +24,14 @@ public class JwtTokenProvider {
 		);
 	}
 
-	public String getEmail(String token) {
+	public String getUsername(String token) {
 
 		return Jwts.parser()
 			.verifyWith(secretKey)
 			.build()
 			.parseSignedClaims(token)
 			.getPayload()
-			.get("email", String.class);
+			.get("username", String.class);
 	}
 
 	public String getRole(String token) {
@@ -55,10 +55,10 @@ public class JwtTokenProvider {
 			.before(new Date());
 	}
 
-	public String createJwt(String email, Long expiredMs) {
+	public String createJwt(String username, Long expiredMs) {
 
 		return Jwts.builder()
-			.claim("email", email)
+			.claim("username", username)
 			.issuedAt(new Date(System.currentTimeMillis()))
 			.expiration(new Date(System.currentTimeMillis() + expiredMs))
 			.compact();
