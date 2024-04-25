@@ -11,9 +11,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import com.thinktank.api.repository.auth.TokenRepository;
 import com.thinktank.api.service.auth.JwtProviderService;
+import com.thinktank.global.auth.filter.CustomLogoutFilter;
 import com.thinktank.global.auth.filter.JwtAuthenticationFilter;
 import com.thinktank.global.auth.filter.JwtLoginFilter;
 
@@ -61,6 +63,11 @@ public class SecurityConfig {
 		httpSecurity.addFilterBefore(
 			new JwtAuthenticationFilter(jwtProviderService),
 			JwtLoginFilter.class
+		);
+
+		httpSecurity.addFilterBefore(
+			new CustomLogoutFilter(jwtProviderService, tokenRepository),
+			LogoutFilter.class
 		);
 
 		httpSecurity.addFilterAt(
