@@ -18,11 +18,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Getter
 @Table(name = "tbl_post")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseTimeEntity {
@@ -70,24 +68,25 @@ public class Post extends BaseTimeEntity {
 		Language language,
 		String content,
 		String condition,
-		String answer){
-		this.title=title;
-		this.category=category;
-		this.language=language;
-		this.content=content;
-		this.condition=condition;
-		this.answer=answer;
+		String answer
+	) {
+		this.title = title;
+		this.category = category;
+		this.language = language;
+		this.content = content;
+		this.condition = condition;
+		this.answer = answer;
 	}
-	public static Post create(PostCreateDto postCreateDto){
+
+	public static Post create(PostCreateDto postCreateDto) {
 
 		return Post.builder()
 			.title(postCreateDto.title())
-			.category(postCreateDto.category())
-			.language(postCreateDto.language())
+			.category(Category.fromValue(postCreateDto.category()))
+			.language(Language.fromValue(postCreateDto.language()))
 			.content(postCreateDto.content())
 			.condition(postCreateDto.condition())
 			.answer(postCreateDto.answer())
 			.build();
 	}
-
 }
