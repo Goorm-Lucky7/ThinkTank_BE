@@ -1,68 +1,61 @@
 package com.thinktank.api.service.auth;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import org.springframework.stereotype.Service;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import com.thinktank.global.config.TokenConfig;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import lombok.RequiredArgsConstructor;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class JwtProviderService {
 
-	private SecretKey secretKey;
+	private final TokenConfig tokenConfig;
 
-	public JwtProviderService(@Value("${spring.jwt.secret}") String secret) {
+	public String getUsernameFromToken(String token) {
 
-		secretKey = new SecretKeySpec(
-			secret.getBytes(StandardCharsets.UTF_8),
-			Jwts.SIG.HS256.key().build().getAlgorithm()
-		);
+		return parseClaims(token).get("username", String.class);
 	}
 
-	public String getUsername(String token) {
+	public String getCategoryFromToken(String token) {
 
-		return Jwts.parser()
-			.verifyWith(secretKey)
-			.build()
-			.parseSignedClaims(token)
-			.getPayload()
-			.get("username", String.class);
+		return parseClaims(token).get("category", String.class);
 	}
 
-	public String getCategory(String token) {
+	public String provideAccessToken(String category, String username, long accessExpireMs) {
 
-		return Jwts.parser()
-			.verifyWith(secretKey)
-			.build()
-			.parseSignedClaims(token)
-			.getPayload()
-			.get("category", String.class);
+		return commonInfo(category, username, accessExpireMs);
 	}
 
-	public boolean isExpired(String token) {
+	public String provideRefreshToken(String category, String username, long refreshExpireMs) {
 
-		return Jwts.parser()
-			.verifyWith(secretKey)
-			.build()
-			.parseSignedClaims(token)
-			.getPayload()
-			.getExpiration()
-			.before(new Date());
+		return commonInfo(category, username, refreshExpireMs);
 	}
 
-	public String createJwt(String category, String username, Long expiredMs) {
+	private String commonInfo(String category, String username, long expireMs) {
+
+		Date issuDate = new Date();
+		Date expireDate = new Date(issuDate.getTime() + expireMs);
 
 		return Jwts.builder()
 			.claim("category", category)
 			.claim("username", username)
-			.issuedAt(new Date(System.currentTimeMillis()))
-			.expiration(new Date(System.currentTimeMillis() + expiredMs))
-			.signWith(secretKey)
+			.issuedAt(issuDate)
+			.expiration(expireDate)
+			.signWith(tokenConfig.getSecretKey())
 			.compact();
+	}
+
+	private Claims parseClaims(String token) {
+
+		return Jwts.parser()
+			.verifyWith(tokenConfig.getSecretKey())
+			.build()
+			.parseSignedClaims(token)
+			.getPayload();
 	}
 }
