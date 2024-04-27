@@ -1,7 +1,5 @@
 package com.thinktank.api.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.thinktank.api.dto.comment.request.CommentCreateDto;
