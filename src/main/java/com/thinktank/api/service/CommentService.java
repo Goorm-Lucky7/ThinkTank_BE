@@ -23,18 +23,11 @@ public class CommentService {
 
 	@Transactional
 	public void createComment(CommentCreateDto commentCreateDto) {
-		Post post = postRepository.findById(commentCreateDto.postId())
+		final Post post = postRepository.findById(commentCreateDto.postId())
 				.orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST));
-		validateContentLength(commentCreateDto.content());
 
 		Comment comment = Comment.create(commentCreateDto, post);
 
 		commentRepository.save(comment);
-	}
-
-	private void validateContentLength(String content){
-		if (content.length() > CONTENT_MAX_LENGTH) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
-		}
 	}
 }
