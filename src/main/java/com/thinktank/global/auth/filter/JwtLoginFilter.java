@@ -1,7 +1,8 @@
 package com.thinktank.global.auth.filter;
 
+import static com.thinktank.global.common.util.AuthConstants.*;
+
 import java.io.IOException;
-import java.util.Date;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,13 +11,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.thinktank.api.entity.TokenSave;
-import com.thinktank.api.repository.auth.TokenRepository;
+import com.thinktank.api.service.auth.AuthorizationService;
 import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.common.util.CookieUtils;
+import com.thinktank.global.config.TokenConfig;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,21 +26,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
-	private static final int HTTP_STATUS_UNAUTHORIZED = 401;
-
-	private static final long ACCESS_TOKEN_EXPIRATION_TIME_MS = 60 * 60 * 10L;
-
-	private static final long REFRESH_TOKEN_EXPIRATION_TIME_MS = 60 * 60 * 24 * 1000L;
-
-	private static final String ACCESS_TOKEN_HEADER = "access";
-
-	private static final String REFRESH_TOKEN_COOKIE_NAME = "refresh";
+	private final TokenConfig tokenConfig;
 
 	private final AuthenticationManager authenticationManager;
 
 	private final JwtProviderService jwtProviderService;
 
-	private final TokenRepository tokenRepository;
+	private final AuthorizationService authorizationService;
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws
@@ -60,22 +54,24 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 		String username = authResult.getName();
 
-		String accessToken = jwtProviderService.createJwt(
+		String accessToken = jwtProviderService.provideAccessToken(
 			ACCESS_TOKEN_HEADER,
 			username,
-			ACCESS_TOKEN_EXPIRATION_TIME_MS
+			tokenConfig.getAccessTokenExpirationTimeMs()
 		);
-
-		String refreshToken = jwtProviderService.createJwt(
+		String refreshToken = jwtProviderService.provideRefreshToken(
 			REFRESH_TOKEN_COOKIE_NAME,
 			username,
-			REFRESH_TOKEN_EXPIRATION_TIME_MS
+			tokenConfig.getRefreshTokenExpirationTimeMs()
 		);
 
-		addRefreshToken(username, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME_MS);
+		authorizationService.addRefreshToken(username, refreshToken, tokenConfig.getRefreshTokenExpirationTimeMs());
 
 		response.setHeader(ACCESS_TOKEN_HEADER, accessToken);
-		response.addCookie(CookieUtils.tokenCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken));
+
+		Cookie refreshTokenCookie = CookieUtils.tokenCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
+		response.addCookie(refreshTokenCookie);
+
 		response.setStatus(HttpStatus.OK.value());
 	}
 
@@ -83,19 +79,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException failed) throws IOException, ServletException {
 
-		response.setStatus(HTTP_STATUS_UNAUTHORIZED);
-	}
-
-	private void addRefreshToken(String username, String refresh, Long expiredMs) {
-
-		Date date = new Date(System.currentTimeMillis() + expiredMs);
-
-		TokenSave tokenSave = TokenSave.builder()
-			.username(username)
-			.refreshToken(refresh)
-			.expiration(date.toString())
-			.build();
-
-		tokenRepository.save(tokenSave);
+		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 }
