@@ -1,7 +1,6 @@
 package com.thinktank.api.entity;
 
 import org.hibernate.annotations.ColumnDefault;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

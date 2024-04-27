@@ -2,6 +2,7 @@ package com.thinktank.api.entity;
 
 import org.hibernate.annotations.ColumnDefault;
 
+import com.thinktank.api.dto.post.request.PostCreateDto;
 import com.thinktank.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -16,11 +17,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.Getter;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Getter
 @Table(name = "tbl_post")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseTimeEntity {
@@ -60,4 +60,33 @@ public class Post extends BaseTimeEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
+
+	@Builder
+	private Post(
+		String title,
+		Category category,
+		Language language,
+		String content,
+		String condition,
+		String answer
+	) {
+		this.title = title;
+		this.category = category;
+		this.language = language;
+		this.content = content;
+		this.condition = condition;
+		this.answer = answer;
+	}
+
+	public static Post create(PostCreateDto postCreateDto) {
+
+		return Post.builder()
+			.title(postCreateDto.title())
+			.category(Category.fromValue(postCreateDto.category()))
+			.language(Language.fromValue(postCreateDto.language()))
+			.content(postCreateDto.content())
+			.condition(postCreateDto.condition())
+			.answer(postCreateDto.answer())
+			.build();
+	}
 }
