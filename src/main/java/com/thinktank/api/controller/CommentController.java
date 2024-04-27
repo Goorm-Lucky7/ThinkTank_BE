@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thinktank.api.dto.comment.CommentCreateDto;
+import com.thinktank.api.dto.comment.request.CommentCreateDto;
 import com.thinktank.api.service.CommentService;
 
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.thinktank.api.entity;
 
-import com.thinktank.api.dto.comment.CommentCreateDto;
+import com.thinktank.api.dto.comment.request.CommentCreateDto;
 import com.thinktank.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -39,12 +39,14 @@ public class Comment extends BaseTimeEntity {
 	private Post post;
 
 	@Builder
-	private Comment(String content){
+	private Comment(Post post, String content){
+		this.post = post;
 		this.content = content;
 	}
 
-	public static Comment create(CommentCreateDto commentCreateDto){
+	public static Comment create(CommentCreateDto commentCreateDto, Post post){
 		return Comment.builder()
+			.post(post)
 			.content(commentCreateDto.content())
 			.build();
 	}
