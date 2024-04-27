@@ -14,9 +14,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import com.thinktank.api.repository.auth.TokenRepository;
+import com.thinktank.api.service.auth.AuthorizationService;
+import com.thinktank.api.service.auth.JwtAuthenticationService;
 import com.thinktank.api.service.auth.JwtProviderService;
+import com.thinktank.global.auth.filter.AuthorizationFilter;
 import com.thinktank.global.auth.filter.CustomLogoutFilter;
-import com.thinktank.global.auth.filter.JwtAuthenticationFilter;
 import com.thinktank.global.auth.filter.JwtLoginFilter;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,12 @@ public class SecurityConfig {
 	private final JwtProviderService jwtProviderService;
 
 	private final TokenRepository tokenRepository;
+
+	private final JwtAuthenticationService jwtAuthenticationService;
+
+	private final AuthorizationService authorizationService;
+
+	private final TokenConfig tokenConfig;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws
@@ -61,17 +69,20 @@ public class SecurityConfig {
 		);
 
 		httpSecurity.addFilterBefore(
-			new JwtAuthenticationFilter(jwtProviderService),
+			new AuthorizationFilter(jwtAuthenticationService, authorizationService),
 			JwtLoginFilter.class
 		);
 
 		httpSecurity.addFilterBefore(
-			new CustomLogoutFilter(jwtProviderService, tokenRepository),
+			new CustomLogoutFilter(jwtProviderService, jwtAuthenticationService, tokenRepository),
 			LogoutFilter.class
 		);
 
 		httpSecurity.addFilterAt(
-			new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtProviderService, tokenRepository),
+			new JwtLoginFilter(
+				tokenConfig, authenticationManager(authenticationConfiguration), jwtProviderService,
+				authorizationService
+			),
 			UsernamePasswordAuthenticationFilter.class
 		);
 
