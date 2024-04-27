@@ -1,5 +1,7 @@
 package com.thinktank.api.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.thinktank.api.dto.comment.request.CommentCreateDto;
@@ -22,18 +24,18 @@ public class CommentService {
 	private final PostRepository postRepository;
 
 	@Transactional
-	public Comment create(CommentCreateDto commentCreateDto){
+	public void createComment(CommentCreateDto commentCreateDto) {
 		Post post = postRepository.findById(commentCreateDto.postId())
 				.orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST));
 		validateContentLength(commentCreateDto.content());
 
 		Comment comment = Comment.create(commentCreateDto, post);
 
-		return commentRepository.save(comment);
+		commentRepository.save(comment);
 	}
 
 	private void validateContentLength(String content){
-		if(content.length() > CONTENT_MAX_LENGTH) {
+		if (content.length() > CONTENT_MAX_LENGTH) {
 			throw new BadRequestException(ErrorCode.BAD_REQUEST);
 		}
 	}

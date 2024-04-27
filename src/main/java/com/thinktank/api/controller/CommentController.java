@@ -20,7 +20,7 @@ public class CommentController {
 
 	@PostMapping("/comments")
 	public ResponseEntity<String> createComment(@RequestBody @Validated CommentCreateDto commentCreateDto) {
-		commentService.create(commentCreateDto);
+		commentService.createComment(commentCreateDto);
 
 		return ResponseEntity.ok("Comment Created Successfully");
 	}
