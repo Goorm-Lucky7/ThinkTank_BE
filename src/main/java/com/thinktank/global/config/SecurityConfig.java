@@ -18,7 +18,7 @@ import com.thinktank.api.service.auth.AuthorizationService;
 import com.thinktank.api.service.auth.JwtAuthenticationService;
 import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.auth.filter.AuthorizationFilter;
-import com.thinktank.global.auth.filter.CustomLogoutFilter;
+import com.thinktank.global.auth.filter.JwtAuthenticationFilter;
 import com.thinktank.global.auth.filter.JwtLoginFilter;
 
 import lombok.RequiredArgsConstructor;
@@ -74,7 +74,7 @@ public class SecurityConfig {
 		);
 
 		httpSecurity.addFilterBefore(
-			new CustomLogoutFilter(jwtProviderService, jwtAuthenticationService, tokenRepository),
+			new JwtAuthenticationFilter(jwtProviderService, jwtAuthenticationService, tokenRepository),
 			LogoutFilter.class
 		);
 
