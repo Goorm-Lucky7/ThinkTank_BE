@@ -1,5 +1,6 @@
 package com.thinktank.api.entity;
 
+import com.thinktank.api.dto.comment.request.CommentCreateDto;
 import com.thinktank.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -12,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,4 +37,17 @@ public class Comment extends BaseTimeEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "post_id")
 	private Post post;
+
+	@Builder
+	private Comment(Post post, String content){
+		this.post = post;
+		this.content = content;
+	}
+
+	public static Comment create(CommentCreateDto commentCreateDto, Post post){
+		return Comment.builder()
+			.post(post)
+			.content(commentCreateDto.content())
+			.build();
+	}
 }
