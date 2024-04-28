@@ -36,9 +36,9 @@ public class UserController {
 
 	@PostMapping("/reissue")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> authorizationTokenIssue(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<String> reissueToken(HttpServletRequest request, HttpServletResponse response) {
 
-		authorizationService.refreshAccessToken(request, response);
+		authorizationService.reissueToken(request, response);
 
 		return ResponseEntity.ok("OK");
 	}
