@@ -9,12 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thinktank.api.dto.user.request.SignupDTO;
+import com.thinktank.api.dto.user.request.LoginReqDto;
+import com.thinktank.api.dto.user.request.SignUpDto;
+import com.thinktank.api.dto.user.response.LoginResDto;
 import com.thinktank.api.service.UserService;
-import com.thinktank.api.service.auth.AuthorizationService;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,22 +23,16 @@ public class UserController {
 
 	private final UserService userService;
 
-	private final AuthorizationService authorizationService;
-
 	@PostMapping("/signup")
-	public ResponseEntity<String> signup(@RequestBody @Validated SignupDTO signupDTO) {
-
-		userService.signup(signupDTO);
-
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<String> signUp(@RequestBody @Validated SignUpDto signUpDto) {
+		userService.signUp(signUpDto);
 		return ResponseEntity.ok("OK");
 	}
 
-	@PostMapping("/reissue")
+	@PostMapping("/login")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> reissueToken(HttpServletRequest request, HttpServletResponse response) {
-
-		authorizationService.reissueToken(request, response);
-
-		return ResponseEntity.ok("OK");
+	public ResponseEntity<LoginResDto> login(@RequestBody @Validated LoginReqDto loginReqDto) {
+		return ResponseEntity.ok(userService.login(loginReqDto));
 	}
 }
