@@ -4,27 +4,30 @@ import java.nio.charset.StandardCharsets;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 
 @Getter
-@ConfigurationProperties(prefix = "spring.jwt")
+@ConfigurationProperties(prefix = "jwt")
 public class TokenConfig {
 
-	private final String secret;
+	@Value("${jwt.secret.access-key}")
+	private String secret;
 
-	private final long accessTokenExpirationTimeMs;
+	@Value("${jwt.access-expire}")
+	private long accessTokenExpire;
 
-	private final long refreshTokenExpirationTimeMs;
+	@Value("${jwt.refresh-expire}")
+	private long refreshTokenExpire;
 
-	private final SecretKey secretKey;
+	private SecretKey secretKey;
 
-	public TokenConfig(String secret, long accessTokenExpirationTimeMs, long refreshTokenExpirationTimeMs) {
-		this.secret = secret;
-		this.accessTokenExpirationTimeMs = accessTokenExpirationTimeMs;
-		this.refreshTokenExpirationTimeMs = refreshTokenExpirationTimeMs;
-		this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+	@PostConstruct
+	private void init() {
+		secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	}
 }
