@@ -14,12 +14,11 @@ public enum ErrorCode {
 	FAIL_WRONG_PASSWORD("[❎ ERROR] 비밀번호가 일치하지 않습니다."),
 	FAIL_INVALID_CATEGORY("[❎ ERROR] 유효하지 않은 카테고리입니다."),
 	FAIL_INVALID_LANGUAGE("[❎ ERROR] 유효하지 않은 카테고리입니다."),
-	FAIL_INVALID_TOKEN_CATEGORY("[❎ ERROR] 유효하지 않은 토큰 유형입니다."),
+	FAIL_INVALID_TOKEN("[❎ ERROR] 유효하지 않은 토큰입니다."),
 
 	// 401: UNAUTHORIZED
 	FAIL_UNAUTHORIZED_EXCEPTION("[❎ ERROR] 로그인이 필요한 기능입니다."),
 	FAIL_TOKEN_EXPIRE_EXCEPTION("[❎ ERROR] 토큰이 만료되었습니다."),
-	FAIL_TOKEN_VALIDATION("[❎ ERROR] 토큰 검증 실패. 토큰이 유효하지 않거나 만료되었습니다."),
 
 	// 403: FORBIDDEN
 	POST_POST_FORBIDDEN_EXCEPTION("[❎ ERROR] 게시글 작성 권한이 없습니다."),
