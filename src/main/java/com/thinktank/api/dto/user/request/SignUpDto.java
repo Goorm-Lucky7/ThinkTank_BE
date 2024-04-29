@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
-public record SignupDTO(
+public record SignUpDto(
 	@NotBlank(message = "[❎ ERROR] 이메일을 입력해주세요.")
 	@Email(message = "[❎ ERROR] 올바른 이메일 형식이 아닙니다.")
 	@Size(max = 30, message = "[❎ ERROR] 이메일은 최대 30자까지 가능합니다.")
