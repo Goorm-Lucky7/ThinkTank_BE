@@ -1,13 +1,17 @@
 package com.thinktank.api.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thinktank.api.dto.user.request.SignupDTO;
+import com.thinktank.api.dto.user.request.LoginReqDto;
+import com.thinktank.api.dto.user.request.SignUpDto;
+import com.thinktank.api.dto.user.response.LoginResDto;
 import com.thinktank.api.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,10 +24,15 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping("/signup")
-	public ResponseEntity<String> signup(@RequestBody @Validated SignupDTO signupDTO) {
-
-		userService.signup(signupDTO);
-
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<String> signUp(@RequestBody @Validated SignUpDto signUpDto) {
+		userService.signUp(signUpDto);
 		return ResponseEntity.ok("OK");
+	}
+
+	@PostMapping("/login")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<LoginResDto> login(@RequestBody @Validated LoginReqDto loginReqDto) {
+		return ResponseEntity.ok(userService.login(loginReqDto));
 	}
 }
