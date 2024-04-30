@@ -42,7 +42,8 @@ public class SecurityConfig {
 			.requestMatchers(PathRequest.toStaticResources().atCommonLocations())
 			.requestMatchers("/h2-console/**")
 			.requestMatchers("/api/signup")
-			.requestMatchers("/api/login");
+			.requestMatchers("/api/login")
+			.requestMatchers("/api/logout");
 	}
 
 	@Bean
@@ -59,7 +60,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(STATELESS));
 
 		httpSecurity.authorizeHttpRequests((auth) -> auth
-			.requestMatchers("/api/login", "/api/signup").permitAll()
+			.requestMatchers("/api/login", "/api/logout", "/api/signup").permitAll()
 			.anyRequest().authenticated()
 		);
 
