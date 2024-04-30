@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.response.LoginResDto;
+import com.thinktank.api.dto.user.response.UserResDto;
 import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.UserRepository;
@@ -49,7 +50,7 @@ public class UserService {
 
 	@Transactional
 	public LoginResDto login(LoginReqDto loginReqDto, HttpServletResponse response) {
-		final User user = getByUserEmail(loginReqDto.email());
+		final User user = findByUserEmail(loginReqDto.email());
 
 		validatePasswordMatch(loginReqDto.password(), user.getPassword());
 
@@ -72,14 +73,24 @@ public class UserService {
 		final AuthUser authUser = jwtProviderService.extractAuthUserByAccessToken(refreshToken);
 		validateRefreshToken(authUser);
 
-		final User user = getByUserEmail(authUser.email());
+		final User user = findByUserEmail(authUser.email());
 		user.updateRefreshToken(null);
 
 		Cookie refreshTokenCookie = CookieUtils.expireRefreshTokenCookie(REFRESH_TOKEN_COOKIE_NAME);
 		response.addCookie(refreshTokenCookie);
 	}
 
-	private User getByUserEmail(String email) {
+	public UserResDto findUserDetails(AuthUser authUser) {
+		final User user = findByUserEmail(authUser.email());
+		return convertToUserResDto(user);
+	}
+
+	private UserResDto convertToUserResDto(User user) {
+		return new UserResDto(user.getEmail(), user.getNickname(), user.getGithub(), user.getBlog(),
+			user.getIntroduce());
+	}
+
+	private User findByUserEmail(String email) {
 		return userRepository.findByEmail(email)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
 	}
