@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,4 +31,22 @@ public class UserLike {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "like_id")
 	private Like like;
+
+	@Column(name = "is_check", nullable = false)
+	private boolean isCheck;
+
+	@Builder
+	public UserLike(User user, Like like, boolean isCheck) {
+		this.user = user;
+		this.like = like;
+		this.isCheck = isCheck;
+	}
+
+	public void recreateLike() {
+		this.isCheck = true;
+	}
+
+	public void cancelLike() {
+		this.isCheck = false;
+	}
 }
