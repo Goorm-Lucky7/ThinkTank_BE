@@ -16,6 +16,7 @@ import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.common.util.CookieUtils;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
+import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import jakarta.servlet.http.Cookie;
@@ -48,8 +49,7 @@ public class UserService {
 
 	@Transactional
 	public LoginResDto login(LoginReqDto loginReqDto, HttpServletResponse response) {
-		final User user = userRepository.findByEmail(loginReqDto.email())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+		final User user = getByUserEmail(loginReqDto.email());
 
 		validatePasswordMatch(loginReqDto.password(), user.getPassword());
 
@@ -69,17 +69,25 @@ public class UserService {
 	public void logout(HttpServletRequest request, HttpServletResponse response) {
 		String refreshToken = jwtProviderService.extractRefreshToken(REFRESH_TOKEN_COOKIE_NAME, request);
 
-		AuthUser authUser = jwtProviderService.extractAuthUserByAccessToken(refreshToken);
-		if (authUser != null) {
-			final User user = userRepository.findByEmail(authUser.email())
-				.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+		final AuthUser authUser = jwtProviderService.extractAuthUserByAccessToken(refreshToken);
+		validateRefreshToken(authUser);
 
-			user.updateRefreshToken(null);
-		}
+		final User user = getByUserEmail(authUser.email());
+		user.updateRefreshToken(null);
 
 		Cookie refreshTokenCookie = CookieUtils.expireRefreshTokenCookie(REFRESH_TOKEN_COOKIE_NAME);
-
 		response.addCookie(refreshTokenCookie);
+	}
+
+	private User getByUserEmail(String email) {
+		return userRepository.findByEmail(email)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+	}
+
+	private void validateRefreshToken(AuthUser authUser) {
+		if (authUser == null) {
+			throw new UnauthorizedException(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION);
+		}
 	}
 
 	private void validateEmailNotExists(String email) {
