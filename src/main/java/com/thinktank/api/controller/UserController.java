@@ -14,6 +14,8 @@ import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.response.LoginResDto;
 import com.thinktank.api.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -32,7 +34,15 @@ public class UserController {
 
 	@PostMapping("/login")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<LoginResDto> login(@RequestBody @Validated LoginReqDto loginReqDto) {
-		return ResponseEntity.ok(userService.login(loginReqDto));
+	public ResponseEntity<LoginResDto> login(
+		@RequestBody @Validated LoginReqDto loginReqDto, HttpServletResponse response
+	) {
+		return ResponseEntity.ok(userService.login(loginReqDto, response));
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+		userService.logout(request, response);
+		return ResponseEntity.ok("OK");
 	}
 }

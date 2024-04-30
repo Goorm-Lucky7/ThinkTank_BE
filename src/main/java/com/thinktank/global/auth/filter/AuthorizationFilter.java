@@ -1,6 +1,7 @@
 package com.thinktank.global.auth.filter;
 
 import static com.thinktank.global.common.util.AuthConstants.*;
+import static com.thinktank.global.common.util.GlobalConstant.*;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,8 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthorizationFilter extends OncePerRequestFilter {
 
-	private static final String BLANK = " ";
-
 	private final JwtProviderService jwtProviderService;
 	private final HandlerExceptionResolver handlerExceptionResolver;
 
@@ -42,18 +41,18 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		@NotNull HttpServletResponse response,
 		@NotNull FilterChain filterChain
 	) {
-		String accessToken = jwtProviderService.extractToken(ACCESS_TOKEN_HEADER, request);
-		String refreshToken = jwtProviderService.extractToken(REFRESH_TOKEN_HEADER, request);
+		String accessToken = jwtProviderService.extractAccessToken(ACCESS_TOKEN_HEADER, request);
+		String refreshToken = jwtProviderService.extractRefreshToken(REFRESH_TOKEN_COOKIE_NAME, request);
 
 		try {
-			if (jwtProviderService.isUsable(accessToken)) {
+			if (jwtProviderService.isUsable(accessToken, response)) {
 				setAuthentication(accessToken);
 				filterChain.doFilter(request, response);
 
 				return;
 			}
 
-			if (jwtProviderService.isUsable(refreshToken)) {
+			if (jwtProviderService.isUsable(refreshToken, response)) {
 				accessToken = jwtProviderService.reGenerateToken(refreshToken, response);
 				setAuthentication(accessToken);
 				filterChain.doFilter(request, response);
@@ -61,7 +60,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 				return;
 			}
 
-			throw new NotFoundException(ErrorCode.FAIL_TOKEN_EXPIRE_EXCEPTION);
+			throw new NotFoundException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
 		} catch (Exception e) {
 			log.warn("JWT ERROR DESCRIPTION");
 			handlerExceptionResolver.resolveException(request, response, null, e);
