@@ -17,6 +17,9 @@ import com.thinktank.api.dto.testcase.custom.TestCaseDto;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.model.ErrorCode;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class JavaJudge implements JudgeUtil {
 	@Override
 	public void executeCode(List<TestCaseDto> testCases, String code) {
@@ -111,7 +114,8 @@ public class JavaJudge implements JudgeUtil {
 			"javac", sourceFile.getName());
 	}
 
-	private ProcessBuilder startDockerRun(File tempDir) {
+	@Override
+	public ProcessBuilder startDockerRun(File tempDir) {
 		final List<String> command = Arrays.asList(
 			"docker", "run", "--rm", "-i",
 			"-v", tempDir.getAbsolutePath() + ":/app",
@@ -123,7 +127,7 @@ public class JavaJudge implements JudgeUtil {
 	}
 
 	private File createFile(File tempDir, String code) {
-		final File sourceFile = new File(tempDir, STAND_CLASS_NAME);
+		final File sourceFile = new File(tempDir, JAVA_CLASS_NAME);
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
 			writer.write(code);
