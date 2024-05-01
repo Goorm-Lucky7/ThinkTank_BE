@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import com.thinktank.api.service.auth.JwtProviderService;
-import com.thinktank.global.auth.filter.AuthorizationFilter;
+import com.thinktank.global.auth.filter.AuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -65,7 +65,7 @@ public class SecurityConfig {
 		);
 
 		httpSecurity.addFilterBefore(
-			new AuthorizationFilter(jwtProviderService, handlerExceptionResolver),
+			new AuthenticationFilter(jwtProviderService, handlerExceptionResolver),
 			UsernamePasswordAuthenticationFilter.class
 		);
 

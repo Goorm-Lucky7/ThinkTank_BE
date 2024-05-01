@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.response.LoginResDto;
+import com.thinktank.api.dto.user.response.UserResDto;
 import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.UserRepository;
@@ -16,6 +17,7 @@ import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.common.util.CookieUtils;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
+import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import jakarta.servlet.http.Cookie;
@@ -48,8 +50,7 @@ public class UserService {
 
 	@Transactional
 	public LoginResDto login(LoginReqDto loginReqDto, HttpServletResponse response) {
-		final User user = userRepository.findByEmail(loginReqDto.email())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+		final User user = findByUserEmail(loginReqDto.email());
 
 		validatePasswordMatch(loginReqDto.password(), user.getPassword());
 
@@ -69,17 +70,35 @@ public class UserService {
 	public void logout(HttpServletRequest request, HttpServletResponse response) {
 		String refreshToken = jwtProviderService.extractRefreshToken(REFRESH_TOKEN_COOKIE_NAME, request);
 
-		AuthUser authUser = jwtProviderService.extractAuthUserByAccessToken(refreshToken);
-		if (authUser != null) {
-			final User user = userRepository.findByEmail(authUser.email())
-				.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+		final AuthUser authUser = jwtProviderService.extractAuthUserByAccessToken(refreshToken);
+		validateRefreshToken(authUser);
 
-			user.updateRefreshToken(null);
-		}
+		final User user = findByUserEmail(authUser.email());
+		user.updateRefreshToken(null);
 
 		Cookie refreshTokenCookie = CookieUtils.expireRefreshTokenCookie(REFRESH_TOKEN_COOKIE_NAME);
-
 		response.addCookie(refreshTokenCookie);
+	}
+
+	public UserResDto findUserDetails(AuthUser authUser) {
+		final User user = findByUserEmail(authUser.email());
+		return convertToUserResDto(user);
+	}
+
+	private UserResDto convertToUserResDto(User user) {
+		return new UserResDto(user.getEmail(), user.getNickname(), user.getGithub(), user.getBlog(),
+			user.getIntroduce());
+	}
+
+	private User findByUserEmail(String email) {
+		return userRepository.findByEmail(email)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+	}
+
+	private void validateRefreshToken(AuthUser authUser) {
+		if (authUser == null) {
+			throw new UnauthorizedException(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION);
+		}
 	}
 
 	private void validateEmailNotExists(String email) {
