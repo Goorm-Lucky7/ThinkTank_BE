@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 public class GlobalConstant {
 	public static final int EXECUTION_TIME_LIMIT = 3000;
 	public static final String FULL_CLASS_NAME = "Main";
-	public static final String STAND_CLASS_NAME = "Main.java";
+	public static final String JAVA_CLASS_NAME = "Main.java";
+	public static final String JAVASCRIPT_CLASS_NAME = "script.js";
 	public static final int ZERO = 0;
 	public static final String BLANK = " ";
 }
