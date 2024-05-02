@@ -103,7 +103,6 @@ public class CommentService {
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
 
-		// return post.getUser().getEmail.equals(userEmail);
-		return true;
+		return post.getUser().getEmail.equals(userEmail);
 	}
 }
