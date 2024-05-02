@@ -12,6 +12,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.auth.JwtProviderService;
+import com.thinktank.global.auth.AuthorizationThreadLocal;
 import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.model.ErrorCode;
 
@@ -22,12 +23,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AuthorizationFilter extends OncePerRequestFilter {
+public class AuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtProviderService jwtProviderService;
 	private final HandlerExceptionResolver handlerExceptionResolver;
 
-	public AuthorizationFilter(
+	public AuthenticationFilter(
 		JwtProviderService jwtProviderService,
 		@Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver
 	) {
@@ -48,7 +49,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 			if (jwtProviderService.isUsable(accessToken, response)) {
 				setAuthentication(accessToken);
 				filterChain.doFilter(request, response);
-
 				return;
 			}
 
@@ -56,7 +56,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 				accessToken = jwtProviderService.reGenerateToken(refreshToken, response);
 				setAuthentication(accessToken);
 				filterChain.doFilter(request, response);
-
 				return;
 			}
 
@@ -64,6 +63,8 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		} catch (Exception e) {
 			log.warn("JWT ERROR DESCRIPTION");
 			handlerExceptionResolver.resolveException(request, response, null, e);
+		} finally {
+			AuthorizationThreadLocal.remove();
 		}
 	}
 
@@ -72,5 +73,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		final Authentication authToken = new UsernamePasswordAuthenticationToken(authUser, BLANK, null);
 
 		SecurityContextHolder.getContext().setAuthentication(authToken);
+
+		AuthorizationThreadLocal.setAuthUser(authUser);
 	}
 }

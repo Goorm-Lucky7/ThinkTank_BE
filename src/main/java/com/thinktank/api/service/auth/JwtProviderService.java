@@ -79,13 +79,15 @@ public class JwtProviderService {
 	public String extractAccessToken(String header, HttpServletRequest request) {
 		String token = request.getHeader(header);
 
-		if (token == null || !token.startsWith(BEARER)) {
-			log.warn("{} IS NULL OR NOT BEARER", header);
+		if (token == null) {
+			log.warn("{} IS NULL", header);
+			return null;
+		} else if (!token.startsWith(BEARER)) {
+			log.warn("{} IS NOT BEARER", header);
 			return null;
 		}
 
-		return token.replaceFirst(BEARER, "")
-			.trim();
+		return token.replaceFirst(BEARER, "").trim();
 	}
 
 	public String extractRefreshToken(String cookieName, HttpServletRequest request) {
