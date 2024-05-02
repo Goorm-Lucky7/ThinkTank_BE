@@ -18,9 +18,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @Table(name = "tbl_post")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseTimeEntity {
@@ -48,11 +50,11 @@ public class Post extends BaseTimeEntity {
 
 	@Column(name = "comment_count", nullable = false)
 	@ColumnDefault("0")
-	private int commentCount;
+	private int commentCount = 0;
 
 	@Column(name = "answer_count", nullable = false)
 	@ColumnDefault("0")
-	private int answerCount;
+	private int answerCount = 0;
 
 	@Column(name = "answer", nullable = false)
 	private String answer;
