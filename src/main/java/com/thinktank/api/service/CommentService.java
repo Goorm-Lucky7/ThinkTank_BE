@@ -58,9 +58,8 @@ public class CommentService {
 	}
 
 	@Transactional(readOnly = true)
-	public CommentsResponseDto getCommentsByPostId(Long postId, Integer pageIndex, Integer pageSize) {
-		Pageable pageable = PageRequest.of(pageIndex == null ? DEFAULT_PAGE_INDEX : pageIndex,
-											pageSize == null ? DEFAULT_PAGE_SIZE : pageSize);
+	public CommentsResponseDto getCommentsByPostId(Long postId, int pageIndex, int pageSize) {
+		Pageable pageable = PageRequest.of(pageIndex, pageSize);
 		Page<Comment> page = commentRepository.findByPostId(postId, pageable);
 
 		List<CommentResponseDto> comments = page.getContent().stream()
