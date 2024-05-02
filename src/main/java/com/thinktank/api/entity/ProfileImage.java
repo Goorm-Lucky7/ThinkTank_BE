@@ -47,7 +47,7 @@ public class ProfileImage {
 		this.user = user;
 	}
 
-	public static ProfileImage createWithUser(User user) {
+	public static ProfileImage createDefaultForUser(User user) {
 		return ProfileImage.builder()
 			.fileName(null)
 			.fileUrl(null)
