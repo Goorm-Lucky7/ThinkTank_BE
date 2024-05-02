@@ -48,7 +48,6 @@ public class SecurityConfig {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-
 		return new BCryptPasswordEncoder();
 	}
 
@@ -58,6 +57,8 @@ public class SecurityConfig {
 		httpSecurity.csrf(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(STATELESS));
+
+		httpSecurity.cors(AbstractHttpConfigurer::disable);
 
 		httpSecurity.authorizeHttpRequests((auth) -> auth
 			.requestMatchers("/api/login", "/api/logout", "/api/signup").permitAll()

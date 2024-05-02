@@ -5,7 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.thinktank.api.dto.user.request.SignUpDto;
-import com.thinktank.api.dto.user.request.UserReqDto;
+import com.thinktank.api.dto.user.request.UserDeleteDto;
+import com.thinktank.api.dto.user.request.UserUpdateDto;
 import com.thinktank.api.dto.user.response.UserResDto;
 import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.auth.AuthUser;
@@ -42,10 +43,19 @@ public class UserService {
 	}
 
 	@Transactional
-	public void removeUser(AuthUser authUser, UserReqDto userReqDto) {
+	public void updateUserNickname(AuthUser authUser, UserUpdateDto userUpdateDto) {
 		final User user = findByUserEmail(authUser.email());
 
-		validatePasswordEquality(user.getPassword(), userReqDto.password());
+		validateNicknameNotExists(userUpdateDto.nickname());
+
+		user.updateNickname(userUpdateDto.nickname());
+	}
+
+	@Transactional
+	public void removeUser(AuthUser authUser, UserDeleteDto userDeleteDto) {
+		final User user = findByUserEmail(authUser.email());
+
+		validatePasswordEquality(user.getPassword(), userDeleteDto.password());
 
 		userRepository.delete(user);
 	}
