@@ -34,8 +34,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-	private static final int DEFAULT_PAGE_INDEX = 0;
-	private static final int DEFAULT_PAGE_SIZE = 10;
 
 	private final CommentRepository commentRepository;
 	private final PostRepository postRepository;
