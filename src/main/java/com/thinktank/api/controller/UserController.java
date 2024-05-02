@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
-import com.thinktank.api.dto.user.request.UserReqDto;
+import com.thinktank.api.dto.user.request.UserDeleteDto;
 import com.thinktank.api.dto.user.response.LoginResDto;
 import com.thinktank.api.dto.user.response.UserResDto;
 import com.thinktank.api.entity.auth.AuthUser;
@@ -60,8 +60,8 @@ public class UserController {
 	}
 
 	@DeleteMapping
-	public ResponseEntity<String> removeUser(@Auth AuthUser authUser, UserReqDto userReqDto) {
-		userService.removeUser(authUser, userReqDto);
+	public ResponseEntity<String> removeUser(@Auth AuthUser authUser, UserDeleteDto userDeleteDto) {
+		userService.removeUser(authUser, userDeleteDto);
 		return ResponseEntity.ok("OK");
 	}
 }
