@@ -31,6 +31,7 @@ public enum ErrorCode {
 	FAIL_NOT_POST_FOUND_EXCEPTION("[❎ ERROR] 요청하신 게시물을 찾을 수 없습니다."),
 	FAIL_NOT_USER_FOUND_EXCEPTION("[❎ ERROR] 요청하신 회원을 찾을 수 없습니다."),
 	FAIL_NOT_COMMENT_FOUND_EXCEPTION("[❎ ERROR] 요청하신 댓글을 찾을 수 없습니다."),
+	FAIL_NOT_LANGUAGE_EXCEPTION("[❎ ERROR] 요청하신 언어를 찾을 수 없습니다."),
 
 	// 409
 	FAIL_EMAIL_CONFLICT("[❎ ERROR] 이미 존재하는 이메일입니다."),
