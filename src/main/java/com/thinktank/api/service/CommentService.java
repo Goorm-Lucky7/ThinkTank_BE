@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.thinktank.api.dto.comment.request.CommentCreateDto;
 import com.thinktank.api.dto.comment.request.CommentDeleteDto;
-import com.thinktank.api.dto.comment.response.CommentPageResponseDto;
+import com.thinktank.api.dto.comment.page.response.PageInfoDto;
 import com.thinktank.api.dto.comment.response.CommentResponseDto;
 import com.thinktank.api.dto.comment.response.CommentUserResponseDto;
 import com.thinktank.api.dto.comment.response.CommentsResponseDto;
@@ -69,7 +69,7 @@ public class CommentService {
 			))
 			.collect(Collectors.toList());
 
-		CommentPageResponseDto pageRequestDto = new CommentPageResponseDto(pageIndex, !page.hasNext());
+		PageInfoDto pageRequestDto = new PageInfoDto(pageIndex, !page.hasNext());
 
 		return new CommentsResponseDto(postId, comments, pageRequestDto);
 	}
