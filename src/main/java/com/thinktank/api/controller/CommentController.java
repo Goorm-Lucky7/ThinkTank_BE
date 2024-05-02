@@ -18,7 +18,6 @@ import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.CommentService;
 import com.thinktank.global.auth.annotation.Auth;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -37,7 +36,8 @@ public class CommentController {
 
 	@GetMapping("/posts/{post-id}/comments")
 	public ResponseEntity<CommentsResponseDto> getCommentsByPostId(@PathVariable("post-id") Long postId,
-												@RequestParam Integer pageIndex, @RequestParam Integer pageSize) {
+												@RequestParam(defaultValue = "0") int pageIndex,
+												@RequestParam(defaultValue = "10") int pageSize) {
 		CommentsResponseDto comments = commentService.getCommentsByPostId(postId, pageIndex, pageSize);
 		return ResponseEntity.ok(comments);
 	}
