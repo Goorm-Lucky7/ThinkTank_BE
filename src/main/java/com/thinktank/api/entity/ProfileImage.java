@@ -1,5 +1,7 @@
 package com.thinktank.api.entity;
 
+import com.thinktank.api.dto.profileImage.request.ProfileImageReqDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,4 +38,28 @@ public class ProfileImage {
 	@OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "user_id")
 	private User user;
+
+	@Builder
+	public ProfileImage(String fileName, String fileUrl, String originalFileName, User user) {
+		this.fileName = fileName;
+		this.fileUrl = fileUrl;
+		this.originalFileName = originalFileName;
+		this.user = user;
+	}
+
+	public static ProfileImage createWithUser(User user) {
+		return ProfileImage.builder()
+			.fileName(null)
+			.fileUrl(null)
+			.originalFileName(null)
+			.user(user)
+			.build();
+	}
+
+	public void updateProfileImage(ProfileImageReqDto profileImageReqDto, User user) {
+		this.fileName = profileImageReqDto.fileName();
+		this.fileUrl = profileImageReqDto.fileUrl();
+		this.originalFileName = profileImageReqDto.originalFileName();
+		this.user = user;
+	}
 }
