@@ -3,6 +3,7 @@ package com.thinktank.api.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,10 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
+import com.thinktank.api.dto.user.request.UserReqDto;
 import com.thinktank.api.dto.user.response.LoginResDto;
 import com.thinktank.api.dto.user.response.UserResDto;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.UserService;
+import com.thinktank.api.service.auth.AuthenticationService;
 import com.thinktank.global.auth.annotation.Auth;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
 	private final UserService userService;
+	private final AuthenticationService authenticationService;
 
 	@PostMapping("/signup")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -41,17 +45,23 @@ public class UserController {
 	public ResponseEntity<LoginResDto> login(
 		@RequestBody @Validated LoginReqDto loginReqDto, HttpServletResponse response
 	) {
-		return ResponseEntity.ok(userService.login(loginReqDto, response));
+		return ResponseEntity.ok(authenticationService.login(loginReqDto, response));
 	}
 
 	@PostMapping("/logout")
 	public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-		userService.logout(request, response);
+		authenticationService.logout(request, response);
 		return ResponseEntity.ok("OK");
 	}
 
 	@GetMapping("/users")
 	public ResponseEntity<UserResDto> findUserDetails(@Auth AuthUser authUser) {
 		return ResponseEntity.ok(userService.findUserDetails(authUser));
+	}
+
+	@DeleteMapping
+	public ResponseEntity<String> removeUser(@Auth AuthUser authUser, UserReqDto userReqDto) {
+		userService.removeUser(authUser, userReqDto);
+		return ResponseEntity.ok("OK");
 	}
 }
