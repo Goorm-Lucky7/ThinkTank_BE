@@ -42,11 +42,11 @@ public class UserLike {
 		this.isCheck = isCheck;
 	}
 
-	public void recreateLike() {
+	public void activateLike() {
 		this.isCheck = true;
 	}
 
-	public void cancelLike() {
+	public void deactivateLike() {
 		this.isCheck = false;
 	}
 }
