@@ -9,12 +9,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import com.thinktank.api.dto.testcase.custom.TestCaseDto;
+import com.thinktank.api.dto.testcase.custom.CustomTestCase;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.model.ErrorCode;
 
@@ -23,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JavaScriptJudge implements JudgeUtil {
 	@Override
-	public void executeCode(List<TestCaseDto> testCases, String code) {
+	public void executeCode(List<CustomTestCase> testCases, String code) {
 		final String uniqueDirName = UUID.randomUUID().toString();
 		final File directory = new File(uniqueDirName);
 
@@ -40,18 +38,11 @@ public class JavaScriptJudge implements JudgeUtil {
 
 	@Override
 	public ProcessBuilder startDockerRun(File tempDir) {
-		List<String> command = new ArrayList<>(Arrays.asList(
-			"docker", "run", "--rm", "-i",
-			"-v", tempDir.getAbsolutePath() + ":/app",
-			"node:alpine",
-			"node", "/app/" + JAVASCRIPT_CLASS_NAME
-		));
-
-		return new ProcessBuilder(command).redirectErrorStream(true);
+		return new ProcessBuilder(DockerCommand.javaScriptCommand(tempDir)).redirectErrorStream(true);
 	}
 
-	private void runTestCases(List<TestCaseDto> testCases, File tempDir) throws IOException {
-		for (TestCaseDto testCase : testCases) {
+	private void runTestCases(List<CustomTestCase> testCases, File tempDir) throws IOException {
+		for (CustomTestCase testCase : testCases) {
 			final ProcessBuilder builder = startDockerRun(tempDir);
 			final Process process = builder.start();
 
