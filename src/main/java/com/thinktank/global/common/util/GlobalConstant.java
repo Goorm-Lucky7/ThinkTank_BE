@@ -9,4 +9,7 @@ public class GlobalConstant {
 	public static final String FULL_CLASS_NAME = "Main";
 	public static final String STAND_CLASS_NAME = "Main.java";
 	public static final int ZERO = 0;
+	public static final String BLANK = " ";
+	public static final String JAVA_CLASS_NAME = "Main.java";
+	public static final String JAVASCRIPT_CLASS_NAME = "script.js";
 }
