@@ -35,7 +35,7 @@ public class UserProfileService {
 	}
 
 	private void createProfileImage(User user) {
-		ProfileImage profileImage = ProfileImage.createWithUser(user);
+		ProfileImage profileImage = ProfileImage.createDefaultForUser(user);
 		profileImageRepository.save(profileImage);
 	}
 }
