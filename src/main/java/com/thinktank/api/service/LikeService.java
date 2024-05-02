@@ -19,16 +19,15 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LikeService {
 	private final PostRepository postRepository;
 	private final LikeRepository likeRepository;
 	private final UserLikeRepository userLikeRepository;
 	private final UserRepository userRepository;
 
-	@Transactional
 	public void handleLike(LikeCreateDto likeCreateDto, Long userId) {
-		Long postId = likeCreateDto.postId();
-		Post post = postRepository.findById(postId)
+		Post post = postRepository.findById(likeCreateDto.postId())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
 
 		Like like = likeRepository.findByPost(post).orElse(null);
@@ -49,7 +48,7 @@ public class LikeService {
 			if (userLike.isCheck()) {
 				cancelLike(like, userId);
 			} else {
-				userLike.recreateLike();
+				userLike.activateLike();
 				userLikeRepository.save(userLike);
 				like.incrementLikeCount();
 				likeRepository.save(like);
@@ -76,7 +75,7 @@ public class LikeService {
 		likeRepository.save(like);
 		UserLike userLike = userLikeRepository.findByLikeIdAndUserId(like.getId(), userId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_LIKE_FOUND_EXCEPTION));
-		userLike.cancelLike();
+		userLike.deactivateLike();
 		userLikeRepository.save(userLike);
 	}
 
