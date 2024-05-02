@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.thinktank.api.dto.comment.request.CommentCreateDto;
 import com.thinktank.api.dto.comment.request.CommentDeleteDto;
 import com.thinktank.api.dto.comment.response.CommentsResponseDto;
+import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.CommentService;
+import com.thinktank.global.auth.annotation.Auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +29,8 @@ public class CommentController {
 
 	@PostMapping("/comments")
 	public ResponseEntity<String> createComment(@RequestBody @Validated CommentCreateDto commentCreateDto,
-												HttpServletRequest request) {
-		commentService.createComment(commentCreateDto, request);
+												@Auth AuthUser authUser) {
+		commentService.createComment(commentCreateDto, authUser);
 
 		return ResponseEntity.ok("Comment Created Successfully");
 	}
@@ -42,8 +44,8 @@ public class CommentController {
 
 	@DeleteMapping("/comments")
 	public ResponseEntity<String> deleteComment(@RequestBody @Validated CommentDeleteDto commentDeleteDto,
-		 										HttpServletRequest request) {
-		commentService.deleteComment(commentDeleteDto, request);
+												@Auth AuthUser authUser) {
+		commentService.deleteComment(commentDeleteDto, authUser);
 		return ResponseEntity.ok("Comment deleted successfully.");
 	}
 }

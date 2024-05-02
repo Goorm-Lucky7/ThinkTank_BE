@@ -25,6 +25,7 @@ import com.thinktank.api.repository.CommentRepository;
 import com.thinktank.api.repository.PostRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.api.service.auth.JwtProviderService;
+import com.thinktank.global.auth.annotation.Auth;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.model.ErrorCode;
 
@@ -41,10 +42,7 @@ public class CommentService {
 	private final JwtProviderService jwtProviderService;
 
 	@Transactional
-	public void createComment(CommentCreateDto commentCreateDto, HttpServletRequest request) {
-		String accessToken = jwtProviderService.extractAccessToken(ACCESS_TOKEN_HEADER, request);
-		AuthUser authUser = jwtProviderService.extractAuthUserByAccessToken(accessToken);
-
+	public void createComment(CommentCreateDto commentCreateDto, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
 
@@ -75,10 +73,7 @@ public class CommentService {
 	}
 
 	@Transactional
-	public void deleteComment(CommentDeleteDto commentDeleteDto, HttpServletRequest request) {
-		String accessToken = jwtProviderService.extractAccessToken(ACCESS_TOKEN_HEADER, request);
-		AuthUser authUser = jwtProviderService.extractAuthUserByAccessToken(accessToken);
-
+	public void deleteComment(CommentDeleteDto commentDeleteDto, AuthUser authUser) {
 		Comment comment = commentRepository.findById(commentDeleteDto.commentId())
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_COMMENT_FOUND_EXCEPTION));
 
