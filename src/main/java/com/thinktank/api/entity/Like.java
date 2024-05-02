@@ -27,7 +27,7 @@ public class Like {
 	private Long id;
 
 	@Column(name = "like_count", nullable = false)
-	@ColumnDefault("0")
+	@ColumnDefault("1")
 	private int likeCount = 1;
 
 	@OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
