@@ -1,9 +1,12 @@
 package com.thinktank.global.common.util;
 
+import java.io.File;
 import java.util.List;
 
-import com.thinktank.api.dto.testcase.custom.TestCaseDto;
+import com.thinktank.api.dto.testcase.custom.CustomTestCase;
 
 public interface JudgeUtil {
-	void executeCode(List<TestCaseDto> testCases, String code);
+	void executeCode(List<CustomTestCase> testCases, String code);
+
+	ProcessBuilder startDockerRun(File tempDir);
 }

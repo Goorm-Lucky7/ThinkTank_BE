@@ -1,5 +1,6 @@
 package com.thinktank.global.common.util;
 
+import static com.thinktank.global.common.util.DockerCommand.*;
 import static com.thinktank.global.common.util.GlobalConstant.*;
 
 import java.io.BufferedReader;
@@ -9,17 +10,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import com.thinktank.api.dto.testcase.custom.TestCaseDto;
+import com.thinktank.api.dto.testcase.custom.CustomTestCase;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.model.ErrorCode;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class JavaJudge implements JudgeUtil {
 	@Override
-	public void executeCode(List<TestCaseDto> testCases, String code) {
+	public void executeCode(List<CustomTestCase> testCases, String code) {
 		final String uniqueDirName = UUID.randomUUID().toString();
 		final File directory = new File(uniqueDirName);
 
@@ -38,9 +41,14 @@ public class JavaJudge implements JudgeUtil {
 		}
 	}
 
+	@Override
+	public ProcessBuilder startDockerRun(File tempDir) {
+		return new ProcessBuilder(javaCommand(tempDir)).redirectErrorStream(true);
+	}
+
 	private void startCompile(
 		File sourceFile,
-		List<TestCaseDto> testCases,
+		List<CustomTestCase> testCases,
 		File tempDir
 	) throws InterruptedException, IOException {
 		final String tempDirPath = tempDir.getAbsolutePath();
@@ -57,10 +65,10 @@ public class JavaJudge implements JudgeUtil {
 		}
 	}
 
-	private void runTestCases(List<TestCaseDto> testCases, File tempDir) throws IOException {
+	private void runTestCases(List<CustomTestCase> testCases, File tempDir) throws IOException {
 		final ProcessBuilder builder = startDockerRun(tempDir);
 
-		for (TestCaseDto testCase : testCases) {
+		for (CustomTestCase testCase : testCases) {
 			final Process process = builder.start();
 			final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 			final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -103,27 +111,11 @@ public class JavaJudge implements JudgeUtil {
 	}
 
 	private ProcessBuilder startDockerCompile(File sourceFile, String tempDirPath) {
-		return new ProcessBuilder(
-			"docker", "run", "--rm",
-			"-v", tempDirPath + ":/usr/src/myapp",
-			"-w", "/usr/src/myapp",
-			"openjdk:17",
-			"javac", sourceFile.getName());
-	}
-
-	private ProcessBuilder startDockerRun(File tempDir) {
-		final List<String> command = Arrays.asList(
-			"docker", "run", "--rm", "-i",
-			"-v", tempDir.getAbsolutePath() + ":/app",
-			"openjdk:17",
-			"sh", "-c", "cd /app && java " + FULL_CLASS_NAME
-		);
-
-		return new ProcessBuilder(command).redirectErrorStream(true);
+		return new ProcessBuilder(compileCommand(sourceFile, tempDirPath));
 	}
 
 	private File createFile(File tempDir, String code) {
-		final File sourceFile = new File(tempDir, STAND_CLASS_NAME);
+		final File sourceFile = new File(tempDir, JAVA_CLASS_NAME);
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
 			writer.write(code);
