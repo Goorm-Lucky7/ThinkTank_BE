@@ -20,9 +20,11 @@ import com.thinktank.api.entity.Category;
 import com.thinktank.api.entity.Language;
 import com.thinktank.api.entity.Post;
 import com.thinktank.api.entity.User;
+import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.CommentRepository;
 import com.thinktank.api.repository.LikeRepository;
 import com.thinktank.api.repository.PostRepository;
+import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.model.ErrorCode;
 
@@ -34,25 +36,30 @@ import lombok.RequiredArgsConstructor;
 public class PostService {
 
 	private final PostRepository postRepository;
+	private final UserRepository userRepository;
 	private final LikeRepository likeRepository;
 	private final CommentRepository commentRepository;
 	private final UserLikeService userLikeService;
 
-	public void createPost(PostCreateDto postCreateDto) {
+	public void createPost(PostCreateDto postCreateDto, AuthUser authUser) {
+		final User user = userRepository.findByEmail(authUser.email())
+			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
 		validateCategory(postCreateDto.category());
 		validateLanguage(postCreateDto.language());
-		Post post = Post.create(postCreateDto);
+		Post post = Post.create(postCreateDto, user);
 		postRepository.save(post);
 	}
 
-	public PagePostResponseDto getAllPosts(int page, int size, Long userId) {
+	public PagePostResponseDto getAllPosts(int page, int size, AuthUser authUser) {
+		final User user = userRepository.findByEmail(authUser.email())
+			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Post> postPage = postRepository.findAll(pageable);
 
 		String profileImage = null;
 
 		List<PostsResponseDto> posts = postPage.getContent().stream()
-			.map(post -> toPost(post, profileImage, userId))
+			.map(post -> toPost(post, profileImage, user.getId()))
 			.collect(Collectors.toList());
 
 		PageInfoDto pageInfoDto = new PageInfoDto(
