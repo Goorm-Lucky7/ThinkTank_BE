@@ -35,7 +35,7 @@ class JwtProviderServiceTest {
 
 	@DisplayName("generateAccessToken(): 액세스 토큰 발급 완료 - accessToken")
 	@Test
-	void success_generateAccessToken() {
+	void generateAccessToken_accessToken_success() {
 		// GIVEN
 		String email = "solmoon@gmail.com";
 		String nickname = "ssol";
@@ -52,27 +52,30 @@ class JwtProviderServiceTest {
 		assertThat(actual.getPayload().get("nickname", String.class)).isEqualTo(nickname);
 	}
 
+	@DisplayName("generateRefreshToken(): 리프레쉬 토큰 발급 완료 - refreshToken")
 	@Test
-	void generateRefreshToken() {
+	void generateRefreshToken_refreshToken_success() {
+		// GIVEN
+		String email = "solmoon@gmail.com";
+
+		// WHEN
+		String refreshToken = jwtProviderService.generateRefreshToken(email);
+		Jws<Claims> actual = Jwts.parser()
+			.verifyWith(tokenConfig.getSecretKey())
+			.build()
+			.parseSignedClaims(refreshToken);
+
+		// THEN
+		assertThat(actual.getPayload().get("email", String.class)).isEqualTo(email);
 	}
 
+	@DisplayName("reGenerateToken(): 액세스 토큰 재발급 - refreshToken")
 	@Test
-	void reGenerateToken() {
-	}
+	void reGenerateToken_accessToken_success() {
+		// GIVEN
 
-	@Test
-	void extractAccessToken() {
-	}
+		// WHEN
 
-	@Test
-	void extractRefreshToken() {
-	}
-
-	@Test
-	void extractAuthUserByAccessToken() {
-	}
-
-	@Test
-	void isUsable() {
+		// THEN
 	}
 }
