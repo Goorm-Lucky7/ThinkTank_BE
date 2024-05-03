@@ -1,5 +1,7 @@
 package com.thinktank.api.service.auth;
 
+import static com.thinktank.global.common.util.AuthConstants.*;
+import static com.thinktank.global.common.util.GlobalConstant.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -11,11 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.TestPropertySource;
 
 import com.thinktank.api.entity.User;
 import com.thinktank.api.repository.UserRepository;
+import com.thinktank.global.common.util.AuthConstants;
+import com.thinktank.global.common.util.GlobalConstant;
 import com.thinktank.global.config.TokenConfig;
 import com.thinktank.global.error.model.ErrorCode;
 import com.thinktank.support.fixture.UserFixture;
@@ -135,5 +140,21 @@ class JwtProviderServiceTest {
 		assertThatThrownBy(() -> jwtProviderService.reGenerateToken(refreshToken, response))
 			.isInstanceOf(ChangeSetPersister.NotFoundException.class)
 			.hasMessage(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION.getMessage());
+	}
+
+	@DisplayName("extractToken(): 토큰 추출 성공 - Token")
+	@Test
+	void extractToken_token_success() {
+		// GIVEN
+		String accessToken = "accessToken";
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader(ACCESS_TOKEN_HEADER, BEARER + BLANK + accessToken);
+
+		// WHEN
+		String actual = jwtProviderService.extractAccessToken(ACCESS_TOKEN_HEADER, request);
+
+		// THEN
+		assertThat(actual).isEqualTo(accessToken);
 	}
 }
