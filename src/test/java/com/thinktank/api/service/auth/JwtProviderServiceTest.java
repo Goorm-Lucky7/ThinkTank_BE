@@ -21,7 +21,9 @@ import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.config.TokenConfig;
+import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.model.ErrorCode;
+import com.thinktank.support.fixture.JwtFixture;
 import com.thinktank.support.fixture.UserFixture;
 
 import io.jsonwebtoken.Claims;
@@ -204,5 +206,42 @@ class JwtProviderServiceTest {
 
 		// THEN
 		assertThat(actual).isTrue();
+	}
+
+	@DisplayName("isUsable(): 토큰 만료 - FALSE")
+	@Test
+	void isUsable_false_fail() {
+		// GIVEN
+		String accessToken = JwtFixture.createExpiredToken(tokenConfig.getSecretKey());
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		// WHEN
+		boolean actual = jwtProviderService.isUsable(accessToken, response);
+
+		// THEN
+		assertThat(actual).isFalse();
+	}
+
+	@DisplayName("isUsable - 토큰이 빈값이다. - NotFoundException (Empty)")
+	@Test
+	void isUsable_emptied_NotFoundException_fail() {
+		// WHEN & THEN
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		assertThatThrownBy(() -> jwtProviderService.isUsable("", response))
+			.isInstanceOf(NotFoundException.class)
+			.hasMessage(ErrorCode.FAIL_NOT_TOKEN_FOUND_EXCEPTION.getMessage());
+	}
+
+	@DisplayName("isUsable - 잘못된 토큰이다. - NotFoundException (Invalid)")
+	@Test
+	void isUsable_invalid_NotFoundException_fail() {
+		// WHEN & THEN
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		assertThatThrownBy(() -> jwtProviderService.isUsable("invalid token", response))
+			.isInstanceOf(NotFoundException.class)
+			.hasMessage(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION.getMessage());
 	}
 }
