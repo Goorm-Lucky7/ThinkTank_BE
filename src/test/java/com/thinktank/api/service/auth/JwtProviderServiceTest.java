@@ -188,4 +188,21 @@ class JwtProviderServiceTest {
 		assertThat(actual.email()).isEqualTo(email);
 		assertThat(actual.nickname()).isEqualTo(nickname);
 	}
+
+	@DisplayName("isUsable(): 토큰 유효 - TRUE")
+	@Test
+	void isUsable_true_success() {
+		// GIVEN
+		String email = "solmoon@gmail.com";
+		String nickname = "ssol";
+		String accessToken = jwtProviderService.generateAccessToken(email, nickname);
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		// WHEN
+		boolean actual = jwtProviderService.isUsable(accessToken, response);
+
+		// THEN
+		assertThat(actual).isTrue();
+	}
 }
