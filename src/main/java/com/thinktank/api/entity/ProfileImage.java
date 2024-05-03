@@ -49,17 +49,16 @@ public class ProfileImage {
 
 	public static ProfileImage createDefaultForUser(User user) {
 		return ProfileImage.builder()
-			.fileName(null)
-			.fileUrl(null)
-			.originalFileName(null)
+			.fileName("default")
+			.fileUrl("default.png")
+			.originalFileName("default")
 			.user(user)
 			.build();
 	}
 
-	public void updateProfileImage(ProfileImageReqDto profileImageReqDto, User user) {
+	public void updateProfileImage(ProfileImageReqDto profileImageReqDto) {
 		this.fileName = profileImageReqDto.fileName();
 		this.fileUrl = profileImageReqDto.fileUrl();
 		this.originalFileName = profileImageReqDto.originalFileName();
-		this.user = user;
 	}
 }
