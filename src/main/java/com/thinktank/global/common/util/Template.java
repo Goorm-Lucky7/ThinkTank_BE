@@ -12,11 +12,28 @@ public class Template {
 			"public class Main {\n" +
 			"    public static void main(String[] args) throws IOException {\n" +
 			"    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));" +
-			"        for(int i = 0; i < %d; i++) {\n" +
+			"        for(int zxcvbnm = 0; zxcvbnm < %d; zxcvbnm++) {\n" +
 			"			 String qwertasdf = br.readLine();   \n" +
 			"            System.out.println(solution(qwertasdf));\n" +
 			"        }\n" +
 			"    }\n" +
 			"    %s\n" +
 			"}\n";
+
+	public static final String JAVASCRIPT_TEMPLATE =
+		"const readline = require('readline').createInterface({\n" +
+			"    input: process.stdin,\n" +
+			"});\n\n" +
+			"let count = 0;\n" +
+			"readline.on('line', input => {\n" +
+			"console.log(solution(input));\n" +
+			"count++;\n" +
+			"if (count === %d) {\n" +
+			"readline.close();\n" +
+			"  }\n" +
+			"});\n" +
+			"readline.on('close', () => {\n" +
+			"process.exit(0);\n" +
+			"});\n" +
+			"%s";
 }
