@@ -24,11 +24,11 @@ public class Template {
 		"const readline = require('readline').createInterface({\n" +
 			"    input: process.stdin,\n" +
 			"});\n\n" +
-			"let count = 0;\n" +
+			"let zxcvbn = 0;\n" +
 			"readline.on('line', input => {\n" +
 			"console.log(solution(input));\n" +
-			"count++;\n" +
-			"if (count === %d) {\n" +
+			"zxcvbn++;\n" +
+			"if (zxcvbn === %d) {\n" +
 			"readline.close();\n" +
 			"  }\n" +
 			"});\n" +
