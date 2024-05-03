@@ -58,8 +58,6 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(STATELESS));
 
-		httpSecurity.cors(AbstractHttpConfigurer::disable);
-
 		httpSecurity.authorizeHttpRequests((auth) -> auth
 			.requestMatchers("/api/login", "/api/logout", "/api/signup").permitAll()
 			.anyRequest().authenticated()
