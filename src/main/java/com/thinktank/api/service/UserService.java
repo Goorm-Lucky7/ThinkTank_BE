@@ -29,6 +29,8 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final ProfileImageRepository profileImageRepository;
 
+	private final UserProfileService userProfileService;
+
 	@Transactional
 	public void signUp(SignUpDto signUpDto) {
 		validateEmailNotExists(signUpDto.email());
@@ -39,6 +41,8 @@ public class UserService {
 		final User user = User.signup(signUpDto, encodedPassword);
 
 		userRepository.save(user);
+
+		userProfileService.createProfileImage(user);
 	}
 
 	public UserResDto findUserProfile(AuthUser authUser) {
