@@ -2,6 +2,7 @@ package com.thinktank.global.common.util;
 
 import static com.thinktank.global.common.util.DockerCommand.*;
 import static com.thinktank.global.common.util.GlobalConstant.*;
+import static com.thinktank.global.common.util.Template.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -28,7 +29,7 @@ public class JavaJudge implements JudgeUtil {
 
 		validateExist(directory);
 		try {
-			final File sourceFile = createFile(directory, code);
+			final File sourceFile = createFile(directory, code, testCases.size());
 
 			startCompile(sourceFile, testCases, directory);
 		} catch (IOException e) {
@@ -67,40 +68,17 @@ public class JavaJudge implements JudgeUtil {
 
 	private void runTestCases(List<CustomTestCase> testCases, File tempDir) throws IOException {
 		final ProcessBuilder builder = startDockerRun(tempDir);
+		final Process process = builder.start();
+		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
 		for (CustomTestCase testCase : testCases) {
-			final Process process = builder.start();
-			final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-			final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
 			writer.write(testCase.example() + "\n");
 			writer.flush();
-
-			final long startTime = System.currentTimeMillis();
-
-			timeOutCheck(process, startTime);
 
 			final String output = reader.readLine();
 
 			validateJudge(testCase.result(), output);
-		}
-	}
-
-	private void timeOutCheck(Process process, long startTime) {
-		while (!isProcessCompleted(process)) {
-			if (System.currentTimeMillis() - startTime > EXECUTION_TIME_LIMIT) {
-				process.destroy();
-				throw new BadRequestException(ErrorCode.BAD_REQUEST_TIME_OUT);
-			}
-		}
-	}
-
-	private boolean isProcessCompleted(Process process) {
-		try {
-			process.exitValue();
-			return true;
-		} catch (IllegalThreadStateException e) {
-			return false;
 		}
 	}
 
@@ -114,11 +92,12 @@ public class JavaJudge implements JudgeUtil {
 		return new ProcessBuilder(compileCommand(sourceFile, tempDirPath));
 	}
 
-	private File createFile(File tempDir, String code) {
+	private File createFile(File tempDir, String code, int size) {
 		final File sourceFile = new File(tempDir, JAVA_CLASS_NAME);
+		final String codeWithLoop = String.format(JAVA_TEMPLATE, size, code);
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
-			writer.write(code);
+			writer.write(codeWithLoop);
 		} catch (IOException e) {
 			throw new BadRequestException(ErrorCode.BAD_REQUEST);
 		}
