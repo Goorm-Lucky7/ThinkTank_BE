@@ -18,6 +18,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.TestPropertySource;
 
 import com.thinktank.api.entity.User;
+import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.config.TokenConfig;
 import com.thinktank.global.error.model.ErrorCode;
@@ -170,5 +171,21 @@ class JwtProviderServiceTest {
 
 		// THEN
 		assertThat(actual).isNull();
+	}
+
+	@DisplayName("extractAuthUserByAccessToken(): 액세스 토큰 정보를 추출해 AuthUser 생성 - AuthUser")
+	@Test
+	void extractAuthUserByAccessToken_AuthUser_success() {
+		// GIVEN
+		String email = "solmoon@gmail.com";
+		String nickname = "ssol";
+		String accessToken = jwtProviderService.generateAccessToken(email, nickname);
+
+		// WHEN
+		AuthUser actual = jwtProviderService.extractAuthUserByAccessToken(accessToken);
+
+		// THEN
+		assertThat(actual.email()).isEqualTo(email);
+		assertThat(actual.nickname()).isEqualTo(nickname);
 	}
 }
