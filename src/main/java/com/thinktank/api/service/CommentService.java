@@ -77,8 +77,8 @@ public class CommentService {
 		Comment comment = commentRepository.findById(commentDeleteDto.commentId())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_COMMENT_FOUND_EXCEPTION));
 
-		boolean isUserComment = validateUserComment(comment, authUser.email());
-		boolean isCommentInUserPost = validateCommentInUserPost(commentDeleteDto.postId(), authUser.email());
+		boolean isUserComment = isUserComment(comment, authUser.email());
+		boolean isCommentInUserPost = isCommentInUserPost(commentDeleteDto.postId(), authUser.email());
 
 		if(!isUserComment && !isCommentInUserPost) {
 			throw new UnauthorizedException(ErrorCode.DELETE_COMMENT_FORBIDDEN_EXCEPTION);
@@ -87,11 +87,11 @@ public class CommentService {
 		commentRepository.delete(comment);
 	}
 
-	private boolean validateUserComment(Comment comment, String userEmail) {
+	private boolean isUserComment(Comment comment, String userEmail) {
 		return comment.getUser().getEmail().equals(userEmail);
 	}
 
-	private boolean validateCommentInUserPost(Long postId, String userEmail) {
+	private boolean isCommentInUserPost(Long postId, String userEmail) {
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
 
