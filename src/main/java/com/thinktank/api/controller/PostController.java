@@ -23,7 +23,7 @@ public class PostController {
 	private final PostService postService;
 
 	@PostMapping("/post")
-	public ResponseEntity<?> createPost(@RequestBody @Validated PostCreateDto postCreateDto) {
+	public ResponseEntity<String> createPost(@RequestBody @Validated PostCreateDto postCreateDto) {
 		postService.createPost(postCreateDto);
 		return ResponseEntity.ok("OK");
 	}
