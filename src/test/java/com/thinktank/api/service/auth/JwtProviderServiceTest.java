@@ -118,4 +118,22 @@ class JwtProviderServiceTest {
 			.isInstanceOf(ChangeSetPersister.NotFoundException.class)
 			.hasMessage(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION.getMessage());
 	}
+
+	@DisplayName("reGenerateToken(): 해당 리프레쉬 토큰은 이미 재발급에 사용된 토큰 - NotFountException")
+	@Test
+	void reGenerateToken_JWT_NotFountException_fail() {
+		// GIVEN
+		User user = UserFixture.createUser();
+		String refreshToken = jwtProviderService.generateRefreshToken(user.getEmail());
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		user.updateRefreshToken("used" + refreshToken);
+
+		given(userRepository.findByEmail(any(String.class))).willReturn(Optional.empty());
+
+		// WHEN & THEN
+		assertThatThrownBy(() -> jwtProviderService.reGenerateToken(refreshToken, response))
+			.isInstanceOf(ChangeSetPersister.NotFoundException.class)
+			.hasMessage(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION.getMessage());
+	}
 }
