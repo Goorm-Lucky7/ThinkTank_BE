@@ -23,6 +23,8 @@ import com.thinktank.api.repository.CommentRepository;
 import com.thinktank.api.repository.PostRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.BadRequestException;
+import com.thinktank.global.error.exception.NotFoundException;
+import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
@@ -38,7 +40,7 @@ public class CommentService {
 	@Transactional
 	public void createComment(CommentCreateDto commentCreateDto, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
 
 		final Post post = postRepository.findById(commentCreateDto.postId())
 				.orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST));
@@ -50,7 +52,7 @@ public class CommentService {
 	@Transactional(readOnly = true)
 	public CommentsResponseDto getCommentsByPostId(Long postId, AuthUser authUser, int pageIndex, int pageSize) {
 		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
 
 		Pageable pageable = PageRequest.of(pageIndex, pageSize);
 		Page<Comment> page = commentRepository.findByPostId(postId, pageable);
@@ -73,13 +75,13 @@ public class CommentService {
 	@Transactional
 	public void deleteComment(CommentDeleteDto commentDeleteDto, AuthUser authUser) {
 		Comment comment = commentRepository.findById(commentDeleteDto.commentId())
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_COMMENT_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_COMMENT_FOUND_EXCEPTION));
 
 		boolean isUserComment = validateUserComment(comment, authUser.email());
 		boolean isCommentInUserPost = validateCommentInUserPost(commentDeleteDto.postId(), authUser.email());
 
 		if(!isUserComment && !isCommentInUserPost) {
-			throw new BadRequestException(ErrorCode.DELETE_COMMENT_FORBIDDEN_EXCEPTION);
+			throw new UnauthorizedException(ErrorCode.DELETE_COMMENT_FORBIDDEN_EXCEPTION);
 		}
 
 		commentRepository.delete(comment);
@@ -91,7 +93,7 @@ public class CommentService {
 
 	private boolean validateCommentInUserPost(Long postId, String userEmail) {
 		Post post = postRepository.findById(postId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
 
 		//return post.getUser().getEmail.equals(userEmail);
 		return true;
