@@ -11,10 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.thinktank.api.dto.comment.request.CommentCreateDto;
 import com.thinktank.api.dto.comment.request.CommentDeleteDto;
-import com.thinktank.api.dto.comment.page.response.PageInfoDto;
 import com.thinktank.api.dto.comment.response.CommentResponseDto;
 import com.thinktank.api.dto.comment.response.CommentUserResponseDto;
 import com.thinktank.api.dto.comment.response.CommentsResponseDto;
+import com.thinktank.api.dto.page.response.PageInfoDto;
 import com.thinktank.api.entity.Comment;
 import com.thinktank.api.entity.Post;
 import com.thinktank.api.entity.User;
@@ -43,7 +43,7 @@ public class CommentService {
 			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
 
 		final Post post = postRepository.findById(commentCreateDto.postId())
-				.orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST));
+			.orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST));
 
 		Comment comment = Comment.create(commentCreateDto, user, post);
 		commentRepository.save(comment);
@@ -67,9 +67,9 @@ public class CommentService {
 			))
 			.collect(Collectors.toList());
 
-		PageInfoDto pageRequestDto = new PageInfoDto(pageIndex, !page.hasNext());
+		PageInfoDto pageInfoDto = new PageInfoDto(pageIndex, !page.hasNext());
 
-		return new CommentsResponseDto(postId, comments, pageRequestDto);
+		return new CommentsResponseDto(postId, comments, pageInfoDto);
 	}
 
 	@Transactional

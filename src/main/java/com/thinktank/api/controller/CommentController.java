@@ -40,6 +40,7 @@ public class CommentController {
 												@RequestParam(defaultValue = "0") int pageIndex,
 												@RequestParam(defaultValue = "10") int pageSize) {
 		CommentsResponseDto comments = commentService.getCommentsByPostId(postId, authUser, pageIndex, pageSize);
+
 		return ResponseEntity.ok(comments);
 	}
 
