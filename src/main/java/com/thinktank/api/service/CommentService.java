@@ -1,7 +1,5 @@
 package com.thinktank.api.service;
 
-import static com.thinktank.global.common.util.AuthConstants.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,12 +22,9 @@ import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.CommentRepository;
 import com.thinktank.api.repository.PostRepository;
 import com.thinktank.api.repository.UserRepository;
-import com.thinktank.api.service.auth.JwtProviderService;
-import com.thinktank.global.auth.annotation.Auth;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.model.ErrorCode;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -39,7 +34,6 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
-	private final JwtProviderService jwtProviderService;
 
 	@Transactional
 	public void createComment(CommentCreateDto commentCreateDto, AuthUser authUser) {
