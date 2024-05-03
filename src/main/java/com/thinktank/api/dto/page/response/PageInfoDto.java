@@ -1,4 +1,4 @@
-package com.thinktank.api.dto.comment.page.response;
+package com.thinktank.api.dto.page.response;
 
 public record PageInfoDto(
 	int pageIndex,
