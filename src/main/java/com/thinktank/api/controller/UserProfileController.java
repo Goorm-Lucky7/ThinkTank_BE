@@ -32,10 +32,10 @@ public class UserProfileController {
 	}
 
 	@PutMapping("/users/image")
-	public ResponseEntity<String> saveOrUpdateProfileImage(
+	public ResponseEntity<String> updateProfileImage(
 		@Auth AuthUser authUser,
 		@RequestBody @Validated ProfileImageReqDto profileImageReqDto) {
-		userProfileService.saveOrUpdateProfileImage(authUser, profileImageReqDto);
+		userProfileService.updateProfileImage(authUser, profileImageReqDto);
 		return ResponseEntity.ok("OK");
 	}
 
