@@ -1,6 +1,7 @@
 package com.thinktank.global.common.util;
 
 import static com.thinktank.global.common.util.GlobalConstant.*;
+import static com.thinktank.global.common.util.Template.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -26,8 +27,8 @@ public class JavaScriptJudge implements JudgeUtil {
 		final File directory = new File(uniqueDirName);
 
 		validateExist(directory);
-		createFile(directory, getUserCode());
 		try {
+			createFile(directory, code, testCases.size());
 			runTestCases(testCases, directory);
 		} catch (IOException e) {
 			throw new BadRequestException(ErrorCode.BAD_REQUEST);
@@ -42,18 +43,17 @@ public class JavaScriptJudge implements JudgeUtil {
 	}
 
 	private void runTestCases(List<CustomTestCase> testCases, File tempDir) throws IOException {
+		final ProcessBuilder builder = startDockerRun(tempDir);
+		final Process process = builder.start();
+		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		for (CustomTestCase testCase : testCases) {
-			final ProcessBuilder builder = startDockerRun(tempDir);
-			final Process process = builder.start();
+			writer.write(testCase.example() + "\n");
+			writer.flush();
 
-			try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()))) {
-				writer.write(testCase.example() + "\n");
-				writer.flush();
-			}
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-				String output = reader.readLine();
-				validateJudge(testCase.result(), output);
-			}
+			final String output = reader.readLine();
+
+			validateJudge(testCase.result(), output);
 		}
 	}
 
@@ -69,14 +69,12 @@ public class JavaScriptJudge implements JudgeUtil {
 		}
 	}
 
-	private void createFile(File tempDir, String code) {
+	private void createFile(File tempDir, String code, int size) throws IOException {
 		final File sourceFile = new File(tempDir, JAVASCRIPT_CLASS_NAME);
+		final String codeWithLoop = String.format(JAVASCRIPT_TEMPLATE, size, code);
 
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
-			writer.write(code);
-		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
-		}
+		BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile));
+		writer.write(codeWithLoop);
 	}
 
 	private void delete(File directory) {
@@ -89,18 +87,5 @@ public class JavaScriptJudge implements JudgeUtil {
 		}
 
 		directory.delete();
-	}
-
-	private String getUserCode() {
-		return "const readline = require('readline').createInterface({\n" +
-			"  input: process.stdin,\n" +
-			"  output: process.stdout\n" +
-			"});\n" +
-			"\n" +
-			"readline.question('', input => {\n" +
-			"  const [a, b] = input.split(' ').map(Number); // 공백으로 분리하여 입력 받기\n" +
-			"  console.log(a + b);\n" +
-			"  readline.close();\n" +
-			"});\n";
 	}
 }
