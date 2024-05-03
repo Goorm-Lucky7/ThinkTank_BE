@@ -19,8 +19,6 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.thinktank.api.entity.User;
 import com.thinktank.api.repository.UserRepository;
-import com.thinktank.global.common.util.AuthConstants;
-import com.thinktank.global.common.util.GlobalConstant;
 import com.thinktank.global.config.TokenConfig;
 import com.thinktank.global.error.model.ErrorCode;
 import com.thinktank.support.fixture.UserFixture;
@@ -156,5 +154,21 @@ class JwtProviderServiceTest {
 
 		// THEN
 		assertThat(actual).isEqualTo(accessToken);
+	}
+
+	@DisplayName("extractToken(): BEARER 타입이 아닌 토큰 추출 - NULL")
+	@Test
+	void extractToken_null_fail() {
+		// GIVEN
+		String accessToken = "accessToken";
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader(ACCESS_TOKEN_HEADER, accessToken);
+
+		// WHEN
+		String actual = jwtProviderService.extractAccessToken(ACCESS_TOKEN_HEADER, request);
+
+		// THEN
+		assertThat(actual).isNull();
 	}
 }
