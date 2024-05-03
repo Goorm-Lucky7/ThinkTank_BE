@@ -74,10 +74,6 @@ public class User extends BaseTimeEntity {
 			.build();
 	}
 
-	public void updateRefreshToken(String refreshToken) {
-		this.refreshToken = refreshToken;
-	}
-
 	public void updateNickname(String nickname) {
 		this.nickname = nickname;
 	}
