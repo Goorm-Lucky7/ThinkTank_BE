@@ -1,16 +1,22 @@
 package com.thinktank.api.service.auth;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.TestPropertySource;
 
+import com.thinktank.api.entity.User;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.config.TokenConfig;
+import com.thinktank.support.fixture.UserFixture;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -73,9 +79,23 @@ class JwtProviderServiceTest {
 	@Test
 	void reGenerateToken_accessToken_success() {
 		// GIVEN
+		User user = UserFixture.createUser();
+		String refreshToken = jwtProviderService.generateRefreshToken(user.getEmail());
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		user.updateRefreshToken(refreshToken);
+
+		given(userRepository.findByEmail(any(String.class))).willReturn(Optional.of(user));
 
 		// WHEN
+		String accessToken = jwtProviderService.reGenerateToken(refreshToken, response);
+		Jws<Claims> actual = Jwts.parser()
+			.verifyWith(tokenConfig.getSecretKey())
+			.build()
+			.parseSignedClaims(accessToken);
 
 		// THEN
+		assertThat(actual.getPayload().get("email", String.class)).isEqualTo(user.getEmail());
+		assertThat(actual.getPayload().get("nickname", String.class)).isEqualTo(user.getNickname());
 	}
 }
