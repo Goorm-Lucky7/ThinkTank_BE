@@ -10,12 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.TestPropertySource;
 
 import com.thinktank.api.entity.User;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.config.TokenConfig;
+import com.thinktank.global.error.model.ErrorCode;
 import com.thinktank.support.fixture.UserFixture;
 
 import io.jsonwebtoken.Claims;
@@ -39,7 +41,7 @@ class JwtProviderServiceTest {
 	@MockBean
 	UserRepository userRepository;
 
-	@DisplayName("generateAccessToken(): 액세스 토큰 발급 완료 - accessToken")
+	@DisplayName("generateAccessToken(): 액세스 토큰 발급 성공 - accessToken")
 	@Test
 	void generateAccessToken_accessToken_success() {
 		// GIVEN
@@ -58,7 +60,7 @@ class JwtProviderServiceTest {
 		assertThat(actual.getPayload().get("nickname", String.class)).isEqualTo(nickname);
 	}
 
-	@DisplayName("generateRefreshToken(): 리프레쉬 토큰 발급 완료 - refreshToken")
+	@DisplayName("generateRefreshToken(): 리프레쉬 토큰 발급 성공 - refreshToken")
 	@Test
 	void generateRefreshToken_refreshToken_success() {
 		// GIVEN
@@ -75,7 +77,7 @@ class JwtProviderServiceTest {
 		assertThat(actual.getPayload().get("email", String.class)).isEqualTo(email);
 	}
 
-	@DisplayName("reGenerateToken(): 액세스 토큰 재발급 - refreshToken")
+	@DisplayName("reGenerateToken(): 리프레쉬 토큰을 이용해서 액세스 토큰 재발급 성공 - accessToken")
 	@Test
 	void reGenerateToken_accessToken_success() {
 		// GIVEN
@@ -97,5 +99,23 @@ class JwtProviderServiceTest {
 		// THEN
 		assertThat(actual.getPayload().get("email", String.class)).isEqualTo(user.getEmail());
 		assertThat(actual.getPayload().get("nickname", String.class)).isEqualTo(user.getNickname());
+	}
+
+	@DisplayName("reGenerateToken(): 리프레쉬 토큰 정보에 해당하는 사용자가 없음 - NotFountException")
+	@Test
+	void reGenerateToken_user_NotFountException_fail() {
+		// GIVEN
+		User user = UserFixture.createUser();
+		String refreshToken = jwtProviderService.generateRefreshToken(user.getEmail());
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		user.updateRefreshToken(refreshToken);
+
+		given(userRepository.findByEmail(any(String.class))).willReturn(Optional.empty());
+
+		// WHEN & THEN
+		assertThatThrownBy(() -> jwtProviderService.reGenerateToken(refreshToken, response))
+			.isInstanceOf(ChangeSetPersister.NotFoundException.class)
+			.hasMessage(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION.getMessage());
 	}
 }
