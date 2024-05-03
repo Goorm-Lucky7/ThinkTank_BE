@@ -35,10 +35,11 @@ public class CommentController {
 	}
 
 	@GetMapping("/posts/{post-id}/comments")
-	public ResponseEntity<CommentsResponseDto> getCommentsByPostId(@PathVariable("post-id") Long postId,
+	public ResponseEntity<CommentsResponseDto> getCommentsByPostId(
+												@PathVariable("post-id") Long postId, @Auth AuthUser authUser,
 												@RequestParam(defaultValue = "0") int pageIndex,
 												@RequestParam(defaultValue = "10") int pageSize) {
-		CommentsResponseDto comments = commentService.getCommentsByPostId(postId, pageIndex, pageSize);
+		CommentsResponseDto comments = commentService.getCommentsByPostId(postId, authUser, pageIndex, pageSize);
 		return ResponseEntity.ok(comments);
 	}
 
