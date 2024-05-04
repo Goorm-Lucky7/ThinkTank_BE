@@ -60,14 +60,9 @@ public class JavaJudge implements JudgeUtil {
 		Thread.currentThread().interrupt();
 	}
 
-	private void validateCompile(Process compileProcess) throws InterruptedException {
-		if (compileProcess.waitFor() != ZERO) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST_COMPILE_ERROR);
-		}
-	}
-
 	private void runTestCases(List<CustomTestCase> testCases, File tempDir) throws IOException {
 		final ProcessBuilder builder = startDockerRun(tempDir);
+		final long startTime = System.currentTimeMillis();
 		final Process process = builder.start();
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -77,14 +72,10 @@ public class JavaJudge implements JudgeUtil {
 			writer.flush();
 
 			final String output = reader.readLine();
+			final long currentTime = System.currentTimeMillis();
 
+			validateTimeOut(currentTime, startTime);
 			validateJudge(testCase.result(), output);
-		}
-	}
-
-	private static void validateJudge(String testCase, String output) {
-		if (!output.equals(testCase)) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST_FAIL);
 		}
 	}
 
@@ -100,6 +91,24 @@ public class JavaJudge implements JudgeUtil {
 		writer.write(codeWithLoop);
 
 		return sourceFile;
+	}
+
+	private void validateCompile(Process compileProcess) throws InterruptedException {
+		if (compileProcess.waitFor() != ZERO) {
+			throw new BadRequestException(ErrorCode.BAD_REQUEST_COMPILE_ERROR);
+		}
+	}
+
+	private static void validateTimeOut(long currentTime, long startTime) {
+		if (currentTime - startTime > EXECUTION_TIME_LIMIT) {
+			throw new BadRequestException(ErrorCode.BAD_REQUEST_TIME_OUT);
+		}
+	}
+
+	private static void validateJudge(String testCase, String output) {
+		if (!output.equals(testCase)) {
+			throw new BadRequestException(ErrorCode.BAD_REQUEST_FAIL);
+		}
 	}
 
 	private void validateExist(File tempDir) {
