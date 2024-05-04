@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thinktank.api.dto.judge.request.JudgeDto;
+import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.JudgeService;
+import com.thinktank.global.auth.annotation.Auth;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,9 +20,11 @@ public class JudgeController {
 	private final JudgeService judgeService;
 
 	@PostMapping("/judge")
-	public ResponseEntity<String> judge(@RequestBody JudgeDto dto) {
-		judgeService.judge(dto);
-
-		return ResponseEntity.ok("성공");
+	public ResponseEntity<String> judge(
+		@RequestBody JudgeDto dto,
+		@Auth AuthUser authUser
+	) {
+		judgeService.judge(dto, authUser);
+		return ResponseEntity.ok("OK");
 	}
 }
