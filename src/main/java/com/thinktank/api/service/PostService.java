@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.thinktank.api.dto.page.response.PageInfoDto;
 import com.thinktank.api.dto.post.request.PostCreateDto;
 import com.thinktank.api.dto.post.response.PagePostResponseDto;
+import com.thinktank.api.dto.post.response.PostDetailResponseDto;
 import com.thinktank.api.dto.post.response.PostsResponseDto;
 import com.thinktank.api.dto.testcase.custom.CustomTestCase;
 import com.thinktank.api.dto.user.response.SimpleUserResDto;
@@ -30,6 +31,7 @@ import com.thinktank.api.repository.PostRepository;
 import com.thinktank.api.repository.TestCaseRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.BadRequestException;
+import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
@@ -80,6 +82,38 @@ public class PostService {
 		);
 
 		return new PagePostResponseDto(posts, pageInfoDto);
+	}
+
+	public PostDetailResponseDto getPostDetail(Long postId, AuthUser authUser) {
+		final User user = userRepository.findByEmail(authUser.email())
+			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+		Post post = postRepository.findById(postId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
+		List<CustomTestCase> testCases = testCaseRepository.findByPostId(postId);
+
+		return mapToPostDetailResponseDto(post, testCases, user.getId());
+	}
+
+	private PostDetailResponseDto mapToPostDetailResponseDto(Post post, List<CustomTestCase> testCases, Long userId) {
+		int commentCount = commentRepository.countCommentsByPost(post);
+		int likeCount = likeRepository.findLikeCountByPost(post);
+		boolean likeType = isPostLikedByUser(userId, post);
+		return new PostDetailResponseDto(
+			post.getId(),
+			post.getTitle(),
+			post.getCategory().toString(),
+			post.getCreatedAt(),
+			post.getContent(),
+			testCases,
+			post.getCondition(),
+			post.getUser().getId().equals(userId),
+			likeCount,
+			commentCount,
+			post.getAnswerCount(),
+			post.getLanguage().toString(),
+			likeType,
+			post.getAnswer()
+		);
 	}
 
 	private PostsResponseDto toPost(Post post, String profileImage, Long userId) {
