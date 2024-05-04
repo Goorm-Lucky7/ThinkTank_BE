@@ -51,6 +51,14 @@ public class AuthenticationService {
 		return new LoginResDto(accessToken, refreshToken);
 	}
 
+	public String reGenerateToken(String refreshToken, HttpServletResponse response) {
+		try {
+			return jwtProviderService.reGenerateToken(refreshToken, response);
+		} catch (Exception e) {
+			throw new UnauthorizedException(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION);
+		}
+	}
+
 	@Transactional
 	public void logout(HttpServletRequest request, HttpServletResponse response) {
 		final String refreshToken = jwtProviderService.extractRefreshToken(REFRESH_TOKEN_COOKIE_NAME, request);
