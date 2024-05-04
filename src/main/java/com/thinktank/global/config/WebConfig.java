@@ -1,5 +1,7 @@
 package com.thinktank.global.config;
 
+import static com.thinktank.global.common.util.AuthConstants.*;
+
 import java.util.List;
 
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +24,7 @@ public class WebConfig implements WebMvcConfigurer {
 		registry.addMapping("/api/**")
 			.allowedOrigins("http://localhost:8080")
 			.allowedMethods("GET", "POST", "PUT", "DELETE")
+			.exposedHeaders(ACCESS_TOKEN_HEADER)
 			.allowCredentials(true);
 	}
 }
