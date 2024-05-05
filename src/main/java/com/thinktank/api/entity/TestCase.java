@@ -1,5 +1,7 @@
 package com.thinktank.api.entity;
 
+import com.thinktank.api.dto.testcase.custom.CustomTestCase;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -32,4 +35,23 @@ public class TestCase {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "post_id")
 	private Post post;
+
+	@Builder
+	private TestCase(
+		String example,
+		String result,
+		Post post
+	) {
+		this.example = example;
+		this.result = result;
+		this.post = post;
+	}
+
+	public static TestCase createTestCase(CustomTestCase customTestCase, Post post) {
+		return TestCase.builder()
+			.example(customTestCase.example())
+			.result(customTestCase.result())
+			.post(post)
+			.build();
+	}
 }

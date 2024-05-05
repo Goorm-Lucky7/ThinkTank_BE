@@ -70,7 +70,8 @@ public class Post extends BaseTimeEntity {
 		Language language,
 		String content,
 		String condition,
-		String answer
+		String answer,
+		User user
 	) {
 		this.title = title;
 		this.category = category;
@@ -78,9 +79,10 @@ public class Post extends BaseTimeEntity {
 		this.content = content;
 		this.condition = condition;
 		this.answer = answer;
+		this.user = user;
 	}
 
-	public static Post create(PostCreateDto postCreateDto) {
+	public static Post create(PostCreateDto postCreateDto, User user) {
 
 		return Post.builder()
 			.title(postCreateDto.title())
@@ -89,6 +91,7 @@ public class Post extends BaseTimeEntity {
 			.content(postCreateDto.content())
 			.condition(postCreateDto.condition())
 			.answer(postCreateDto.answer())
+			.user(user)
 			.build();
 	}
 }
