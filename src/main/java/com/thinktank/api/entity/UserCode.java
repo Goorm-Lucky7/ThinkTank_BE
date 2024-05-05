@@ -34,4 +34,14 @@ public class UserCode {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
+
+	private UserCode(String code, Post post, User user) {
+		this.code = code;
+		this.post = post;
+		this.user = user;
+	}
+
+	public static UserCode create(String code, Post post, User user) {
+		return new UserCode(code, post, user);
+	}
 }
