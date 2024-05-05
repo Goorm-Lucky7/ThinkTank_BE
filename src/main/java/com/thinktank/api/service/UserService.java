@@ -4,12 +4,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.thinktank.api.dto.profileImage.response.ProfileImageResDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.request.UserDeleteDto;
 import com.thinktank.api.dto.user.request.UserUpdateDto;
 import com.thinktank.api.dto.user.response.UserResDto;
+import com.thinktank.api.entity.ProfileImage;
 import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.auth.AuthUser;
+import com.thinktank.api.repository.ProfileImageRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
@@ -24,6 +27,9 @@ public class UserService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final ProfileImageRepository profileImageRepository;
+
+	private final UserProfileService userProfileService;
 
 	@Transactional
 	public void signUp(SignUpDto signUpDto) {
@@ -35,11 +41,17 @@ public class UserService {
 		final User user = User.signup(signUpDto, encodedPassword);
 
 		userRepository.save(user);
+
+		userProfileService.createProfileImage(user);
 	}
 
-	public UserResDto findUserDetails(AuthUser authUser) {
+	public UserResDto findUserProfile(AuthUser authUser) {
 		final User user = findByUserEmail(authUser.email());
-		return convertToUserResDto(user);
+
+		final ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_IMAGE_EXCEPTION));
+
+		return convertToUserResDto(user, profileImage);
 	}
 
 	@Transactional
@@ -60,9 +72,14 @@ public class UserService {
 		userRepository.delete(user);
 	}
 
-	private UserResDto convertToUserResDto(User user) {
+	private UserResDto convertToUserResDto(User user, ProfileImage profileImage) {
 		return new UserResDto(user.getEmail(), user.getNickname(), user.getGithub(), user.getBlog(),
-			user.getIntroduce());
+			user.getIntroduce(), convertToProfileImageResDto(profileImage));
+	}
+
+	private ProfileImageResDto convertToProfileImageResDto(ProfileImage profileImage) {
+		return new ProfileImageResDto(profileImage.getFileName(), profileImage.getFileUrl(),
+			profileImage.getOriginalFileName());
 	}
 
 	private User findByUserEmail(String email) {
