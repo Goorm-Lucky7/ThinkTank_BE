@@ -22,20 +22,19 @@ public class UserProfileService {
 	private final ProfileImageRepository profileImageRepository;
 	private final UserRepository userRepository;
 
+	public void createProfileImage(User user) {
+		final ProfileImage profileImage = ProfileImage.createDefaultForUser(user);
+		profileImageRepository.save(profileImage);
+	}
+
 	@Transactional
-	public void saveOrUpdateProfileImage(AuthUser authUser, ProfileImageReqDto profileImageReqDto) {
+	public void updateProfileImage(AuthUser authUser, ProfileImageReqDto profileImageReqDto) {
 		final User user = userRepository.findByEmail(authUser.email())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
 
-		profileImageRepository.findByUserEmail(user.getEmail())
-			.ifPresentOrElse(
-				updateProfileImage -> updateProfileImage.updateProfileImage(profileImageReqDto, user),
-				() -> createProfileImage(user)
-			);
-	}
+		final ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_IMAGE_EXCEPTION));
 
-	private void createProfileImage(User user) {
-		ProfileImage profileImage = ProfileImage.createWithUser(user);
-		profileImageRepository.save(profileImage);
+		profileImage.updateProfileImage(profileImageReqDto);
 	}
 }

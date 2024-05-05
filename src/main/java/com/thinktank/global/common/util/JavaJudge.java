@@ -92,15 +92,12 @@ public class JavaJudge implements JudgeUtil {
 		return new ProcessBuilder(compileCommand(sourceFile, tempDirPath));
 	}
 
-	private File createFile(File tempDir, String code, int size) {
+	private File createFile(File tempDir, String code, int size) throws IOException {
 		final File sourceFile = new File(tempDir, JAVA_CLASS_NAME);
 		final String codeWithLoop = String.format(JAVA_TEMPLATE, size, code);
 
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
-			writer.write(codeWithLoop);
-		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
-		}
+		BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile));
+		writer.write(codeWithLoop);
 
 		return sourceFile;
 	}

@@ -1,6 +1,9 @@
 package com.thinktank.api.entity;
 
+import static com.thinktank.global.common.util.GlobalConstant.*;
+
 import com.thinktank.api.dto.profileImage.request.ProfileImageReqDto;
+import com.thinktank.global.common.util.GlobalConstant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,19 +50,18 @@ public class ProfileImage {
 		this.user = user;
 	}
 
-	public static ProfileImage createWithUser(User user) {
+	public static ProfileImage createDefaultForUser(User user) {
 		return ProfileImage.builder()
-			.fileName(null)
-			.fileUrl(null)
-			.originalFileName(null)
+			.fileName(DEFAULT_FILE_NAME)
+			.fileUrl(DEFAULT_FILE_URL)
+			.originalFileName(DEFAULT_FILE_NAME)
 			.user(user)
 			.build();
 	}
 
-	public void updateProfileImage(ProfileImageReqDto profileImageReqDto, User user) {
+	public void updateProfileImage(ProfileImageReqDto profileImageReqDto) {
 		this.fileName = profileImageReqDto.fileName();
 		this.fileUrl = profileImageReqDto.fileUrl();
 		this.originalFileName = profileImageReqDto.originalFileName();
-		this.user = user;
 	}
 }

@@ -29,7 +29,6 @@ public class PostController {
 	public ResponseEntity<String> createPost(@RequestBody @Validated PostCreateDto postCreateDto,
 		@Auth AuthUser authUser) {
 		postService.createPost(postCreateDto, authUser);
-
 		return ResponseEntity.ok("OK");
 	}
 
