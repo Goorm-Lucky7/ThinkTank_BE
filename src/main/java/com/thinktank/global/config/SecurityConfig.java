@@ -43,6 +43,7 @@ public class SecurityConfig {
 			.requestMatchers("/h2-console/**")
 			.requestMatchers("/api/signup")
 			.requestMatchers("/api/login")
+			.requestMatchers("/api/reissue")
 			.requestMatchers("/api/logout");
 	}
 
@@ -58,10 +59,8 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(STATELESS));
 
-		httpSecurity.cors(AbstractHttpConfigurer::disable);
-
 		httpSecurity.authorizeHttpRequests((auth) -> auth
-			.requestMatchers("/api/login", "/api/logout", "/api/signup").permitAll()
+			.requestMatchers("/api/login", "/api/logout", "/api/signup", "/api/reissue").permitAll()
 			.anyRequest().authenticated()
 		);
 

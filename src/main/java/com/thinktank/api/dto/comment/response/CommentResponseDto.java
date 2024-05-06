@@ -9,6 +9,7 @@ public record CommentResponseDto(
 	String content,
 	@NotNull
 	String createdAt,
+	boolean isAuthor,
 	@NotNull
 	CommentUserResponseDto user
 ) {
