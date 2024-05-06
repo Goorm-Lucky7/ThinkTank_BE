@@ -3,6 +3,7 @@ package com.thinktank.api.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.thinktank.api.dto.post.request.PostCreateDto;
 import com.thinktank.api.dto.post.response.PagePostResponseDto;
+import com.thinktank.api.dto.post.response.PostDetailResponseDto;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.PostService;
 import com.thinktank.global.auth.annotation.Auth;
@@ -39,4 +41,12 @@ public class PostController {
 		PagePostResponseDto posts = postService.getAllPosts(page, size, authUser);
 		return ResponseEntity.ok(posts);
 	}
+
+	@GetMapping("/posts/{postId}")
+	public ResponseEntity<PostDetailResponseDto> getPostDetails(@PathVariable("postId") Long postId,
+		@Auth AuthUser authUser) {
+		PostDetailResponseDto postDetailResponseDto = postService.getPostDetail(postId, authUser);
+		return ResponseEntity.ok(postDetailResponseDto);
+	}
+
 }
