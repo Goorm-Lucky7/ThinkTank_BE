@@ -7,9 +7,9 @@ import java.util.Date;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.thinktank.api.entity.User;
+import com.thinktank.api.dto.auth.TokenSaveValue;
 import com.thinktank.api.entity.auth.AuthUser;
-import com.thinktank.api.repository.UserRepository;
+import com.thinktank.api.repository.redis.TokenRepository;
 import com.thinktank.global.common.util.CookieUtils;
 import com.thinktank.global.config.TokenConfig;
 import com.thinktank.global.error.exception.NotFoundException;
@@ -34,7 +34,7 @@ public class JwtProviderService {
 	private static final String NICKNAME = "nickname";
 
 	private final TokenConfig tokenConfig;
-	private final UserRepository userRepository;
+	private final TokenRepository tokenRepository;
 
 	public String generateAccessToken(String email, String nickname) {
 		final Date issuedDate = new Date();
@@ -58,16 +58,20 @@ public class JwtProviderService {
 	@Transactional
 	public String reGenerateToken(String refreshToken, HttpServletResponse response) {
 		final Claims claims = getClaimsByToken(refreshToken);
+
 		final String email = claims.get(EMAIL, String.class);
-		final User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+		final String nickname = claims.get(NICKNAME, String.class);
 
-		validateRefreshToken(refreshToken, user.getRefreshToken());
+		TokenSaveValue tokenSaveValue = tokenRepository.getTokenSaveValue(email);
+		validateTokenSaveValue(tokenSaveValue);
 
-		final String newAccessToken = generateAccessToken(user.getEmail(), user.getNickname());
-		final String newRefreshToken = generateRefreshToken(user.getEmail());
+		validateRefreshToken(refreshToken, tokenSaveValue.refreshToken());
 
-		user.updateRefreshToken(newRefreshToken);
+		final String newAccessToken = generateAccessToken(email, nickname);
+		final String newRefreshToken = generateRefreshToken(email);
+
+		tokenRepository.saveToken(email, new TokenSaveValue(newRefreshToken));
+
 		response.setHeader(ACCESS_TOKEN_HEADER, newAccessToken);
 
 		Cookie refreshTokenCookie = CookieUtils.generateRefreshTokenCookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken);
@@ -145,6 +149,13 @@ public class JwtProviderService {
 			.build()
 			.parseSignedClaims(token)
 			.getPayload();
+	}
+
+	private void validateTokenSaveValue(TokenSaveValue tokenSaveValue) {
+		if (tokenSaveValue == null) {
+			log.warn("INVALID TOKEN SAVE VALUE");
+			throw new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION);
+		}
 	}
 
 	private void validateRefreshToken(String currentRefreshToken, String savedRefreshToken) {

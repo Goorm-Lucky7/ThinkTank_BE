@@ -43,9 +43,6 @@ public class User extends BaseTimeEntity {
 	@Column(name = "introduce")
 	private String introduce;
 
-	@Column(name = "refresh_token")
-	private String refreshToken;
-
 	@Builder
 	private User(String email,
 		String nickname,
@@ -72,10 +69,6 @@ public class User extends BaseTimeEntity {
 			.blog(signupDTO.blog())
 			.introduce(signupDTO.introduce())
 			.build();
-	}
-
-	public void updateRefreshToken(String refreshToken) {
-		this.refreshToken = refreshToken;
 	}
 
 	public void updateNickname(String nickname) {

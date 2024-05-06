@@ -3,7 +3,6 @@ package com.thinktank.api.entity;
 import static com.thinktank.global.common.util.GlobalConstant.*;
 
 import com.thinktank.api.dto.profileImage.request.ProfileImageReqDto;
-import com.thinktank.global.common.util.GlobalConstant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,7 +42,7 @@ public class ProfileImage {
 	private User user;
 
 	@Builder
-	public ProfileImage(String fileName, String fileUrl, String originalFileName, User user) {
+	private ProfileImage(String fileName, String fileUrl, String originalFileName, User user) {
 		this.fileName = fileName;
 		this.fileUrl = fileUrl;
 		this.originalFileName = originalFileName;
