@@ -2,6 +2,7 @@ package com.thinktank.api.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thinktank.api.dto.post.request.PostCreateDto;
+import com.thinktank.api.dto.post.request.PostDeleteDto;
 import com.thinktank.api.dto.post.response.PagePostResponseDto;
 import com.thinktank.api.dto.post.response.PostDetailResponseDto;
 import com.thinktank.api.entity.auth.AuthUser;
@@ -47,6 +49,13 @@ public class PostController {
 		@Auth AuthUser authUser) {
 		PostDetailResponseDto postDetailResponseDto = postService.getPostDetail(postId, authUser);
 		return ResponseEntity.ok(postDetailResponseDto);
+	}
+
+	@DeleteMapping("/posts")
+	public ResponseEntity<String> deletePost(@RequestBody @Validated PostDeleteDto postDeleteDto,
+		@Auth AuthUser authUser) {
+		postService.deletePost(postDeleteDto, authUser);
+		return ResponseEntity.ok("OK");
 	}
 
 }

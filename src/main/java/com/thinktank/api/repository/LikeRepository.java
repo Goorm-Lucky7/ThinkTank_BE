@@ -14,4 +14,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
 	@Query("SELECT COALESCE(SUM(l.likeCount), 0) FROM Like l WHERE l.post = :post")
 	int findLikeCountByPost(@Param("post") Post post);
+
+	void deleteByPostId(Long postId);
 }
