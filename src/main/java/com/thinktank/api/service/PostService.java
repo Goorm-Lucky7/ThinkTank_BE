@@ -69,6 +69,7 @@ public class PostService {
 		testCaseRepository.saveAll(savedTestCases);
 	}
 
+	@Transactional(readOnly = true)
 	public PagePostResponseDto getAllPosts(int page, int size, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
@@ -89,6 +90,7 @@ public class PostService {
 		return new PagePostResponseDto(posts, pageInfoDto);
 	}
 
+	@Transactional(readOnly = true)
 	public PostDetailResponseDto getPostDetail(Long postId, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
