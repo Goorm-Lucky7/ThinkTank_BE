@@ -1,6 +1,7 @@
 package com.thinktank.api.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +20,9 @@ import lombok.RequiredArgsConstructor;
 public class JudgeController {
 	private final JudgeService judgeService;
 
-	@PostMapping("/judge")
+	@PostMapping("/posts/submit")
 	public ResponseEntity<String> judge(
-		@RequestBody JudgeDto dto,
+		@RequestBody @Validated JudgeDto dto,
 		@Auth AuthUser authUser
 	) {
 		judgeService.judge(dto, authUser);
