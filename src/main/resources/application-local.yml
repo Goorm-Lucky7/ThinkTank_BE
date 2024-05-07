@@ -1,3 +1,9 @@
+jwt:
+  secret:
+    access-key: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
+  access-expire: 300_000
+  refresh-expire: 604_800_000
+
 spring:
   config:
     activate:
@@ -6,19 +12,23 @@ spring:
   h2:
     console:
       enabled: true
-      path: /h2-console-vot
+      path: /h2-think
 
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:~/vot
+    url: jdbc:h2:tcp://localhost/~/think
     username: sa
     password:
 
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+
+  redis:
+    host: localhost
+    port: 6379
