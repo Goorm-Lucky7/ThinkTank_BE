@@ -14,6 +14,7 @@ public class CookieUtils {
 		Cookie refreshTokenCookie = new Cookie(refreshTokenName, token);
 		refreshTokenCookie.setMaxAge(COOKIE_MAX_AGE);
 		refreshTokenCookie.setHttpOnly(true);
+		refreshTokenCookie.setPath("/");
 
 		return refreshTokenCookie;
 	}
@@ -33,6 +34,7 @@ public class CookieUtils {
 		Cookie refreshTokenCookie = new Cookie(refreshTokenName, null);
 		refreshTokenCookie.setHttpOnly(true);
 		refreshTokenCookie.setMaxAge(0);
+		refreshTokenCookie.setPath("/");
 
 		return refreshTokenCookie;
 	}
