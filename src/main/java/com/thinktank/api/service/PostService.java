@@ -32,6 +32,7 @@ import com.thinktank.api.repository.CommentRepository;
 import com.thinktank.api.repository.LikeRepository;
 import com.thinktank.api.repository.PostRepository;
 import com.thinktank.api.repository.TestCaseRepository;
+import com.thinktank.api.repository.UserCodeRepository;
 import com.thinktank.api.repository.UserLikeRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.BadRequestException;
@@ -51,6 +52,7 @@ public class PostService {
 	private final CommentRepository commentRepository;
 	private final TestCaseRepository testCaseRepository;
 	private final UserLikeRepository userLikeRepository;
+	private final UserCodeRepository userCodeRepository;
 	private final UserLikeService userLikeService;
 
 	public void createPost(PostCreateDto postCreateDto, AuthUser authUser) {
@@ -110,6 +112,8 @@ public class PostService {
 		if (!Objects.equals(user.getId(), post.getUser().getId())) {
 			throw new BadRequestException(ErrorCode.DELETE_POST_FORBIDDEN_EXCEPTION);
 		}
+		userCodeRepository.deleteByPostId(postDeleteDto.postId());
+		commentRepository.deleteByPostId(postDeleteDto.postId());
 		testCaseRepository.deleteByPostId(postDeleteDto.postId());
 		List<UserLike> userLikes = userLikeRepository.findByLikePostId(postDeleteDto.postId());
 		userLikeRepository.deleteAll(userLikes);
@@ -120,6 +124,7 @@ public class PostService {
 	private PostDetailResponseDto mapToPostDetailResponseDto(Post post, List<CustomTestCase> testCases, Long userId) {
 		int commentCount = commentRepository.countCommentsByPost(post);
 		int likeCount = likeRepository.findLikeCountByPost(post);
+		int answerCount = userCodeRepository.countUserCodeByPost(post);
 		boolean likeType = isPostLikedByUser(userId, post);
 		return new PostDetailResponseDto(
 			post.getId(),
@@ -132,7 +137,7 @@ public class PostService {
 			post.getUser().getId().equals(userId),
 			likeCount,
 			commentCount,
-			post.getAnswerCount(),
+			answerCount,
 			post.getLanguage().toString(),
 			likeType,
 			post.getAnswer()
@@ -143,6 +148,7 @@ public class PostService {
 		SimpleUserResDto userDto = toUser(post.getUser(), profileImage);
 		int commentCount = commentRepository.countCommentsByPost(post);
 		int likeCount = likeRepository.findLikeCountByPost(post);
+		int answerCount = userCodeRepository.countUserCodeByPost(post);
 		boolean likeType = isPostLikedByUser(userId, post);
 
 		return new PostsResponseDto(
@@ -154,7 +160,7 @@ public class PostService {
 			post.getContent(),
 			commentCount,
 			likeCount,
-			post.getAnswerCount(),
+			answerCount,
 			likeType,
 			userDto
 		);
