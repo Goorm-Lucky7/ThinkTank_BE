@@ -7,6 +7,7 @@ import java.util.Date;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.thinktank.api.dto.auth.TokenResDto;
 import com.thinktank.api.dto.auth.TokenSaveValue;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.redis.TokenRepository;
@@ -56,7 +57,7 @@ public class JwtProviderService {
 	}
 
 	@Transactional
-	public String reGenerateToken(String refreshToken, HttpServletResponse response) {
+	public TokenResDto reGenerateToken(String refreshToken, HttpServletResponse response) {
 		final Claims claims = getClaimsByToken(refreshToken);
 
 		final String email = claims.get(EMAIL, String.class);
@@ -68,16 +69,19 @@ public class JwtProviderService {
 		validateRefreshToken(refreshToken, tokenSaveValue.refreshToken());
 
 		final String newAccessToken = generateAccessToken(email, nickname);
-		final String newRefreshToken = generateRefreshToken(email);
+		String newRefreshToken = refreshToken;
 
-		tokenRepository.saveToken(email, new TokenSaveValue(newRefreshToken));
+		if (!isUsable(refreshToken)) {
+			newRefreshToken = generateRefreshToken(email);
 
-		response.setHeader(ACCESS_TOKEN_HEADER, newAccessToken);
+			tokenRepository.saveToken(email, new TokenSaveValue(newRefreshToken));
 
-		Cookie refreshTokenCookie = CookieUtils.generateRefreshTokenCookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken);
-		response.addCookie(refreshTokenCookie);
+			Cookie refreshTokenCookie =
+				CookieUtils.generateRefreshTokenCookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken);
+			response.addCookie(refreshTokenCookie);
+		}
 
-		return newAccessToken;
+		return new TokenResDto(newAccessToken, newRefreshToken);
 	}
 
 	public String extractAccessToken(String header, HttpServletRequest request) {
@@ -98,7 +102,7 @@ public class JwtProviderService {
 		String refreshToken = CookieUtils.getCookieValue(cookieName, request);
 
 		if (refreshToken == null) {
-			log.warn("{} COOKIE NOT FOUND", cookieName);
+			log.warn("{}Token COOKIE NOT FOUND", cookieName);
 			throw new NotFoundException(ErrorCode.FAIL_NOT_COOKIE_FOUND_EXCEPTION);
 		}
 
@@ -113,7 +117,7 @@ public class JwtProviderService {
 		return AuthUser.create(email, nickname);
 	}
 
-	public boolean isUsable(String token, HttpServletResponse response) {
+	public boolean isUsable(String token) {
 		try {
 			Jwts.parser()
 				.verifyWith(tokenConfig.getSecretKey())
@@ -122,15 +126,11 @@ public class JwtProviderService {
 
 			return true;
 		} catch (ExpiredJwtException e) {
-			log.warn("TOKEN EXPIRED");
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			throw new NotFoundException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
-		} catch (IllegalArgumentException e) {
-			log.warn("TOKEN IS NULL");
-			throw new NotFoundException(ErrorCode.FAIL_NOT_TOKEN_FOUND_EXCEPTION);
+			log.warn("{} TOKEN EXPIRED", token);
+			return false;
 		} catch (Exception e) {
-			log.warn("INVALID TOKEN");
-			throw new NotFoundException(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION);
+			log.warn("INVALID {} TOKEN", token);
+			return false;
 		}
 	}
 
