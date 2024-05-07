@@ -1,7 +1,7 @@
 FROM openjdk:17
 LABEL description="Think tank"
 VOLUME /home/web/app/petmates/upload
-EXPOSE 8080
+EXPOSE 8082
 ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} /home/web/app/workdir/think-tank.jar
 WORKDIR /home/web/app/workdir/
