@@ -3,7 +3,6 @@ package com.thinktank.api.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,14 +38,6 @@ public class UserController {
 		return ResponseEntity.ok("OK");
 	}
 
-	@PostMapping("/reissue")
-	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<String> reGenerateToken(
-		@CookieValue(name = "refresh") String refreshToken,
-		HttpServletResponse response) {
-		return ResponseEntity.ok(authenticationService.reGenerateToken(refreshToken, response));
-	}
-
 	@PostMapping("/login")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<LoginResDto> login(
@@ -62,7 +53,8 @@ public class UserController {
 	}
 
 	@DeleteMapping
-	public ResponseEntity<String> removeUser(@Auth AuthUser authUser, UserDeleteDto userDeleteDto) {
+	public ResponseEntity<String> removeUser(@Auth AuthUser authUser,
+		@RequestBody @Validated UserDeleteDto userDeleteDto) {
 		userService.removeUser(authUser, userDeleteDto);
 		return ResponseEntity.ok("OK");
 	}
