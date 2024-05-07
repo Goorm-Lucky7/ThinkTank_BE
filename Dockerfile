@@ -17,7 +17,7 @@ RUN ./gradlew clean build
 ENV SPRING_PROFILES_ACTIVE=dev
 
 # DATABASE_URL을 환경 변수로 삽입
-ENV DATABASE_URL=jdbc:mariadb://mariadb/krampoline
+ENV DATABASE_URL=jdbc:mysql://mysql/krampoline
 
 # 빌드 결과 jar 파일을 실행
 CMD ["java", "-jar", "/home/gradle/project/build/libs/kakao-1.0.jar"]
