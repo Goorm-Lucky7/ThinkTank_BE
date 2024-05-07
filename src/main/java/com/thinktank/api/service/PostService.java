@@ -4,6 +4,7 @@ import static com.thinktank.global.common.util.GlobalConstant.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.thinktank.api.dto.page.response.PageInfoDto;
 import com.thinktank.api.dto.post.request.PostCreateDto;
+import com.thinktank.api.dto.post.request.PostDeleteDto;
 import com.thinktank.api.dto.post.response.PagePostResponseDto;
 import com.thinktank.api.dto.post.response.PostDetailResponseDto;
 import com.thinktank.api.dto.post.response.PostsResponseDto;
@@ -24,11 +26,13 @@ import com.thinktank.api.entity.Language;
 import com.thinktank.api.entity.Post;
 import com.thinktank.api.entity.TestCase;
 import com.thinktank.api.entity.User;
+import com.thinktank.api.entity.UserLike;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.CommentRepository;
 import com.thinktank.api.repository.LikeRepository;
 import com.thinktank.api.repository.PostRepository;
 import com.thinktank.api.repository.TestCaseRepository;
+import com.thinktank.api.repository.UserLikeRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
@@ -46,6 +50,7 @@ public class PostService {
 	private final LikeRepository likeRepository;
 	private final CommentRepository commentRepository;
 	private final TestCaseRepository testCaseRepository;
+	private final UserLikeRepository userLikeRepository;
 	private final UserLikeService userLikeService;
 
 	public void createPost(PostCreateDto postCreateDto, AuthUser authUser) {
@@ -64,6 +69,7 @@ public class PostService {
 		testCaseRepository.saveAll(savedTestCases);
 	}
 
+	@Transactional(readOnly = true)
 	public PagePostResponseDto getAllPosts(int page, int size, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
@@ -84,6 +90,7 @@ public class PostService {
 		return new PagePostResponseDto(posts, pageInfoDto);
 	}
 
+	@Transactional(readOnly = true)
 	public PostDetailResponseDto getPostDetail(Long postId, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
@@ -92,6 +99,22 @@ public class PostService {
 		List<CustomTestCase> testCases = testCaseRepository.findByPostId(postId);
 
 		return mapToPostDetailResponseDto(post, testCases, user.getId());
+	}
+
+	public void deletePost(PostDeleteDto postDeleteDto, AuthUser authUser) {
+		final User user = userRepository.findByEmail(authUser.email())
+			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+		Post post = postRepository.findById(postDeleteDto.postId())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
+
+		if (!Objects.equals(user.getId(), post.getUser().getId())) {
+			throw new BadRequestException(ErrorCode.DELETE_POST_FORBIDDEN_EXCEPTION);
+		}
+		testCaseRepository.deleteByPostId(postDeleteDto.postId());
+		List<UserLike> userLikes = userLikeRepository.findByLikePostId(postDeleteDto.postId());
+		userLikeRepository.deleteAll(userLikes);
+		likeRepository.deleteByPostId(postDeleteDto.postId());
+		postRepository.delete(post);
 	}
 
 	private PostDetailResponseDto mapToPostDetailResponseDto(Post post, List<CustomTestCase> testCases, Long userId) {

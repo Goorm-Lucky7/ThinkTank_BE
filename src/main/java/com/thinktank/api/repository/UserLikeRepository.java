@@ -1,5 +1,6 @@
 package com.thinktank.api.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,6 @@ public interface UserLikeRepository extends JpaRepository<UserLike, Long> {
 	boolean existsByLikeIdAndUserId(Long id, Long userId);
 
 	UserLike findByUserIdAndLikePostId(Long userId, Long postId);
+
+	List<UserLike> findByLikePostId(Long postId);
 }
