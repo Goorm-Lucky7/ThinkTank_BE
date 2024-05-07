@@ -171,10 +171,8 @@ class JwtProviderServiceTest {
 		String nickname = "ssol";
 		String accessToken = jwtProviderService.generateAccessToken(email, nickname);
 
-		MockHttpServletResponse response = new MockHttpServletResponse();
-
 		// WHEN
-		boolean actual = jwtProviderService.isUsable(accessToken, response);
+		boolean actual = jwtProviderService.isUsable(accessToken);
 
 		// THEN
 		assertThat(actual).isTrue();
@@ -186,10 +184,8 @@ class JwtProviderServiceTest {
 		// GIVEN
 		String accessToken = JwtFixture.createExpiredToken(tokenConfig.getSecretKey());
 
-		MockHttpServletResponse response = new MockHttpServletResponse();
-
 		// WHEN
-		boolean actual = jwtProviderService.isUsable(accessToken, response);
+		boolean actual = jwtProviderService.isUsable(accessToken);
 
 		// THEN
 		assertThat(actual).isFalse();
@@ -199,9 +195,7 @@ class JwtProviderServiceTest {
 	@Test
 	void isUsable_emptied_NotFoundException_fail() {
 		// WHEN & THEN
-		MockHttpServletResponse response = new MockHttpServletResponse();
-
-		assertThatThrownBy(() -> jwtProviderService.isUsable("", response))
+		assertThatThrownBy(() -> jwtProviderService.isUsable(""))
 			.isInstanceOf(NotFoundException.class)
 			.hasMessage(ErrorCode.FAIL_NOT_TOKEN_FOUND_EXCEPTION.getMessage());
 	}
@@ -210,9 +204,7 @@ class JwtProviderServiceTest {
 	@Test
 	void isUsable_invalid_NotFoundException_fail() {
 		// WHEN & THEN
-		MockHttpServletResponse response = new MockHttpServletResponse();
-
-		assertThatThrownBy(() -> jwtProviderService.isUsable("invalid token", response))
+		assertThatThrownBy(() -> jwtProviderService.isUsable("invalid token"))
 			.isInstanceOf(NotFoundException.class)
 			.hasMessage(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION.getMessage());
 	}
