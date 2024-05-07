@@ -13,5 +13,5 @@ spec:
     spec:
       containers:
         - name: krampoline
-          image: krmp-d2hub-idock.9rum.cc/dev-test/repo_a673aba88f6d
+          image: krmp-d2hub-idock.9rum.cc/dev-test/repo_fb85b19f2c88
           imagePullPolicy: Always
