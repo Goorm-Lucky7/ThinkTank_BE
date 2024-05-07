@@ -1,15 +1,18 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  labels:
+    app.kubernetes.io/managed-by: kargocd
+  name: krampoline
+  namespace: default
 spec:
-    template:
-        metadata:
-            labels:
-                app: backend
-        spec:
-            containers:
-                - name: backend
-                  # 여러분의 image 주소를 입력해주세요.
-                  image: krmp-d2hub-idock.9rum.cc/dev-test/repo_fb85b19f2c88
-                  imagePullPolicy: Always
-                  ports:
-                      - containerPort: 8080
+  rules:
+    - http:
+        paths:
+          - backend:
+              serviceName: krampoline
+              servicePort: 3000
+              path: /
+              pathType: Prefix
