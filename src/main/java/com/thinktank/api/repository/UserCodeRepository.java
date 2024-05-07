@@ -1,5 +1,7 @@
 package com.thinktank.api.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +17,8 @@ public interface UserCodeRepository extends JpaRepository<UserCode, Long> {
 	int countUserCodeByPost(@Param("post") Post post);
 
 	void deleteByPostId(Long postId);
+
+	UserCode findByPostId(Long postId);
+
+	List<UserCode> findByUser(User user);
 }

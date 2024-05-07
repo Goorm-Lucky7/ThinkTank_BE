@@ -84,12 +84,12 @@ public class PostService {
 			.map(post -> toPost(post, profileImage, user.getId()))
 			.collect(Collectors.toList());
 
-		PageInfoDto pageInfoDto = new PageInfoDto(
+		PageInfoDto pageInfo = new PageInfoDto(
 			postPage.getNumber(),
 			postPage.isLast()
 		);
 
-		return new PagePostResponseDto(posts, pageInfoDto);
+		return new PagePostResponseDto(posts, pageInfo);
 	}
 
 	@Transactional(readOnly = true)
@@ -145,7 +145,7 @@ public class PostService {
 	}
 
 	private PostsResponseDto toPost(Post post, String profileImage, Long userId) {
-		SimpleUserResDto userDto = toUser(post.getUser(), profileImage);
+		SimpleUserResDto user = toUser(post.getUser(), profileImage);
 		int commentCount = commentRepository.countCommentsByPost(post);
 		int likeCount = likeRepository.findLikeCountByPost(post);
 		int answerCount = userCodeRepository.countUserCodeByPost(post);
@@ -162,7 +162,7 @@ public class PostService {
 			likeCount,
 			answerCount,
 			likeType,
-			userDto
+			user
 		);
 	}
 
