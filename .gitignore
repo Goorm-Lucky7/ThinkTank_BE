@@ -201,4 +201,4 @@ gradle-app.setting
 */application-dev.yml
 /src/main/resources/application-dev.yml
 
-/k8s/secret.yaml
+/k8s/mysql-secret.yaml
