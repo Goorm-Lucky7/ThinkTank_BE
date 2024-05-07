@@ -6,8 +6,8 @@ import com.thinktank.api.dto.page.response.PageInfoDto;
 import com.thinktank.api.dto.user.response.UserProfileResDto;
 
 public record PagePostProfileResponseDto(
-	UserProfileResDto userProfileResDto,
+	UserProfileResDto user,
 	List<? extends PostResponseDto> posts,
-	PageInfoDto pageInfoDto
+	PageInfoDto pageInfo
 ) {
 }

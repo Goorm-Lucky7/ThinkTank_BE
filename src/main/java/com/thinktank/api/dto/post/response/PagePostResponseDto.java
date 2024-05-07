@@ -6,6 +6,6 @@ import com.thinktank.api.dto.page.response.PageInfoDto;
 
 public record PagePostResponseDto(
 	List<PostsResponseDto> posts,
-	PageInfoDto pageInfoDto
+	PageInfoDto pageInfo
 ) {
 }
