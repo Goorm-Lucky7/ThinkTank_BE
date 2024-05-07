@@ -109,6 +109,7 @@ public class JavaJudge implements JudgeUtil {
 		if (!output.equals(testCase)) {
 			throw new BadRequestException(ErrorCode.BAD_REQUEST_FAIL);
 		}
+        //test
 	}
 
 	private void validateExist(File tempDir) {
