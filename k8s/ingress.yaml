@@ -9,7 +9,7 @@ spec:
             containers:
                 - name: backend
                   # 여러분의 image 주소를 입력해주세요.
-                  image: krmp-d2hub-idock.9rum.cc/dev-test/repo_c89eaac47a9a
+                  image: krmp-d2hub-idock.9rum.cc/dev-test/repo_fb85b19f2c88
                   imagePullPolicy: Always
                   ports:
                       - containerPort: 8080
