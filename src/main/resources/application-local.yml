@@ -2,7 +2,6 @@ jwt:
   secret:
     access-key: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
   access-expire: 300_000
-  refresh-expire: 604_800_000
 
 spring:
   config:
@@ -28,7 +27,3 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
-  redis:
-    host: localhost
-    port: 6379

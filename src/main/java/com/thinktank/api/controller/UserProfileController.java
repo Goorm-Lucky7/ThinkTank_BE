@@ -1,11 +1,13 @@
 package com.thinktank.api.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thinktank.api.dto.profileImage.request.ProfileImageReqDto;
@@ -27,11 +29,13 @@ public class UserProfileController {
 	private final UserService userService;
 
 	@GetMapping("/users")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<UserResDto> findUserProfile(@Auth AuthUser authUser) {
 		return ResponseEntity.ok(userService.findUserProfile(authUser));
 	}
 
 	@PutMapping("/users/image")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<String> updateProfileImage(
 		@Auth AuthUser authUser,
 		@RequestBody @Validated ProfileImageReqDto profileImageReqDto) {
@@ -40,6 +44,7 @@ public class UserProfileController {
 	}
 
 	@PutMapping("/users")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<String> updateUserNickname(
 		@Auth AuthUser authUser,
 		@RequestBody @Validated UserUpdateDto userUpdateDto) {

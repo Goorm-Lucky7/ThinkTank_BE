@@ -66,9 +66,12 @@ public class UserService {
 	@Transactional
 	public void removeUser(AuthUser authUser, UserDeleteDto userDeleteDto) {
 		final User user = findByUserEmail(authUser.email());
+		validatePasswordEquality(userDeleteDto.password(), user.getPassword());
 
-		validatePasswordEquality(user.getPassword(), userDeleteDto.password());
+		final ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_IMAGE_EXCEPTION));
 
+		profileImageRepository.delete(profileImage);
 		userRepository.delete(user);
 	}
 
@@ -99,8 +102,8 @@ public class UserService {
 		}
 	}
 
-	private void validatePasswordEquality(String password, String checkPassword) {
-		if (!password.equals(checkPassword)) {
+	private void validatePasswordEquality(String rawPassword, String checkPassword) {
+		if (!rawPassword.equals(checkPassword)) {
 			throw new BadRequestException(ErrorCode.FAIL_WRONG_PASSWORD);
 		}
 	}

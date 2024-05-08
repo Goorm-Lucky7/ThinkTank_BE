@@ -37,19 +37,17 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public WebSecurityCustomizer webSecurityCustomizer() {
-		return webSecurity -> webSecurity.ignoring()
-			.requestMatchers(PathRequest.toStaticResources().atCommonLocations())
-			.requestMatchers("/h2-console/**")
-			.requestMatchers("/api/signup")
-			.requestMatchers("/api/login")
-			.requestMatchers("/api/reissue")
-			.requestMatchers("/api/logout");
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 
 	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
+	public WebSecurityCustomizer webSecurityCustomizer() {
+		return web -> web.ignoring()
+			.requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+			.requestMatchers("/h2-console/**")
+			.requestMatchers("/api/signup")
+			.requestMatchers("/api/login");
 	}
 
 	@Bean
@@ -60,8 +58,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(STATELESS));
 
 		httpSecurity.authorizeHttpRequests((auth) -> auth
-			.requestMatchers("/api/login", "/api/logout", "/api/signup", "/api/reissue").permitAll()
-			.anyRequest().authenticated()
+			.anyRequest().permitAll()
 		);
 
 		httpSecurity.addFilterBefore(

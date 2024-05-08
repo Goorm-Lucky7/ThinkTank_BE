@@ -2,26 +2,23 @@ package com.thinktank.api.service.auth;
 
 import static com.thinktank.global.common.util.AuthConstants.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import javax.crypto.SecretKey;
 
-import com.thinktank.api.dto.auth.TokenSaveValue;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.thinktank.api.entity.auth.AuthUser;
-import com.thinktank.api.repository.redis.TokenRepository;
-import com.thinktank.global.common.util.CookieUtils;
-import com.thinktank.global.config.TokenConfig;
-import com.thinktank.global.error.exception.NotFoundException;
-import com.thinktank.global.error.model.ErrorCode;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-import jakarta.servlet.http.Cookie;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,51 +30,43 @@ public class JwtProviderService {
 	private static final String EMAIL = "email";
 	private static final String NICKNAME = "nickname";
 
-	private final TokenConfig tokenConfig;
-	private final TokenRepository tokenRepository;
+	@Value("${jwt.secret.access-key}")
+	private String secret;
+
+	@Value("${jwt.access-expire}")
+	private long accessTokenExpire;
+
+	private SecretKey secretKey;
+
+	@PostConstruct
+	private void init() {
+		secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+	}
 
 	public String generateAccessToken(String email, String nickname) {
 		final Date issuedDate = new Date();
-		final Date expiredDate = new Date(issuedDate.getTime() + tokenConfig.getAccessTokenExpire());
+		final Date expiredDate = new Date(issuedDate.getTime() + accessTokenExpire);
 
-		return buildJwt(issuedDate, expiredDate)
-			.claim(EMAIL, email)
-			.claim(NICKNAME, nickname)
-			.compact();
+		return buildJwt(issuedDate, expiredDate).claim(EMAIL, email).claim(NICKNAME, nickname).compact();
 	}
 
-	public String generateRefreshToken(String email) {
-		final Date issuedDate = new Date();
-		final Date expiredDate = new Date(issuedDate.getTime() + tokenConfig.getRefreshTokenExpire());
-
-		return buildJwt(issuedDate, expiredDate)
-			.claim(EMAIL, email)
-			.compact();
+	public boolean isTokenExpired(String token) {
+		try {
+			Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
+			return false;
+		} catch (ExpiredJwtException e) {
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
-	@Transactional
-	public String reGenerateToken(String refreshToken, HttpServletResponse response) {
-		final Claims claims = getClaimsByToken(refreshToken);
-
+	public String reGenerateExpiredAccessToken(String expiredToken) {
+		final Claims claims = getClaimsByToken(expiredToken);
 		final String email = claims.get(EMAIL, String.class);
 		final String nickname = claims.get(NICKNAME, String.class);
 
-		TokenSaveValue tokenSaveValue = tokenRepository.getTokenSaveValue(email);
-		validateTokenSaveValue(tokenSaveValue);
-
-		validateRefreshToken(refreshToken, tokenSaveValue.refreshToken());
-
-		final String newAccessToken = generateAccessToken(email, nickname);
-		final String newRefreshToken = generateRefreshToken(email);
-
-		tokenRepository.saveToken(email, new TokenSaveValue(newRefreshToken));
-
-		response.setHeader(ACCESS_TOKEN_HEADER, newAccessToken);
-
-		Cookie refreshTokenCookie = CookieUtils.generateRefreshTokenCookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken);
-		response.addCookie(refreshTokenCookie);
-
-		return newAccessToken;
+		return generateAccessToken(email, nickname);
 	}
 
 	public String extractAccessToken(String header, HttpServletRequest request) {
@@ -94,17 +83,6 @@ public class JwtProviderService {
 		return token.replaceFirst(BEARER, "").trim();
 	}
 
-	public String extractRefreshToken(String cookieName, HttpServletRequest request) {
-		String refreshToken = CookieUtils.getCookieValue(cookieName, request);
-
-		if (refreshToken == null) {
-			log.warn("{} COOKIE NOT FOUND", cookieName);
-			throw new NotFoundException(ErrorCode.FAIL_NOT_COOKIE_FOUND_EXCEPTION);
-		}
-
-		return refreshToken;
-	}
-
 	public AuthUser extractAuthUserByAccessToken(String token) {
 		final Claims claims = getClaimsByToken(token);
 		final String email = claims.get(EMAIL, String.class);
@@ -113,24 +91,17 @@ public class JwtProviderService {
 		return AuthUser.create(email, nickname);
 	}
 
-	public boolean isUsable(String token, HttpServletResponse response) {
+	public boolean isUsable(String token) {
 		try {
-			Jwts.parser()
-				.verifyWith(tokenConfig.getSecretKey())
-				.build()
-				.parseSignedClaims(token);
+			Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
 
 			return true;
 		} catch (ExpiredJwtException e) {
-			log.warn("TOKEN EXPIRED");
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			throw new NotFoundException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
-		} catch (IllegalArgumentException e) {
-			log.warn("TOKEN IS NULL");
-			throw new NotFoundException(ErrorCode.FAIL_NOT_TOKEN_FOUND_EXCEPTION);
+			log.warn("{} TOKEN EXPIRED", token);
+			return false;
 		} catch (Exception e) {
-			log.warn("INVALID TOKEN");
-			throw new NotFoundException(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION);
+			log.warn("INVALID {} TOKEN", token);
+			return false;
 		}
 	}
 
@@ -138,30 +109,12 @@ public class JwtProviderService {
 		return Jwts.builder()
 			.issuedAt(issuedDate)
 			.expiration(expiredDate)
-			.signWith(tokenConfig.getSecretKey(), Jwts.SIG.HS256)
+			.signWith(secretKey, Jwts.SIG.HS256)
 			.setHeaderParam("alg", "HS256")
 			.setHeaderParam("typ", "JWT");
 	}
 
 	private Claims getClaimsByToken(String token) {
-		return Jwts.parser()
-			.verifyWith(tokenConfig.getSecretKey())
-			.build()
-			.parseSignedClaims(token)
-			.getPayload();
-	}
-
-	private void validateTokenSaveValue(TokenSaveValue tokenSaveValue) {
-		if (tokenSaveValue == null) {
-			log.warn("INVALID TOKEN SAVE VALUE");
-			throw new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION);
-		}
-	}
-
-	private void validateRefreshToken(String currentRefreshToken, String savedRefreshToken) {
-		if (!currentRefreshToken.equals(savedRefreshToken)) {
-			log.warn("INVALID REFRESH TOKEN");
-			throw new NotFoundException(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION);
-		}
+		return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
 	}
 }
