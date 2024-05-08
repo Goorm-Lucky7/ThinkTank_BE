@@ -3,7 +3,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
-  - mysqldb.yaml
+  - mysql.yaml
 configMapGenerator:
   - name: nginx
     files:
