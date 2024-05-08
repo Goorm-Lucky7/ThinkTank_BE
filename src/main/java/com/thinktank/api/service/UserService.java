@@ -102,8 +102,8 @@ public class UserService {
 		}
 	}
 
-	private void validatePasswordEquality(String rawPassword, String encodedPassword) {
-		if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+	private void validatePasswordEquality(String rawPassword, String checkPassword) {
+		if (!rawPassword.equals(checkPassword)) {
 			throw new BadRequestException(ErrorCode.FAIL_WRONG_PASSWORD);
 		}
 	}
