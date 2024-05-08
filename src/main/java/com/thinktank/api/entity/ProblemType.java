@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ProblemType {
-	CREATED("만든문제", "created"),
-	SOLVED("맞은문제", "solved"),
-	LIKED("좋아요 한 문제", "liked");
+	CREATED("만든 문제", "created"),
+	SOLVED("맞은 문제", "solved"),
+	LIKED("즐겨찾기", "liked");
 
 	private final String name;
 	private final String value;
