@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.UserLike;
 
 public interface UserLikeRepository extends JpaRepository<UserLike, Long> {
@@ -16,4 +17,6 @@ public interface UserLikeRepository extends JpaRepository<UserLike, Long> {
 	UserLike findByUserIdAndLikePostId(Long userId, Long postId);
 
 	List<UserLike> findByLikePostId(Long postId);
+
+	List<UserLike> findByUserAndIsCheckTrue(User user);
 }
