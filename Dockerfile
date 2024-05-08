@@ -1,4 +1,5 @@
-FROM openjdk:17
+FROM amazoncorretto:17
+
 LABEL description="PetMates API Web Application"
 VOLUME /home/web/app/petmates/upload
 EXPOSE 8080
