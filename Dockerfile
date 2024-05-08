@@ -20,9 +20,6 @@ FROM krmp-d2hub-idock.9rum.cc/goorm/eclipse-temurin:17-jre
 
 COPY --from=build /workspace/ThinkTank_BE/build/libs/thinktank-0.0.1-SNAPSHOT.jar .
 
-# dev 프로파일에 대한 환경 변수 설정
-ENV SPRING_PROFILES_ACTIVE=dev
-
 # DATABASE_URL을 환경 변수로 삽입
 ENV DATABASE_URL=jdbc:mysql://mysql:3306/mysql?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
 
