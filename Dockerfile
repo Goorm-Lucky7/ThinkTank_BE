@@ -1,7 +1,4 @@
-#FROM openjdk:17
-#VOLUME /home/web/app/thinktank/upload
-#EXPOSE 8080
-#ARG JAR_FILE=build/libs/*.jar
-#COPY ${JAR_FILE} /home/web/app/workdir/thinktank-api-app.jar
-#WORKDIR /home/web/app/workdir/
-#ENTRYPOINT [“java”,“-jar”,“-Duser.timezone=Asia/Seoul”,“./thinktank-api-app.jar”]
+FROM openjdk:17
+EXPOSE 8080
+COPY build/libs/thinktank-0.0.1-SNAPSHOT.jar thinktank.jar
+ENTRYPOINT ["java","-jar","-Duser.timezone=Asia/Seoul","/thinktank.jar"]
