@@ -18,7 +18,5 @@ public interface UserLikeRepository extends JpaRepository<UserLike, Long> {
 
 	List<UserLike> findByLikePostId(Long postId);
 
-	List<UserLike> findByUser(User user);
-
 	List<UserLike> findByUserAndIsCheckTrue(User user);
 }
