@@ -18,7 +18,7 @@ RUN ./gradlew clean build
 # Stage 2: Run the application
 FROM krmp-d2hub-idock.9rum.cc/goorm/eclipse-temurin:17-jre
 
-COPY --from=build /workspace/ThinkTank_BE/build/libs/thinktank-0.0.1-SNAPSHOT.jar
+COPY --from=build /workspace/ThinkTank_BE/build/libs/thinktank-0.0.1-SNAPSHOT.jar .
 
 # dev 프로파일에 대한 환경 변수 설정
 ENV SPRING_PROFILES_ACTIVE=dev
