@@ -49,8 +49,6 @@ public class UserPostService {
 
 	public PagePostProfileResponseDto getProfilePosts(int page, int size, ProblemTypeDto problemTypeDto,
 		AuthUser authUser) {
-		final User me = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Post> postsWithProfile = postRepository.findAll(pageable);
 		String profileImage = null;
