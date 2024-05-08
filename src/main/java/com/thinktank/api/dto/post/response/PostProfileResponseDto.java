@@ -25,3 +25,4 @@ public record PostProfileResponseDto(
 		return title;
 	}
 }
+

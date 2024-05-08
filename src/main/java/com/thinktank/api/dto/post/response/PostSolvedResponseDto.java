@@ -22,3 +22,4 @@ public record PostSolvedResponseDto(
 		return title;
 	}
 }
+
