@@ -201,4 +201,6 @@ gradle-app.setting
 */application-dev.yml
 /src/main/resources/application-dev.yml
 
+/db/*
+
 /k8s/secret.yaml

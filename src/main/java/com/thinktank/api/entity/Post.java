@@ -41,7 +41,7 @@ public class Post extends BaseTimeEntity {
 	@Column(name = "content", nullable = false)
 	private String content;
 
-	@Column(name = "condition", nullable = false)
+	@Column(name = "`condition`", nullable = false)
 	private String condition;
 
 	@Enumerated(EnumType.STRING)
