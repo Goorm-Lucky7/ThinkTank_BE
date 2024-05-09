@@ -21,6 +21,7 @@ public enum ErrorCode {
 	BAD_REQUEST_RUNTIME_ERROR("[❎실패] 런타임 에러 입니다."),
 	BAD_REQUEST_FAIL("[❎실패] 테스트케이스를 통과하지 못했습니다."),
 	BAD_REQUEST_TIME_OUT("[❎실패] 시간 초과입니다."),
+	FAIL_ALREADY_DEFAULT_IMAGE("[❎ ERROR] 해당 프로필 이미지는 이미 기본 이미지입니다."),
 
 	// 401: UNAUTHORIZED
 	FAIL_UNAUTHORIZED_EXCEPTION("[❎ ERROR] 로그인이 필요한 기능입니다."),
