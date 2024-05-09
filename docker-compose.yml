@@ -1,0 +1,34 @@
+version: "3.3"
+services:
+  database:
+    image: mysql:8.4
+    restart: always
+    container_name: mysql-app
+    environment:
+      MYSQL_DATABASE: mysql
+      MYSQL_ROOT_PASSWORD: 1234
+    volumes:
+      - ./db:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - thinktank-mysql-net
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    container_name: thinktank-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/mysql?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+    networks:
+      - thinktank-mysql-net
+networks:
+  thinktank-mysql-net:
+    driver: bridge
