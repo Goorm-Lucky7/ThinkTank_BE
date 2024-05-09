@@ -45,7 +45,7 @@ public class UserService {
 		userProfileService.createProfileImage(user);
 	}
 
-	public UserResDto findUserProfile(AuthUser authUser) {
+	public UserResDto getOwnProfileDetails(AuthUser authUser) {
 		final User user = findByUserEmail(authUser.email());
 
 		final ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
@@ -66,7 +66,7 @@ public class UserService {
 	@Transactional
 	public void removeUser(AuthUser authUser, UserDeleteDto userDeleteDto) {
 		final User user = findByUserEmail(authUser.email());
-		validatePasswordEquality(userDeleteDto.password(), user.getPassword());
+		validatePasswordMatch(userDeleteDto.password(), user.getPassword());
 
 		final ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_IMAGE_EXCEPTION));
@@ -104,6 +104,12 @@ public class UserService {
 
 	private void validatePasswordEquality(String rawPassword, String checkPassword) {
 		if (!rawPassword.equals(checkPassword)) {
+			throw new BadRequestException(ErrorCode.FAIL_WRONG_PASSWORD);
+		}
+	}
+
+	private void validatePasswordMatch(String rawPassword, String encodedPassword) {
+		if (passwordEncoder.matches(encodedPassword, rawPassword)) {
 			throw new BadRequestException(ErrorCode.FAIL_WRONG_PASSWORD);
 		}
 	}
