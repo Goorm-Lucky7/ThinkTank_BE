@@ -51,9 +51,6 @@ public class CommentService {
 
 	@Transactional(readOnly = true)
 	public CommentsResponseDto getCommentsByPostId(Long postId, AuthUser authUser, int pageIndex, int pageSize) {
-		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
-
 		Pageable pageable = PageRequest.of(pageIndex, pageSize);
 		Page<Comment> page = commentRepository.findByPostId(postId, pageable);
 
@@ -62,7 +59,7 @@ public class CommentService {
 				comment.getId(),
 				comment.getContent(),
 				comment.getCreatedAt().toString(),
-				comment.getUser().getEmail().equals(user.getEmail()),
+				(authUser == null) ? false : comment.getUser().getEmail().equals(authUser.email()),
 				new CommentUserResponseDto(comment.getUser().getNickname())
 			))
 			.collect(Collectors.toList());
