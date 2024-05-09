@@ -59,7 +59,7 @@ public class CommentService {
 				comment.getId(),
 				comment.getContent(),
 				comment.getCreatedAt().toString(),
-				(authUser == null) ? false : comment.getUser().getEmail().equals(authUser.email()),
+				authUser != null && comment.getUser().getEmail().equals(authUser.email()),
 				new CommentUserResponseDto(comment.getUser().getNickname())
 			))
 			.collect(Collectors.toList());
