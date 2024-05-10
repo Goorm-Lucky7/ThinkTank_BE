@@ -14,6 +14,7 @@ import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.auth.AuthorizationThreadLocal;
 import com.thinktank.global.error.exception.NotFoundException;
+import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import jakarta.servlet.FilterChain;
@@ -63,7 +64,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 				return;
 			}
 
-			throw new NotFoundException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
+			throw new UnauthorizedException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
 		} catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			handlerExceptionResolver.resolveException(request, response, null, e);
