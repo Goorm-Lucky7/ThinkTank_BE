@@ -1,6 +1,7 @@
 package com.thinktank.api.entity;
 
 import com.thinktank.api.dto.user.request.SignUpDto;
+import com.thinktank.api.dto.user.request.UserUpdateDto;
 import com.thinktank.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -50,7 +51,6 @@ public class User extends BaseTimeEntity {
 		String github,
 		String blog,
 		String introduce) {
-
 		this.email = email;
 		this.nickname = nickname;
 		this.password = password;
@@ -60,7 +60,6 @@ public class User extends BaseTimeEntity {
 	}
 
 	public static User signup(SignUpDto signupDTO, String password) {
-
 		return User.builder()
 			.email(signupDTO.email())
 			.nickname(signupDTO.nickname())
@@ -71,7 +70,10 @@ public class User extends BaseTimeEntity {
 			.build();
 	}
 
-	public void updateNickname(String nickname) {
-		this.nickname = nickname;
+	public void updateUserProfile(UserUpdateDto userUpdateDto) {
+		this.nickname = userUpdateDto.nickname();
+		this.github = userUpdateDto.github();
+		this.blog = userUpdateDto.blog();
+		this.introduce = userUpdateDto.introduce();
 	}
 }
