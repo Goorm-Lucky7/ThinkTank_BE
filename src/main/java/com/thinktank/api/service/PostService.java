@@ -5,6 +5,7 @@ import static com.thinktank.global.common.util.GlobalConstant.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -73,19 +74,13 @@ public class PostService {
 
 	@Transactional(readOnly = true)
 	public PagePostResponseDto getAllPosts(int page, int size, Long userId) {
-		User user = userId != null ? userRepository.findById(userId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION)) :
-			null;
-
+		Optional<User> optionalUser = userId != null ? userRepository.findById(userId) : Optional.empty();
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Post> postPage = postRepository.findAll(pageable);
-
 		String profileImage = null;
-
 		List<PostsResponseDto> posts = postPage.getContent().stream()
-			.map(post -> toPost(post, profileImage, user != null ? userId : null))
+			.map(post -> toPost(post, profileImage, optionalUser.map(User::getId).orElse(null)))
 			.collect(Collectors.toList());
-
 		PageInfoDto pageInfo = new PageInfoDto(
 			postPage.getNumber(),
 			postPage.isLast()
@@ -96,15 +91,13 @@ public class PostService {
 
 	@Transactional(readOnly = true)
 	public PostDetailResponseDto getPostDetail(Long postId, Long userId) {
-		User user = userId != null ? userRepository.findById(userId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION)) :
-			null;
+		Optional<User> optionalUser = userId != null ? userRepository.findById(userId) : Optional.empty();
 
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
 		List<CustomTestCase> testCases = testCaseRepository.findByPostId(postId);
 
-		return mapToPostDetailResponseDto(post, testCases, user != null ? userId : null);
+		return mapToPostDetailResponseDto(post, testCases, optionalUser.map(User::getId).orElse(null));
 	}
 
 	public void deletePost(PostDeleteDto postDeleteDto, AuthUser authUser) {
