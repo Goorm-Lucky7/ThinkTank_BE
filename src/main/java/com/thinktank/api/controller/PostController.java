@@ -23,19 +23,19 @@ import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class PostController {
 	private final PostService postService;
 
-	@PostMapping("/post")
+	@PostMapping
 	public ResponseEntity<String> createPost(@RequestBody @Validated PostCreateDto postCreateDto,
 		@Auth AuthUser authUser) {
 		postService.createPost(postCreateDto, authUser);
 		return ResponseEntity.ok("OK");
 	}
 
-	@GetMapping("/posts")
+	@GetMapping
 	public ResponseEntity<PagePostResponseDto> getAllPosts(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
@@ -45,15 +45,15 @@ public class PostController {
 		return ResponseEntity.ok(posts);
 	}
 
-	@GetMapping("/posts/{postId}")
+	@GetMapping("/{post-id}")
 	public ResponseEntity<PostDetailResponseDto> getPostDetails(
-		@PathVariable("postId") Long postId,
+		@PathVariable("post-id") Long postId,
 		@RequestParam @Nullable Long userId) {
 		PostDetailResponseDto postDetailResponseDto = postService.getPostDetail(postId, userId);
 		return ResponseEntity.ok(postDetailResponseDto);
 	}
 
-	@DeleteMapping("/posts")
+	@DeleteMapping
 	public ResponseEntity<String> deletePost(
 		@RequestBody @Validated PostDeleteDto postDeleteDto,
 		@Auth AuthUser authUser) {
