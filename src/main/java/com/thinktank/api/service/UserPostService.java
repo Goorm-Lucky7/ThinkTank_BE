@@ -16,7 +16,6 @@ import com.thinktank.api.dto.post.response.PagePostProfileResponseDto;
 import com.thinktank.api.dto.post.response.PostProfileResponseDto;
 import com.thinktank.api.dto.post.response.PostResponseDto;
 import com.thinktank.api.dto.post.response.PostSolvedResponseDto;
-import com.thinktank.api.dto.problemType.request.ProblemTypeDto;
 import com.thinktank.api.dto.user.response.UserProfileResDto;
 import com.thinktank.api.entity.Post;
 import com.thinktank.api.entity.ProblemType;
@@ -46,12 +45,12 @@ public class UserPostService {
 	private final UserCodeRepository userCodeRepository;
 	private final UserLikeService userLikeService;
 
-	public PagePostProfileResponseDto getProfilePosts(int page, int size, ProblemTypeDto problemTypeDto) {
+	public PagePostProfileResponseDto getProfilePosts(int page, int size, String value, Long userId, Long loginUserId) {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Post> postsWithProfile = postRepository.findAll(pageable);
 		String profileImage = null;
-		List<? extends PostResponseDto> posts = processProblemType(problemTypeDto);
-		UserProfileResDto user = toUser(problemTypeDto.userId(), profileImage);
+		List<? extends PostResponseDto> posts = processProblemType(value, userId, loginUserId);
+		UserProfileResDto user = toUser(userId, profileImage);
 		PageInfoDto pageInfo = new PageInfoDto(
 			postsWithProfile.getNumber(),
 			postsWithProfile.isLast()
@@ -59,13 +58,13 @@ public class UserPostService {
 		return new PagePostProfileResponseDto(user, posts, pageInfo);
 	}
 
-	public List<? extends PostResponseDto> processProblemType(ProblemTypeDto problemTypeDto) {
-		ProblemType problemType = ProblemType.fromValue(problemTypeDto.value());
+	public List<? extends PostResponseDto> processProblemType(String value, Long userId, Long loginUserId) {
+		ProblemType problemType = ProblemType.fromValue(value);
 		if (problemType != null) {
 			return switch (problemType) {
-				case CREATED -> processCreatedProblems(problemTypeDto.userId(), problemTypeDto.loginUserId());
-				case SOLVED -> processSolvedProblems(problemTypeDto.userId());
-				case LIKED -> processLikedProblems(problemTypeDto.userId(), problemTypeDto.loginUserId());
+				case CREATED -> processCreatedProblems(userId, loginUserId);
+				case SOLVED -> processSolvedProblems(userId);
+				case LIKED -> processLikedProblems(userId, loginUserId);
 			};
 		} else {
 			throw new BadRequestException(ErrorCode.BAD_REQUEST);
