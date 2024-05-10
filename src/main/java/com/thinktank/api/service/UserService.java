@@ -46,30 +46,26 @@ public class UserService {
 	}
 
 	public UserResDto getOwnProfileDetails(AuthUser authUser) {
-		final User user = findByUserEmail(authUser.email());
-
-		final ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_IMAGE_EXCEPTION));
+		final User user = findUserByEmail(authUser.email());
+		final ProfileImage profileImage = findProfileImageByEmail(user.getEmail());
 
 		return convertToUserResDto(user, profileImage);
 	}
 
 	@Transactional
-	public void updateUserNickname(AuthUser authUser, UserUpdateDto userUpdateDto) {
-		final User user = findByUserEmail(authUser.email());
+	public void updateUserDetails(AuthUser authUser, UserUpdateDto userUpdateDto) {
+		final User user = findUserByEmail(authUser.email());
 
 		validateNicknameNotExists(userUpdateDto.nickname());
-
-		user.updateNickname(userUpdateDto.nickname());
+		user.updateUserProfile(userUpdateDto);
 	}
 
 	@Transactional
 	public void removeUser(AuthUser authUser, UserDeleteDto userDeleteDto) {
-		final User user = findByUserEmail(authUser.email());
+		final User user = findUserByEmail(authUser.email());
 		validatePasswordMatch(userDeleteDto.password(), user.getPassword());
 
-		final ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_IMAGE_EXCEPTION));
+		final ProfileImage profileImage = findProfileImageByEmail(user.getEmail());
 
 		profileImageRepository.delete(profileImage);
 		userRepository.delete(user);
@@ -85,7 +81,12 @@ public class UserService {
 			profileImage.getOriginalFileName());
 	}
 
-	private User findByUserEmail(String email) {
+	private ProfileImage findProfileImageByEmail(String email) {
+		return profileImageRepository.findByUserEmail(email)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_IMAGE_EXCEPTION));
+	}
+
+	private User findUserByEmail(String email) {
 		return userRepository.findByEmail(email)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
 	}
