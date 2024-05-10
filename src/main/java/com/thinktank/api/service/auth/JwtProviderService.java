@@ -9,8 +9,14 @@ import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.auth.AuthUser;
+import com.thinktank.api.repository.UserRepository;
+import com.thinktank.global.error.exception.NotFoundException;
+import com.thinktank.global.error.exception.UnauthorizedException;
+import com.thinktank.global.error.model.ErrorCode;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -38,45 +44,38 @@ public class JwtProviderService {
 
 	private SecretKey secretKey;
 
+	private final UserRepository userRepository;
+
 	@PostConstruct
 	private void init() {
 		secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public String generateAccessToken(String email, String nickname) {
+	public String generateToken(String email, String nickname) {
 		final Date issuedDate = new Date();
 		final Date expiredDate = new Date(issuedDate.getTime() + accessTokenExpire);
 
-		return buildJwt(issuedDate, expiredDate).claim(EMAIL, email).claim(NICKNAME, nickname).compact();
+		return buildJwt(issuedDate, expiredDate)
+			.claim(EMAIL, email)
+			.claim(NICKNAME, nickname)
+			.compact();
 	}
 
-	public boolean isTokenExpired(String token) {
-		try {
-			Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
-			return false;
-		} catch (ExpiredJwtException e) {
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	public String reGenerateExpiredAccessToken(String expiredToken) {
-		final Claims claims = getClaimsByToken(expiredToken);
+	@Transactional
+	public String reGenerateToken(String accessToken) {
+		final Claims claims = getClaimsByToken(accessToken);
 		final String email = claims.get(EMAIL, String.class);
-		final String nickname = claims.get(NICKNAME, String.class);
+		final User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
 
-		return generateAccessToken(email, nickname);
+		return generateToken(user.getEmail(), user.getNickname());
 	}
 
-	public String extractAccessToken(String header, HttpServletRequest request) {
+	public String extractToken(String header, HttpServletRequest request) {
 		String token = request.getHeader(header);
 
-		if (token == null) {
-			log.warn("{} IS NULL", header);
-			return null;
-		} else if (!token.startsWith(BEARER)) {
-			log.warn("{} IS NOT BEARER", header);
+		if (token == null || !token.startsWith(BEARER)) {
+			log.warn("====== {} is null or not bearer =======", header);
 			return null;
 		}
 
@@ -93,16 +92,23 @@ public class JwtProviderService {
 
 	public boolean isUsable(String token) {
 		try {
-			Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
+			Jwts.parser()
+				.verifyWith(secretKey)
+				.build()
+				.parseSignedClaims(token);
 
 			return true;
 		} catch (ExpiredJwtException e) {
-			log.warn("{} TOKEN EXPIRED", token);
-			return false;
+			log.warn("====== TOKEN EXPIRED ======");
+		} catch (IllegalArgumentException e) {
+			log.warn("====== EMPTIED TOKEN ======");
+			throw new NotFoundException(ErrorCode.FAIL_NOT_TOKEN_FOUND_EXCEPTION);
 		} catch (Exception e) {
-			log.warn("INVALID {} TOKEN", token);
-			return false;
+			log.warn("====== INVALID TOKEN ======");
+			throw new NotFoundException(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION);
 		}
+
+		return false;
 	}
 
 	private JwtBuilder buildJwt(Date issuedDate, Date expiredDate) {
@@ -115,6 +121,16 @@ public class JwtProviderService {
 	}
 
 	private Claims getClaimsByToken(String token) {
-		return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
+		try {
+			return Jwts.parser()
+				.verifyWith(secretKey)
+				.build()
+				.parseSignedClaims(token)
+				.getPayload();
+		} catch (ExpiredJwtException e) {
+			return e.getClaims();
+		} catch (Exception e) {
+			throw new UnauthorizedException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
+		}
 	}
 }
