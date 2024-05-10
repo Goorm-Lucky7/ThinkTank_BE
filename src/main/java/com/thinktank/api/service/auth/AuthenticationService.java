@@ -37,7 +37,6 @@ public class AuthenticationService {
 		final String accessToken = jwtProviderService.generateToken(user.getEmail(), user.getNickname());
 
 		response.setHeader(ACCESS_TOKEN_HEADER, accessToken);
-		response.setStatus(HttpServletResponse.SC_CREATED);
 
 		return new LoginResDto(accessToken);
 	}
