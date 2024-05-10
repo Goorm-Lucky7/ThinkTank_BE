@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.thinktank.api.dto.post.response.PagePostProfileResponseDto;
 import com.thinktank.api.dto.problemType.request.ProblemTypeDto;
-import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.UserPostService;
-import com.thinktank.global.auth.annotation.Auth;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,9 +23,8 @@ public class UserPostController {
 	@GetMapping("/profile")
 	public ResponseEntity<PagePostProfileResponseDto> getProfilePosts(@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
-		@RequestBody @Validated ProblemTypeDto problemTypeDto,
-		@Auth AuthUser authUser) {
-		PagePostProfileResponseDto profilePosts = userPostService.getProfilePosts(page, size, problemTypeDto, authUser);
+		@RequestBody @Validated ProblemTypeDto problemTypeDto) {
+		PagePostProfileResponseDto profilePosts = userPostService.getProfilePosts(page, size, problemTypeDto);
 		return ResponseEntity.ok(profilePosts);
 	}
 }
