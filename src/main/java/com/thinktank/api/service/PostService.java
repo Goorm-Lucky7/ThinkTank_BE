@@ -20,6 +20,7 @@ import com.thinktank.api.dto.post.response.PagePostResponseDto;
 import com.thinktank.api.dto.post.response.PostDetailResponseDto;
 import com.thinktank.api.dto.post.response.PostsResponseDto;
 import com.thinktank.api.dto.testcase.custom.CustomTestCase;
+import com.thinktank.api.dto.user.request.UserIdReqDto;
 import com.thinktank.api.dto.user.response.SimpleUserResDto;
 import com.thinktank.api.entity.Category;
 import com.thinktank.api.entity.Language;
@@ -72,16 +73,19 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public PagePostResponseDto getAllPosts(int page, int size, AuthUser authUser) {
-		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+	public PagePostResponseDto getAllPosts(int page, int size, UserIdReqDto userIdReqDto) {
+		Long userId = userIdReqDto.userId();
+		User user = userId != null ? userRepository.findById(userId)
+			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION)) :
+			null;
+
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Post> postPage = postRepository.findAll(pageable);
 
 		String profileImage = null;
 
 		List<PostsResponseDto> posts = postPage.getContent().stream()
-			.map(post -> toPost(post, profileImage, user.getId()))
+			.map(post -> toPost(post, profileImage, user != null ? userId : null))
 			.collect(Collectors.toList());
 
 		PageInfoDto pageInfo = new PageInfoDto(
@@ -93,14 +97,17 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public PostDetailResponseDto getPostDetail(Long postId, AuthUser authUser) {
-		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+	public PostDetailResponseDto getPostDetail(Long postId, UserIdReqDto userIdReqDto) {
+		Long userId = userIdReqDto.userId();
+		User user = userId != null ? userRepository.findById(userId)
+			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION)) :
+			null;
+
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
 		List<CustomTestCase> testCases = testCaseRepository.findByPostId(postId);
 
-		return mapToPostDetailResponseDto(post, testCases, user.getId());
+		return mapToPostDetailResponseDto(post, testCases, user != null ? userId : null);
 	}
 
 	public void deletePost(PostDeleteDto postDeleteDto, AuthUser authUser) {
@@ -174,6 +181,9 @@ public class PostService {
 	}
 
 	private boolean isPostLikedByUser(Long userId, Post post) {
+		if (userId == null) {
+			return false;
+		}
 		return userLikeService.isPostLikedByUser(userId, post.getId());
 	}
 

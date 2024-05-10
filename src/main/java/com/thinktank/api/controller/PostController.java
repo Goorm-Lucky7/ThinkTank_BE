@@ -15,6 +15,7 @@ import com.thinktank.api.dto.post.request.PostCreateDto;
 import com.thinktank.api.dto.post.request.PostDeleteDto;
 import com.thinktank.api.dto.post.response.PagePostResponseDto;
 import com.thinktank.api.dto.post.response.PostDetailResponseDto;
+import com.thinktank.api.dto.user.request.UserIdReqDto;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.PostService;
 import com.thinktank.global.auth.annotation.Auth;
@@ -38,16 +39,16 @@ public class PostController {
 	public ResponseEntity<PagePostResponseDto> getAllPosts(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
-		@Auth AuthUser authUser
+		@RequestBody UserIdReqDto userIdReqDto
 	) {
-		PagePostResponseDto posts = postService.getAllPosts(page, size, authUser);
+		PagePostResponseDto posts = postService.getAllPosts(page, size, userIdReqDto);
 		return ResponseEntity.ok(posts);
 	}
 
 	@GetMapping("/posts/{postId}")
 	public ResponseEntity<PostDetailResponseDto> getPostDetails(@PathVariable("postId") Long postId,
-		@Auth AuthUser authUser) {
-		PostDetailResponseDto postDetailResponseDto = postService.getPostDetail(postId, authUser);
+		@RequestBody UserIdReqDto userIdReqDto) {
+		PostDetailResponseDto postDetailResponseDto = postService.getPostDetail(postId, userIdReqDto);
 		return ResponseEntity.ok(postDetailResponseDto);
 	}
 
