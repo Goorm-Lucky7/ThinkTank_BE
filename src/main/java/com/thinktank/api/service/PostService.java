@@ -76,20 +76,6 @@ public class PostService {
 		testCaseRepository.saveAll(testCases);
 	}
 
-	private void validateJudge(List<CustomTestCase> testCases, String code, String language) {
-		final JudgeUtil judgeService;
-
-		if (language.equals("java")) {
-			judgeService = new JavaJudge();
-		} else if (language.equals("javascript")) {
-			judgeService = new JavaScriptJudge();
-		} else {
-			throw new BadRequestException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION);
-		}
-
-		judgeService.executeCode(testCases, code);
-	}
-
 	@Transactional(readOnly = true)
 	public PagePostResponseDto getAllPosts(int page, int size, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
@@ -206,5 +192,19 @@ public class PostService {
 		if (!Language.isValidLanguage(language)) {
 			throw new BadRequestException(ErrorCode.FAIL_INVALID_LANGUAGE);
 		}
+	}
+
+	private void validateJudge(List<CustomTestCase> testCases, String code, String language) {
+		final JudgeUtil judgeService;
+
+		if (language.equals("java")) {
+			judgeService = new JavaJudge();
+		} else if (language.equals("javascript")) {
+			judgeService = new JavaScriptJudge();
+		} else {
+			throw new BadRequestException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION);
+		}
+
+		judgeService.executeCode(testCases, code);
 	}
 }
