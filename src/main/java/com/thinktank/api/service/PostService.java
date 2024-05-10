@@ -20,7 +20,6 @@ import com.thinktank.api.dto.post.response.PagePostResponseDto;
 import com.thinktank.api.dto.post.response.PostDetailResponseDto;
 import com.thinktank.api.dto.post.response.PostsResponseDto;
 import com.thinktank.api.dto.testcase.custom.CustomTestCase;
-import com.thinktank.api.dto.user.request.UserIdReqDto;
 import com.thinktank.api.dto.user.response.SimpleUserResDto;
 import com.thinktank.api.entity.Category;
 import com.thinktank.api.entity.Language;
@@ -73,8 +72,7 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public PagePostResponseDto getAllPosts(int page, int size, UserIdReqDto userIdReqDto) {
-		Long userId = userIdReqDto.userId();
+	public PagePostResponseDto getAllPosts(int page, int size, Long userId) {
 		User user = userId != null ? userRepository.findById(userId)
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION)) :
 			null;
@@ -97,8 +95,7 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public PostDetailResponseDto getPostDetail(Long postId, UserIdReqDto userIdReqDto) {
-		Long userId = userIdReqDto.userId();
+	public PostDetailResponseDto getPostDetail(Long postId, Long userId) {
 		User user = userId != null ? userRepository.findById(userId)
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION)) :
 			null;
