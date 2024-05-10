@@ -48,6 +48,7 @@ public class UserController {
 	}
 
 	@DeleteMapping
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<String> removeUser(@Auth AuthUser authUser,
 		@RequestBody @Validated UserDeleteDto userDeleteDto) {
 		userService.removeUser(authUser, userDeleteDto);
@@ -55,6 +56,7 @@ public class UserController {
 	}
 
 	@PostMapping("/reissue")
+	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<TokenResDto> reissue(@RequestBody TokenReqDto tokenReqDto, HttpServletResponse response) {
 		return ResponseEntity.ok(authenticationService.reissue(tokenReqDto, response));
 	}
