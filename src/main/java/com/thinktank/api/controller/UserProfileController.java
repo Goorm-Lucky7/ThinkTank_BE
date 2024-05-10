@@ -46,10 +46,10 @@ public class UserProfileController {
 
 	@PutMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> updateUserNickname(
+	public ResponseEntity<String> updateUserDetails(
 		@Auth AuthUser authUser,
 		@RequestBody @Validated UserUpdateDto userUpdateDto) {
-		userService.updateUserNickname(authUser, userUpdateDto);
+		userService.updateUserDetails(authUser, userUpdateDto);
 		return ResponseEntity.ok("OK");
 	}
 
