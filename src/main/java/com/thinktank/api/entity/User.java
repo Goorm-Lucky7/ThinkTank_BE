@@ -1,6 +1,6 @@
 package com.thinktank.api.entity;
 
-import com.thinktank.api.dto.auth.KakaoLoginReqDto;
+import com.thinktank.api.dto.auth.OAuthLoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.request.UserUpdateDto;
 import com.thinktank.global.common.entity.BaseTimeEntity;
@@ -85,10 +85,10 @@ public class User extends BaseTimeEntity {
 		this.refreshToken = refreshToken;
 	}
 
-	public static User kakaoSignup(KakaoLoginReqDto kakaoLoginReqDto, String password) {
+	public static User kakaoSignup(OAuthLoginReqDto OAuthLoginReqDto, String password) {
 		return User.builder()
-			.email(kakaoLoginReqDto.email())
-			.nickname(kakaoLoginReqDto.nickname())
+			.email(OAuthLoginReqDto.email())
+			.nickname(OAuthLoginReqDto.nickname())
 			.password(password)
 			.build();
 	}
