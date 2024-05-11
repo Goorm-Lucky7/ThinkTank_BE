@@ -48,7 +48,10 @@ public class SecurityConfig {
 			.requestMatchers("/h2-console/**")
 			.requestMatchers("/api/signup")
 			.requestMatchers("/api/login")
-			.requestMatchers("/api/posts/*/comments");
+			.requestMatchers("/api/posts/*/comments")
+			.requestMatchers("/api/kakao")
+			.requestMatchers("/api/login/kakao")
+			.requestMatchers("/api/oauth/authorize");
 	}
 
 	@Bean
