@@ -28,7 +28,7 @@ public class KakaoAuthController {
 		response.sendRedirect(kakaoAuthService.responseUri());
 	}
 
-	@GetMapping("/login/kakao")
+	@GetMapping("/kakao/login")
 	public ResponseEntity<KakaoUserInfoResDto> kakaoLogin(@RequestParam("code") String code) throws IOException {
 		return ResponseEntity.ok(oAuthService.kakaoLogin(code));
 	}
