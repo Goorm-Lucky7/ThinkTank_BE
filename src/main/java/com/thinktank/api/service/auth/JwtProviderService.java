@@ -15,7 +15,6 @@ import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.NotFoundException;
-import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import io.jsonwebtoken.Claims;
@@ -25,6 +24,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,6 +42,9 @@ public class JwtProviderService {
 	@Value("${jwt.access-expire}")
 	private long accessTokenExpire;
 
+	@Value("${jwt.refresh-expire}")
+	private long refreshTokenExpire;
+
 	private SecretKey secretKey;
 
 	private final UserRepository userRepository;
@@ -51,7 +54,7 @@ public class JwtProviderService {
 		secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public String generateToken(String email, String nickname) {
+	public String generateAccessToken(String email, String nickname) {
 		final Date issuedDate = new Date();
 		final Date expiredDate = new Date(issuedDate.getTime() + accessTokenExpire);
 
@@ -61,14 +64,33 @@ public class JwtProviderService {
 			.compact();
 	}
 
+	public String generateRefreshToken(String email) {
+		final Date issuedDate = new Date();
+		final Date expiredDate = new Date(issuedDate.getTime() + refreshTokenExpire);
+
+		return buildJwt(issuedDate, expiredDate)
+			.claim(EMAIL, email)
+			.compact();
+	}
+
 	@Transactional
-	public String reGenerateToken(String accessToken) {
-		final Claims claims = getClaimsByToken(accessToken);
+	public String reGenerateToken(String refreshToken, HttpServletResponse response) {
+		final Claims claims = getClaimsByToken(refreshToken);
 		final String email = claims.get(EMAIL, String.class);
 		final User user = userRepository.findByEmail(email)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
 
-		return generateToken(user.getEmail(), user.getNickname());
+		validateRefreshToken(refreshToken, user.getRefreshToken());
+
+		final String newAccessToken = generateAccessToken(user.getEmail(), user.getNickname());
+		final String newRefreshToken = generateRefreshToken(user.getEmail());
+
+		user.updateRefreshToken(newRefreshToken);
+
+		response.setHeader(ACCESS_TOKEN_HEADER, newAccessToken);
+		response.setHeader(REFRESH_TOKEN_HEADER, newRefreshToken);
+
+		return newAccessToken;
 	}
 
 	public String extractToken(String header, HttpServletRequest request) {
@@ -111,6 +133,13 @@ public class JwtProviderService {
 		return false;
 	}
 
+	private void validateRefreshToken(String currentRefreshToken, String savedRefreshToken) {
+		if (!currentRefreshToken.equals(savedRefreshToken)) {
+			log.warn("===== INVALID REFRESH TOKEN =====");
+			throw new NotFoundException(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION);
+		}
+	}
+
 	private JwtBuilder buildJwt(Date issuedDate, Date expiredDate) {
 		return Jwts.builder()
 			.issuedAt(issuedDate)
@@ -121,16 +150,10 @@ public class JwtProviderService {
 	}
 
 	private Claims getClaimsByToken(String token) {
-		try {
-			return Jwts.parser()
-				.verifyWith(secretKey)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload();
-		} catch (ExpiredJwtException e) {
-			return e.getClaims();
-		} catch (Exception e) {
-			throw new UnauthorizedException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
-		}
+		return Jwts.parser()
+			.verifyWith(secretKey)
+			.build()
+			.parseSignedClaims(token)
+			.getPayload();
 	}
 }
