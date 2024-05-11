@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thinktank.api.dto.auth.KakaoLoginReqDto;
+import com.thinktank.api.dto.auth.OAuthLoginReqDto;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.request.UserDeleteDto;
@@ -54,8 +54,8 @@ public class UserController {
 
 	@PostMapping("/oauth/authorize")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<LoginResDto> kakaoLogin(@RequestBody KakaoLoginReqDto kakaoLoginReqDto,
+	public ResponseEntity<LoginResDto> kakaoLogin(@RequestBody OAuthLoginReqDto OAuthLoginReqDto,
 		HttpServletResponse response) {
-		return ResponseEntity.ok(authenticationService.kakaoLogin(kakaoLoginReqDto, response));
+		return ResponseEntity.ok(authenticationService.oauthLogin(OAuthLoginReqDto, response));
 	}
 }
