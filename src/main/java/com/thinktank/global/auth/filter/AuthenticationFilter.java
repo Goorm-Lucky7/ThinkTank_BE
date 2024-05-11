@@ -13,7 +13,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.auth.AuthorizationThreadLocal;
-import com.thinktank.global.error.exception.NotFoundException;
+import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import jakarta.servlet.FilterChain;
@@ -43,27 +43,25 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 		@NotNull FilterChain filterChain
 	) {
 		String accessToken = jwtProviderService.extractToken(ACCESS_TOKEN_HEADER, request);
+		String refreshToken = jwtProviderService.extractToken(REFRESH_TOKEN_HEADER, request);
 
 		try {
-			String requestURI = request.getRequestURI();
-
-			if (!jwtProviderService.isUsable(accessToken) || "/api/reissue".equals(requestURI)) {
-				if ("/api/reissue".equals(requestURI)) {
-					filterChain.doFilter(request, response);
-
-					return;
-				}
-
-				String newAccessToken = jwtProviderService.reGenerateToken(accessToken);
-				setAuthentication(newAccessToken);
-			} else {
+			if (jwtProviderService.isUsable(accessToken)) {
 				setAuthentication(accessToken);
 				filterChain.doFilter(request, response);
 
 				return;
 			}
 
-			throw new NotFoundException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
+			if (jwtProviderService.isUsable(refreshToken)) {
+				accessToken = jwtProviderService.reGenerateToken(refreshToken, response);
+				setAuthentication(accessToken);
+				filterChain.doFilter(request, response);
+
+				return;
+			}
+
+			throw new UnauthorizedException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
 		} catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			handlerExceptionResolver.resolveException(request, response, null, e);
