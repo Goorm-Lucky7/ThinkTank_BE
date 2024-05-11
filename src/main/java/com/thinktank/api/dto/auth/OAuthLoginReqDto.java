@@ -1,6 +1,6 @@
 package com.thinktank.api.dto.auth;
 
-public record KakaoLoginReqDto(
+public record OAuthLoginReqDto(
 	String email,
 	String nickname
 ) {
