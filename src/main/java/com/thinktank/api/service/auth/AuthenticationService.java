@@ -6,7 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.thinktank.api.dto.auth.KakaoLoginReqDto;
+import com.thinktank.api.dto.auth.OAuthLoginReqDto;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.response.LoginResDto;
 import com.thinktank.api.entity.User;
@@ -46,9 +46,9 @@ public class AuthenticationService {
 	}
 
 	@Transactional
-	public LoginResDto kakaoLogin(KakaoLoginReqDto kakaoLoginReqDto, HttpServletResponse response) {
-		final User user = userRepository.findByEmail(kakaoLoginReqDto.email())
-			.orElseGet(() -> registerUser(kakaoLoginReqDto));
+	public LoginResDto oauthLogin(OAuthLoginReqDto OAuthLoginReqDto, HttpServletResponse response) {
+		final User user = userRepository.findByEmail(OAuthLoginReqDto.email())
+			.orElseGet(() -> registerUser(OAuthLoginReqDto));
 		userProfileService.createProfileImage(user);
 
 		final String accessToken = jwtProviderService.generateAccessToken(user.getEmail(), user.getNickname());
@@ -72,9 +72,9 @@ public class AuthenticationService {
 		}
 	}
 
-	private User registerUser(KakaoLoginReqDto kakaoLoginReqDto) {
+	private User registerUser(OAuthLoginReqDto OAuthLoginReqDto) {
 		final User user = User.kakaoSignup(
-			kakaoLoginReqDto, passwordEncoder.encode("SecureRandomPassword")
+			OAuthLoginReqDto, passwordEncoder.encode("SecureRandomPassword")
 		);
 
 		return userRepository.save(user);
