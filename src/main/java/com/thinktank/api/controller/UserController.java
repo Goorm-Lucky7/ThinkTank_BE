@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thinktank.api.dto.TokenReqDto;
-import com.thinktank.api.dto.TokenResDto;
+import com.thinktank.api.dto.auth.KakaoLoginReqDto;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.request.UserDeleteDto;
@@ -41,9 +40,8 @@ public class UserController {
 
 	@PostMapping("/login")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<LoginResDto> login(
-		@RequestBody @Validated LoginReqDto loginReqDto, HttpServletResponse response
-	) {
+	public ResponseEntity<LoginResDto> login(@RequestBody @Validated LoginReqDto loginReqDto,
+		HttpServletResponse response) {
 		return ResponseEntity.ok(authenticationService.login(loginReqDto, response));
 	}
 
@@ -54,8 +52,10 @@ public class UserController {
 		return ResponseEntity.ok("OK");
 	}
 
-	@PostMapping("/reissue")
-	public ResponseEntity<TokenResDto> reissue(@RequestBody TokenReqDto tokenReqDto, HttpServletResponse response) {
-		return ResponseEntity.ok(authenticationService.reissue(tokenReqDto, response));
+	@PostMapping("/oauth/authorize")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<LoginResDto> kakaoLogin(@RequestBody KakaoLoginReqDto kakaoLoginReqDto,
+		HttpServletResponse response) {
+		return ResponseEntity.ok(authenticationService.kakaoLogin(kakaoLoginReqDto, response));
 	}
 }
