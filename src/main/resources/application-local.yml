@@ -24,7 +24,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
@@ -43,6 +43,13 @@ spring:
             client-name: Kakao
             scope: profile_nickname, account_email
 
+          google:
+            client-id: 864609368162-s04mmrh57da6mr27gugi7onts8u576d2.apps.googleusercontent.com
+            client-secret: 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
+            scope: email, profile
+            redirect-uri: http://localhost:8080/oauth/authorize/google
+            client-name: Google
+
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -50,6 +57,9 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-logging:
-  level:
-    root: info
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
