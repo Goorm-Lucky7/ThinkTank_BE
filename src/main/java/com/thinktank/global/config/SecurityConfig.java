@@ -49,11 +49,12 @@ public class SecurityConfig {
 			.requestMatchers("/api/signup")
 			.requestMatchers("/api/login")
 			.requestMatchers("/api/posts/*/comments")
-			.requestMatchers("/api/kakao")
-			.requestMatchers("/api/kakao/login")
-			.requestMatchers("/api/google")
-			.requestMatchers("/api/google/login")
-			.requestMatchers("/api/oauth/authorize");
+			.requestMatchers("/api/login/kakao")
+			.requestMatchers("/api/login/google")
+			.requestMatchers("/api/oauth/authorize")
+			.requestMatchers("/api/oauth/kakao")
+			.requestMatchers("/api/oauth/google");
+
 	}
 
 	@Bean
