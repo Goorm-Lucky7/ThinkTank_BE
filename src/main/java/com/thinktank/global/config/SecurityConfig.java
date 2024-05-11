@@ -50,7 +50,9 @@ public class SecurityConfig {
 			.requestMatchers("/api/login")
 			.requestMatchers("/api/posts/*/comments")
 			.requestMatchers("/api/kakao")
-			.requestMatchers("/api/login/kakao")
+			.requestMatchers("/api/kakao/login")
+			.requestMatchers("/api/google")
+			.requestMatchers("/api/google/login")
 			.requestMatchers("/api/oauth/authorize");
 	}
 
