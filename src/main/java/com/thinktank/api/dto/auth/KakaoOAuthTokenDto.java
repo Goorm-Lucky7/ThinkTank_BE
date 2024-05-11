@@ -9,5 +9,5 @@ public record KakaoOAuthTokenDto(
 	@JsonProperty("refresh_token_expires_in") String refreshTokenExpiresIn,
 	@JsonProperty("scope") String scope,
 	@JsonProperty("token_type") String tokenType
-	) {
+) {
 }
