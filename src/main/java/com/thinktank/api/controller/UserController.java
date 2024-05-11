@@ -4,12 +4,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.thinktank.api.dto.auth.GoogleUserInfoResDto;
+import com.thinktank.api.dto.auth.KakaoUserInfoResDto;
 import com.thinktank.api.dto.auth.OAuthLoginReqDto;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
@@ -52,10 +56,30 @@ public class UserController {
 		return ResponseEntity.ok("OK");
 	}
 
+	@GetMapping("/login/kakao")
+	public void kakaoSocialLogin(HttpServletResponse response) {
+		authenticationService.redirectToKakaoLoginPage(response);
+	}
+
+	@GetMapping("/login/google")
+	public void googleSocialLogin(HttpServletResponse response) {
+		authenticationService.redirectToGoogleLoginPage(response);
+	}
+
 	@PostMapping("/oauth/authorize")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<LoginResDto> kakaoLogin(@RequestBody OAuthLoginReqDto OAuthLoginReqDto,
+	public ResponseEntity<LoginResDto> socialLogin(@RequestBody OAuthLoginReqDto OAuthLoginReqDto,
 		HttpServletResponse response) {
-		return ResponseEntity.ok(authenticationService.oauthLogin(OAuthLoginReqDto, response));
+		return ResponseEntity.ok(authenticationService.socialLogin(OAuthLoginReqDto, response));
+	}
+
+	@GetMapping("/oauth/kakao")
+	public ResponseEntity<KakaoUserInfoResDto> kakaoLogin(@RequestParam("code") String code) {
+		return ResponseEntity.ok(authenticationService.kakaoLogin(code));
+	}
+
+	@GetMapping("/oauth/google")
+	public ResponseEntity<GoogleUserInfoResDto> googleLogin(@RequestParam("code") String code) {
+		return ResponseEntity.ok(authenticationService.googleLogin(code));
 	}
 }
