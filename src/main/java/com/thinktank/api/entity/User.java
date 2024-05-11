@@ -1,5 +1,6 @@
 package com.thinktank.api.entity;
 
+import com.thinktank.api.dto.auth.KakaoLoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.request.UserUpdateDto;
 import com.thinktank.global.common.entity.BaseTimeEntity;
@@ -44,6 +45,9 @@ public class User extends BaseTimeEntity {
 	@Column(name = "introduce")
 	private String introduce;
 
+	@Column(name = "refresh_token")
+	private String refreshToken;
+
 	@Builder
 	private User(String email,
 		String nickname,
@@ -75,5 +79,17 @@ public class User extends BaseTimeEntity {
 		this.github = userUpdateDto.github();
 		this.blog = userUpdateDto.blog();
 		this.introduce = userUpdateDto.introduce();
+	}
+
+	public void updateRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+	}
+
+	public static User kakaoSignup(KakaoLoginReqDto kakaoLoginReqDto, String password) {
+		return User.builder()
+			.email(kakaoLoginReqDto.email())
+			.nickname(kakaoLoginReqDto.nickname())
+			.password(password)
+			.build();
 	}
 }
