@@ -15,9 +15,9 @@ public class Template {
 			"    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();\n" +
 			"    executor.schedule(() -> System.exit(0), 15, TimeUnit.SECONDS);\n" +
 			"    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));" +
-			"        for(int zxcvbnm = 0; zxcvbnm < %d; zxcvbnm++) {\n" +
-			"			 String qwertasdf = br.readLine();   \n" +
-			"            System.out.println(solution(qwertasdf));\n" +
+			"        for(int zxc = 0; zxc < %d; zxc++) {\n" +
+			"			 String qwer = br.readLine();   \n" +
+			"            System.out.println(solution(qwer));\n" +
 			"        }\n" +
 			"    }\n" +
 			"    %s\n" +

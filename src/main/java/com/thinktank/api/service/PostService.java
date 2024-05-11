@@ -2,10 +2,8 @@ package com.thinktank.api.service;
 
 import static com.thinktank.global.common.util.GlobalConstant.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +33,9 @@ import com.thinktank.api.repository.TestCaseRepository;
 import com.thinktank.api.repository.UserCodeRepository;
 import com.thinktank.api.repository.UserLikeRepository;
 import com.thinktank.api.repository.UserRepository;
+import com.thinktank.global.common.util.JavaJudge;
+import com.thinktank.global.common.util.JavaScriptJudge;
+import com.thinktank.global.common.util.JudgeUtil;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.model.ErrorCode;
@@ -58,17 +59,21 @@ public class PostService {
 	public void createPost(PostCreateDto postCreateDto, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+
 		validateCategory(postCreateDto.category());
 		validateLanguage(postCreateDto.language());
-		Post post = Post.create(postCreateDto, user);
+
+		final Post post = Post.create(postCreateDto, user);
+		final List<CustomTestCase> customTestCases = postCreateDto.testCases();
+
+		validateJudge(customTestCases, postCreateDto.answer(), postCreateDto.language());
+
+		final List<TestCase> testCases = customTestCases.stream()
+			.map(customTestCase -> TestCase.createTestCase(customTestCase, post))
+			.toList();
+
 		postRepository.save(post);
-		List<CustomTestCase> testCases = postCreateDto.testCases();
-		List<TestCase> savedTestCases = new ArrayList<>();
-		for (CustomTestCase customTestCase : testCases) {
-			TestCase testCase = TestCase.createTestCase(customTestCase, post);
-			savedTestCases.add(testCase);
-		}
-		testCaseRepository.saveAll(savedTestCases);
+		testCaseRepository.saveAll(testCases);
 	}
 
 	@Transactional(readOnly = true)
@@ -82,7 +87,7 @@ public class PostService {
 
 		List<PostsResponseDto> posts = postPage.getContent().stream()
 			.map(post -> toPost(post, profileImage, user.getId()))
-			.collect(Collectors.toList());
+			.toList();
 
 		PageInfoDto pageInfo = new PageInfoDto(
 			postPage.getNumber(),
@@ -187,5 +192,19 @@ public class PostService {
 		if (!Language.isValidLanguage(language)) {
 			throw new BadRequestException(ErrorCode.FAIL_INVALID_LANGUAGE);
 		}
+	}
+
+	private void validateJudge(List<CustomTestCase> testCases, String code, String language) {
+		final JudgeUtil judgeService;
+
+		if (language.equals("java")) {
+			judgeService = new JavaJudge();
+		} else if (language.equals("javascript")) {
+			judgeService = new JavaScriptJudge();
+		} else {
+			throw new BadRequestException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION);
+		}
+
+		judgeService.executeCode(testCases, code);
 	}
 }
