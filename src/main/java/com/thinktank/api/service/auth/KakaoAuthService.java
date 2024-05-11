@@ -46,7 +46,6 @@ public class KakaoAuthService {
 	public ResponseEntity<String> requestAccessToken(String code) {
 		RestTemplate restTemplate = new RestTemplate();
 
-		// accessToken 받기
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
 
