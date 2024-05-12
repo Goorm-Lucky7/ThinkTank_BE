@@ -12,15 +12,14 @@ public enum ErrorCode {
 	// 204: NO CONTENT
 
 	// 400: BAD REQUEST
-	BAD_REQUEST("[❎ ERROR]"),
+	FAIL_BAD_REQUEST("[❎ ERROR]"),
 	FAIL_WRONG_PASSWORD("[❎ ERROR] 비밀번호가 일치하지 않습니다."),
 	FAIL_INVALID_CATEGORY("[❎ ERROR] 유효하지 않은 카테고리입니다."),
 	FAIL_INVALID_LANGUAGE("[❎ ERROR] 유효하지 않은 언어입니다."),
 	FAIL_INVALID_TOKEN("[❎ ERROR] 유효하지 않은 토큰입니다."),
-	BAD_REQUEST_COMPILE_ERROR("[❎실패] 컴파일 에러 입니다."),
-	BAD_REQUEST_RUNTIME_ERROR("[❎실패] 런타임 에러 입니다."),
-	BAD_REQUEST_FAIL("[❎실패] 테스트케이스를 통과하지 못했습니다."),
-	BAD_REQUEST_TIME_OUT("[❎실패] 시간 초과입니다."),
+	FAIL_COMPILE_ERROR("[❎ ERROR] 컴파일 에러 입니다."),
+	FAIL_TESTCASES("[❎ ERROR] 테스트케이스를 통과하지 못했습니다."),
+	FAIL_TIME_OUT("[❎ ERROR] 시간 초과입니다."),
 	FAIL_ALREADY_DEFAULT_IMAGE("[❎ ERROR] 해당 프로필 이미지는 이미 기본 이미지입니다."),
 
 	// 401: UNAUTHORIZED
