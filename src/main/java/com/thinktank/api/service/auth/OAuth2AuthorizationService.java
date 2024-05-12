@@ -15,10 +15,9 @@ import org.springframework.util.MultiValueMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thinktank.api.dto.auth.GoogleOAuthTokenDto;
 import com.thinktank.api.dto.auth.GoogleUserInfoResDto;
-import com.thinktank.api.dto.auth.KakaoOAuthTokenDto;
 import com.thinktank.api.dto.auth.KakaoUserInfoResDto;
+import com.thinktank.api.dto.auth.OAuthTokenResDto;
 import com.thinktank.global.config.RestTemplateConfig;
 
 import lombok.RequiredArgsConstructor;
@@ -82,20 +81,20 @@ public class OAuth2AuthorizationService {
 		return sendTokenRequest(params, googleTokenRequestUri);
 	}
 
-	public KakaoOAuthTokenDto getKakaoAccessToken(ResponseEntity<String> responseEntity) {
-		return convertToDto(responseEntity, KakaoOAuthTokenDto.class);
+	public OAuthTokenResDto getKakaoAccessToken(ResponseEntity<String> responseEntity) {
+		return convertToDto(responseEntity, OAuthTokenResDto.class);
 	}
 
-	public GoogleOAuthTokenDto getGoogleAccessToken(ResponseEntity<String> responseEntity) {
-		return convertToDto(responseEntity, GoogleOAuthTokenDto.class);
+	public OAuthTokenResDto getGoogleAccessToken(ResponseEntity<String> responseEntity) {
+		return convertToDto(responseEntity, OAuthTokenResDto.class);
 	}
 
-	public ResponseEntity<String> requestKakaoUserInfo(KakaoOAuthTokenDto kakaoOAuthTokenDto) {
-		return requestUserInfo(kakaoOAuthTokenDto.accessToken(), kakaoUserInfoUri);
+	public ResponseEntity<String> requestKakaoUserInfo(OAuthTokenResDto oAuthTokenResDto) {
+		return requestUserInfo(oAuthTokenResDto.accessToken(), kakaoUserInfoUri);
 	}
 
-	public ResponseEntity<String> requestGoogleUserInfo(GoogleOAuthTokenDto googleOAuthTokenDto) {
-		return requestUserInfo(googleOAuthTokenDto.accessToken(), googleUserInfoUri);
+	public ResponseEntity<String> requestGoogleUserInfo(OAuthTokenResDto OAuthTokenResDto) {
+		return requestUserInfo(OAuthTokenResDto.accessToken(), googleUserInfoUri);
 	}
 
 	public KakaoUserInfoResDto getKakaoUserInfo(ResponseEntity<String> responseEntity) {
