@@ -26,6 +26,6 @@ public class JudgeController {
 		@Auth AuthUser authUser
 	) {
 		judgeService.judge(dto, authUser);
-		return ResponseEntity.ok("OK");
+		return ResponseEntity.ok("[✅ SUCCESS] 모든 테스트케이스를 통과하셨습니다");
 	}
 }
