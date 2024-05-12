@@ -25,9 +25,21 @@ public class UserProfileService {
 	private final ProfileImageRepository profileImageRepository;
 	private final UserRepository userRepository;
 
+	@Transactional
 	public void createProfileImage(User user) {
 		final ProfileImage profileImage = ProfileImage.createDefaultForUser(user);
 		profileImageRepository.save(profileImage);
+	}
+
+	@Transactional
+	public void saveOrUpdateSocialProfileImage(User user, String imageUrl) {
+		ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
+			.orElse(ProfileImage.createDefaultForUser(user));
+
+		String fileName = extractFileNameFromUrl(imageUrl);
+
+		ProfileImageReqDto profileImageReqDto = new ProfileImageReqDto(fileName, imageUrl, fileName);
+		profileImage.updateProfileImage(profileImageReqDto);
 	}
 
 	@Transactional
@@ -52,6 +64,10 @@ public class UserProfileService {
 		validateDefaultImage(profileImage);
 
 		profileImage.updateProfileImageToDefault();
+	}
+
+	private String extractFileNameFromUrl(String imageUrl) {
+		return imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
 	}
 
 	private void validateDefaultImage(ProfileImage profileImage) {
