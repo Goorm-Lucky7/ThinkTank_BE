@@ -3,8 +3,6 @@ package com.thinktank.global.auth.filter;
 import static com.thinktank.global.common.util.AuthConstants.*;
 import static com.thinktank.global.common.util.GlobalConstant.*;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,12 +13,11 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.auth.AuthorizationThreadLocal;
+import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
@@ -45,26 +42,32 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 		@NotNull HttpServletRequest request,
 		@NotNull HttpServletResponse response,
 		@NotNull FilterChain filterChain
-	) throws ServletException, IOException {
-		String accessToken = jwtProviderService.extractAccessToken(ACCESS_TOKEN_HEADER, request);
+	) {
+		String accessToken = jwtProviderService.extractToken(ACCESS_TOKEN_HEADER, request);
 
 		try {
-			if (jwtProviderService.isUsable(accessToken)) {
-				setAuthentication(accessToken);
-			} else if (jwtProviderService.isTokenExpired(accessToken)) {
-				String newAccessToken = jwtProviderService.reGenerateExpiredAccessToken(accessToken);
+			String requestURI = request.getRequestURI();
+
+			if (!jwtProviderService.isUsable(accessToken) || "/api/reissue".equals(requestURI)) {
+				if ("/api/reissue".equals(requestURI)) {
+					filterChain.doFilter(request, response);
+
+					return;
+				}
+
+				String newAccessToken = jwtProviderService.reGenerateToken(accessToken);
 				setAuthentication(newAccessToken);
-				response.setHeader(ACCESS_TOKEN_HEADER, newAccessToken);
 			} else {
-				throw new ExpiredJwtException(null, null, "TOKEN EXPIRED");
+				setAuthentication(accessToken);
+				filterChain.doFilter(request, response);
+
+				return;
 			}
 
-			filterChain.doFilter(request, response);
-
-		} catch (ExpiredJwtException e) {
+			throw new UnauthorizedException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
+		} catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			handlerExceptionResolver.resolveException(request, response, null,
-				new UnauthorizedException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+			handlerExceptionResolver.resolveException(request, response, null, e);
 		} finally {
 			AuthorizationThreadLocal.remove();
 		}
@@ -75,7 +78,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 		final Authentication authToken = new UsernamePasswordAuthenticationToken(authUser, BLANK, null);
 
 		SecurityContextHolder.getContext().setAuthentication(authToken);
-
 		AuthorizationThreadLocal.setAuthUser(authUser);
 	}
 }

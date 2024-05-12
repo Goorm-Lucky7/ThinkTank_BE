@@ -6,6 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.thinktank.api.dto.TokenReqDto;
+import com.thinktank.api.dto.TokenResDto;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.response.LoginResDto;
 import com.thinktank.api.entity.User;
@@ -32,11 +34,20 @@ public class AuthenticationService {
 		final User user = findByUserEmail(loginReqDto.email());
 		validatePasswordMatch(loginReqDto.password(), user.getPassword());
 
-		final String accessToken = jwtProviderService.generateAccessToken(user.getEmail(), user.getNickname());
+		final String accessToken = jwtProviderService.generateToken(user.getEmail(), user.getNickname());
 
 		response.setHeader(ACCESS_TOKEN_HEADER, accessToken);
 
 		return new LoginResDto(accessToken);
+	}
+
+	public TokenResDto reissue(TokenReqDto tokenReqDto, HttpServletResponse response) {
+		final String newAccessToken = jwtProviderService.reGenerateToken(tokenReqDto.expiredToken());
+
+		response.setHeader(ACCESS_TOKEN_HEADER, newAccessToken);
+		response.setStatus(HttpServletResponse.SC_CREATED);
+
+		return new TokenResDto(newAccessToken);
 	}
 
 	private User findByUserEmail(String email) {

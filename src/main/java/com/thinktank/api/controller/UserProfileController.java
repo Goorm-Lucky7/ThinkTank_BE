@@ -3,6 +3,7 @@ package com.thinktank.api.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,8 +31,8 @@ public class UserProfileController {
 
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<UserResDto> findUserProfile(@Auth AuthUser authUser) {
-		return ResponseEntity.ok(userService.findUserProfile(authUser));
+	public ResponseEntity<UserResDto> getOwnProfileDetails(@Auth AuthUser authUser) {
+		return ResponseEntity.ok(userService.getOwnProfileDetails(authUser));
 	}
 
 	@PutMapping("/users/image")
@@ -45,10 +46,17 @@ public class UserProfileController {
 
 	@PutMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> updateUserNickname(
+	public ResponseEntity<String> updateUserDetails(
 		@Auth AuthUser authUser,
 		@RequestBody @Validated UserUpdateDto userUpdateDto) {
-		userService.updateUserNickname(authUser, userUpdateDto);
+		userService.updateUserDetails(authUser, userUpdateDto);
+		return ResponseEntity.ok("OK");
+	}
+
+	@DeleteMapping("/users/image")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<String> resetProfileImageToDefault(@Auth AuthUser authUser) {
+		userProfileService.resetProfileImageToDefault(authUser);
 		return ResponseEntity.ok("OK");
 	}
 }

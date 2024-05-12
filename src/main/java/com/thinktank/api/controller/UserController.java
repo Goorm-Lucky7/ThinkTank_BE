@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.thinktank.api.dto.TokenReqDto;
+import com.thinktank.api.dto.TokenResDto;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.request.UserDeleteDto;
@@ -46,9 +48,16 @@ public class UserController {
 	}
 
 	@DeleteMapping
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<String> removeUser(@Auth AuthUser authUser,
 		@RequestBody @Validated UserDeleteDto userDeleteDto) {
 		userService.removeUser(authUser, userDeleteDto);
 		return ResponseEntity.ok("OK");
+	}
+
+	@PostMapping("/reissue")
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<TokenResDto> reissue(@RequestBody TokenReqDto tokenReqDto, HttpServletResponse response) {
+		return ResponseEntity.ok(authenticationService.reissue(tokenReqDto, response));
 	}
 }

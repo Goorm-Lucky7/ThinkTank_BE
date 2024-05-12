@@ -1,5 +1,7 @@
 package com.thinktank.api.service;
 
+import static com.thinktank.global.common.util.GlobalConstant.*;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +11,7 @@ import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.ProfileImageRepository;
 import com.thinktank.api.repository.UserRepository;
+import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.model.ErrorCode;
 
@@ -36,5 +39,24 @@ public class UserProfileService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_IMAGE_EXCEPTION));
 
 		profileImage.updateProfileImage(profileImageReqDto);
+	}
+
+	@Transactional
+	public void resetProfileImageToDefault(AuthUser authUser) {
+		final User user = userRepository.findByEmail(authUser.email())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+
+		final ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_IMAGE_EXCEPTION));
+
+		validateDefaultImage(profileImage);
+
+		profileImage.updateProfileImageToDefault();
+	}
+
+	private void validateDefaultImage(ProfileImage profileImage) {
+		if (DEFAULT_FILE_URL.equals(profileImage.getFileUrl())) {
+			throw new BadRequestException(ErrorCode.FAIL_ALREADY_DEFAULT_IMAGE);
+		}
 	}
 }
