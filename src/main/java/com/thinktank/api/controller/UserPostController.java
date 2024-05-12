@@ -22,9 +22,9 @@ public class UserPostController {
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
 		@RequestParam String value,
-		@RequestParam Long userId,
+		@RequestParam String userNickname,
 		@RequestParam(required = false) Long loginUserId) {
-		PagePostProfileResponseDto profilePosts = userPostService.getProfilePosts(page, size, value, userId,
+		PagePostProfileResponseDto profilePosts = userPostService.getProfilePosts(page, size, value, userNickname,
 			loginUserId);
 		return ResponseEntity.ok(profilePosts);
 	}
