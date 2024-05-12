@@ -31,7 +31,7 @@ public class JavaScriptJudge implements JudgeUtil {
 			createFile(directory, code, testCases.size());
 			runTestCases(testCases, directory);
 		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_BAD_REQUEST);
 		} finally {
 			delete(directory);
 		}
@@ -44,28 +44,38 @@ public class JavaScriptJudge implements JudgeUtil {
 
 	private void runTestCases(List<CustomTestCase> testCases, File tempDir) throws IOException {
 		final ProcessBuilder builder = startDockerRun(tempDir);
+		final long startTime = System.currentTimeMillis();
 		final Process process = builder.start();
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
 		for (CustomTestCase testCase : testCases) {
 			writer.write(testCase.example() + "\n");
 			writer.flush();
 
 			final String output = reader.readLine();
+			final long currentTime = System.currentTimeMillis();
 
+			validateTimeOut(currentTime, startTime);
 			validateJudge(testCase.result(), output);
+		}
+	}
+
+	private static void validateTimeOut(long currentTime, long startTime) {
+		if (currentTime - startTime > EXECUTION_TIME_LIMIT) {
+			throw new BadRequestException(ErrorCode.FAIL_TIME_OUT);
 		}
 	}
 
 	private static void validateJudge(String testCase, String output) {
 		if (!output.equals(testCase)) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST_FAIL);
+			throw new BadRequestException(ErrorCode.FAIL_TESTCASES);
 		}
 	}
 
 	private void validateExist(File tempDir) {
 		if (!tempDir.mkdirs()) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_BAD_REQUEST);
 		}
 	}
 
@@ -76,7 +86,7 @@ public class JavaScriptJudge implements JudgeUtil {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
 			writer.write(codeWithLoop);
 		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_BAD_REQUEST);
 		}
 	}
 
