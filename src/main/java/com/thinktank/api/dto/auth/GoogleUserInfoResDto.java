@@ -4,6 +4,9 @@ public record GoogleUserInfoResDto(
 	String id,
 	String email,
 	String name,
-	String picture
+	boolean verifiedEmail,
+	String givenName,
+	String picture,
+	String locale
 ) {
 }
