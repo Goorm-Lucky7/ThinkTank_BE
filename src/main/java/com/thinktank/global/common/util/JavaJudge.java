@@ -33,7 +33,7 @@ public class JavaJudge implements JudgeUtil {
 
 			startCompile(sourceFile, testCases, directory);
 		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.FAIL_BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.BAD_REQUEST);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new BadRequestException(ErrorCode.FAIL_TIME_OUT);
@@ -90,7 +90,7 @@ public class JavaJudge implements JudgeUtil {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
 			writer.write(codeWithLoop);
 		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.FAIL_BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.BAD_REQUEST);
 		}
 
 		return sourceFile;
@@ -116,7 +116,7 @@ public class JavaJudge implements JudgeUtil {
 
 	private void validateExist(File tempDir) {
 		if (!tempDir.mkdirs()) {
-			throw new BadRequestException(ErrorCode.FAIL_BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.BAD_REQUEST);
 		}
 	}
 

@@ -31,7 +31,7 @@ public class JavaScriptJudge implements JudgeUtil {
 			createFile(directory, code, testCases.size());
 			runTestCases(testCases, directory);
 		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.FAIL_BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.BAD_REQUEST);
 		} finally {
 			delete(directory);
 		}
@@ -75,7 +75,7 @@ public class JavaScriptJudge implements JudgeUtil {
 
 	private void validateExist(File tempDir) {
 		if (!tempDir.mkdirs()) {
-			throw new BadRequestException(ErrorCode.FAIL_BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.BAD_REQUEST);
 		}
 	}
 
@@ -86,7 +86,7 @@ public class JavaScriptJudge implements JudgeUtil {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
 			writer.write(codeWithLoop);
 		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.FAIL_BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.BAD_REQUEST);
 		}
 	}
 

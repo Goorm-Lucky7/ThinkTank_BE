@@ -12,7 +12,7 @@ public enum ErrorCode {
 	// 204: NO CONTENT
 
 	// 400: BAD REQUEST
-	FAIL_BAD_REQUEST("[❎ ERROR]"),
+	BAD_REQUEST("[❎ ERROR]"),
 	FAIL_WRONG_PASSWORD("[❎ ERROR] 비밀번호가 일치하지 않습니다."),
 	FAIL_INVALID_CATEGORY("[❎ ERROR] 유효하지 않은 카테고리입니다."),
 	FAIL_INVALID_LANGUAGE("[❎ ERROR] 유효하지 않은 언어입니다."),
