@@ -73,8 +73,11 @@ public class JavaScriptJudge implements JudgeUtil {
 		final File sourceFile = new File(tempDir, JAVASCRIPT_CLASS_NAME);
 		final String codeWithLoop = String.format(JAVASCRIPT_TEMPLATE, size, code);
 
-		BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile));
-		writer.write(codeWithLoop);
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
+			writer.write(codeWithLoop);
+		} catch (IOException e) {
+			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+		}
 	}
 
 	private void delete(File directory) {
