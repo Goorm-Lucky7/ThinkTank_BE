@@ -35,7 +35,7 @@ public enum ErrorCode {
 	DELETE_COMMENT_FORBIDDEN_EXCEPTION("[❎ ERROR] 댓글 삭제 권한이 없습니다."),
 
 	// 404: NOT FOUNT
-	FAIL_NOT_POST_FOUND_EXCEPTION("[❎ ERROR] 요청하신 게시물을 찾을 수 없습니다."),
+	FAIL_NOT_POST_FOUND_EXCEPTION("[❎ ERROR] 요청하신 게시글을 찾을 수 없습니다."),
 	FAIL_NOT_USER_FOUND_EXCEPTION("[❎ ERROR] 요청하신 회원을 찾을 수 없습니다."),
 	FAIL_NOT_COMMENT_FOUND_EXCEPTION("[❎ ERROR] 요청하신 댓글을 찾을 수 없습니다."),
 	FAIL_NOT_TOKEN_FOUND_EXCEPTION("[❎ ERROR] 요청하신 토큰을 찾을 수 없습니다."),

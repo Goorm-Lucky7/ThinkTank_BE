@@ -19,40 +19,43 @@ import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.PostService;
 import com.thinktank.global.auth.annotation.Auth;
 
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class PostController {
 	private final PostService postService;
 
-	@PostMapping("/post")
+	@PostMapping
 	public ResponseEntity<String> createPost(@RequestBody @Validated PostCreateDto postCreateDto,
 		@Auth AuthUser authUser) {
 		postService.createPost(postCreateDto, authUser);
 		return ResponseEntity.ok("OK");
 	}
 
-	@GetMapping("/posts")
+	@GetMapping
 	public ResponseEntity<PagePostResponseDto> getAllPosts(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
-		@Auth AuthUser authUser
+		@RequestParam @Nullable Long userId
 	) {
-		PagePostResponseDto posts = postService.getAllPosts(page, size, authUser);
+		PagePostResponseDto posts = postService.getAllPosts(page, size, userId);
 		return ResponseEntity.ok(posts);
 	}
 
-	@GetMapping("/posts/{postId}")
-	public ResponseEntity<PostDetailResponseDto> getPostDetails(@PathVariable("postId") Long postId,
-		@Auth AuthUser authUser) {
-		PostDetailResponseDto postDetailResponseDto = postService.getPostDetail(postId, authUser);
+	@GetMapping("/{post-id}")
+	public ResponseEntity<PostDetailResponseDto> getPostDetails(
+		@PathVariable("post-id") Long postId,
+		@RequestParam @Nullable Long userId) {
+		PostDetailResponseDto postDetailResponseDto = postService.getPostDetail(postId, userId);
 		return ResponseEntity.ok(postDetailResponseDto);
 	}
 
-	@DeleteMapping("/posts")
-	public ResponseEntity<String> deletePost(@RequestBody @Validated PostDeleteDto postDeleteDto,
+	@DeleteMapping
+	public ResponseEntity<String> deletePost(
+		@RequestBody @Validated PostDeleteDto postDeleteDto,
 		@Auth AuthUser authUser) {
 		postService.deletePost(postDeleteDto, authUser);
 		return ResponseEntity.ok("OK");

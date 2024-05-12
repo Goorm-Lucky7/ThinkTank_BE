@@ -16,14 +16,12 @@ import com.thinktank.api.dto.post.response.PagePostProfileResponseDto;
 import com.thinktank.api.dto.post.response.PostProfileResponseDto;
 import com.thinktank.api.dto.post.response.PostResponseDto;
 import com.thinktank.api.dto.post.response.PostSolvedResponseDto;
-import com.thinktank.api.dto.problemType.request.ProblemTypeDto;
 import com.thinktank.api.dto.user.response.UserProfileResDto;
 import com.thinktank.api.entity.Post;
 import com.thinktank.api.entity.ProblemType;
 import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.UserCode;
 import com.thinktank.api.entity.UserLike;
-import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.CommentRepository;
 import com.thinktank.api.repository.LikeRepository;
 import com.thinktank.api.repository.PostRepository;
@@ -47,13 +45,17 @@ public class UserPostService {
 	private final UserCodeRepository userCodeRepository;
 	private final UserLikeService userLikeService;
 
-	public PagePostProfileResponseDto getProfilePosts(int page, int size, ProblemTypeDto problemTypeDto,
-		AuthUser authUser) {
+	public PagePostProfileResponseDto getProfilePosts(int page, int size, String value, String userNickname,
+		Long loginUserId) {
+		Long userId = userRepository.findUserIdByNickname(userNickname);
+		if (userId == null) {
+			throw new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION);
+		}
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Post> postsWithProfile = postRepository.findAll(pageable);
 		String profileImage = null;
-		List<? extends PostResponseDto> posts = processProblemType(problemTypeDto);
-		UserProfileResDto user = toUser(problemTypeDto.userId(), profileImage);
+		List<? extends PostResponseDto> posts = processProblemType(value, userId, loginUserId);
+		UserProfileResDto user = toUser(userId, profileImage);
 		PageInfoDto pageInfo = new PageInfoDto(
 			postsWithProfile.getNumber(),
 			postsWithProfile.isLast()
@@ -61,26 +63,26 @@ public class UserPostService {
 		return new PagePostProfileResponseDto(user, posts, pageInfo);
 	}
 
-	public List<? extends PostResponseDto> processProblemType(ProblemTypeDto problemTypeDto) {
-		ProblemType problemType = ProblemType.fromValue(problemTypeDto.value());
+	public List<? extends PostResponseDto> processProblemType(String value, Long userId, Long loginUserId) {
+		ProblemType problemType = ProblemType.fromValue(value);
 		if (problemType != null) {
 			return switch (problemType) {
-				case CREATED -> processCreatedProblems(problemTypeDto.userId());
-				case SOLVED -> processSolvedProblems(problemTypeDto.userId());
-				case LIKED -> processLikedProblems(problemTypeDto.userId());
+				case CREATED -> processCreatedProblems(userId, loginUserId);
+				case SOLVED -> processSolvedProblems(userId);
+				case LIKED -> processLikedProblems(userId, loginUserId);
 			};
 		} else {
 			throw new BadRequestException(ErrorCode.BAD_REQUEST);
 		}
 	}
 
-	private List<? extends PostResponseDto> processCreatedProblems(Long userId) {
+	private List<? extends PostResponseDto> processCreatedProblems(Long userId, Long loginUserId) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
 		List<Post> createdPosts = postRepository.findByUser(user);
 		List<PostProfileResponseDto> createdPostDtos = new ArrayList<>();
 		for (Post post : createdPosts) {
-			PostProfileResponseDto postDto = toPostNotSolved(post, userId);
+			PostProfileResponseDto postDto = toPostNotSolved(post, loginUserId);
 			createdPostDtos.add(postDto);
 		}
 		return createdPostDtos;
@@ -99,14 +101,14 @@ public class UserPostService {
 		return solvedPostDtos;
 	}
 
-	private List<? extends PostResponseDto> processLikedProblems(Long userId) {
+	private List<? extends PostResponseDto> processLikedProblems(Long userId, Long loginUserId) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
 		List<UserLike> userLikes = userLikeRepository.findByUserAndIsCheckTrue(user);
 		List<PostProfileResponseDto> likedPostDtos = new ArrayList<>();
 		for (UserLike userLike : userLikes) {
 			Post post = userLike.getLike().getPost();
-			PostProfileResponseDto postDto = toPostNotSolved(post, userId);
+			PostProfileResponseDto postDto = toPostNotSolved(post, loginUserId);
 			likedPostDtos.add(postDto);
 		}
 		return likedPostDtos;
@@ -123,11 +125,11 @@ public class UserPostService {
 		);
 	}
 
-	private PostProfileResponseDto toPostNotSolved(Post post, Long userId) {
+	private PostProfileResponseDto toPostNotSolved(Post post, Long loginUserId) {
 		int commentCount = commentRepository.countCommentsByPost(post);
 		int likeCount = likeRepository.findLikeCountByPost(post);
 		int answerCount = userCodeRepository.countUserCodeByPost(post);
-		boolean likeType = isPostLikedByUser(userId, post);
+		boolean likeType = isPostLikedByUser(loginUserId, post);
 
 		return new PostProfileResponseDto(
 			post.getId(),
@@ -152,7 +154,10 @@ public class UserPostService {
 		);
 	}
 
-	private boolean isPostLikedByUser(Long userId, Post post) {
-		return userLikeService.isPostLikedByUser(userId, post.getId());
+	private boolean isPostLikedByUser(Long loginUserId, Post post) {
+		if (loginUserId == null) {
+			return false;
+		}
+		return userLikeService.isPostLikedByUser(loginUserId, post.getId());
 	}
 }
