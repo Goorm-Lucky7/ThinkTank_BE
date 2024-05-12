@@ -49,7 +49,7 @@ public class SecurityConfig {
 			.requestMatchers("/api/signup")
 			.requestMatchers("/api/login")
 			.requestMatchers("/api/posts/*/comments")
-			.requestMatchers("/api/posts/**")
+			// .requestMatchers("/api/posts/**")
 			.requestMatchers("/api/users/profile");
 	}
 
