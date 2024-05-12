@@ -9,11 +9,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.thinktank.api.dto.auth.GoogleOAuthTokenDto;
 import com.thinktank.api.dto.auth.GoogleUserInfoResDto;
-import com.thinktank.api.dto.auth.KakaoOAuthTokenDto;
 import com.thinktank.api.dto.auth.KakaoUserInfoResDto;
 import com.thinktank.api.dto.auth.OAuthLoginReqDto;
+import com.thinktank.api.dto.auth.OAuthTokenResDto;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.response.LoginResDto;
 import com.thinktank.api.entity.User;
@@ -47,11 +46,10 @@ public class AuthenticationService {
 	}
 
 	@Transactional
-	public LoginResDto socialLogin(OAuthLoginReqDto OAuthLoginReqDto, HttpServletResponse response) {
-		final User user = userRepository.findByEmail(OAuthLoginReqDto.email())
-			.orElseGet(() -> registerUser(OAuthLoginReqDto));
-
-		userProfileService.createProfileImage(user);
+	public LoginResDto socialLogin(OAuthLoginReqDto oAuthLoginReqDto, HttpServletResponse response) {
+		final User user = userRepository.findByEmail(oAuthLoginReqDto.email())
+			.orElseGet(() -> registerUser(oAuthLoginReqDto));
+		userProfileService.saveOrUpdateSocialProfileImage(user, oAuthLoginReqDto.imageUrl());
 
 		return processUserAuthentication(user, response);
 	}
@@ -68,18 +66,18 @@ public class AuthenticationService {
 
 	public KakaoUserInfoResDto kakaoLogin(String code) {
 		ResponseEntity<String> accessToken = oAuth2AuthorizationService.requestKakaoAccessToken(code);
-		KakaoOAuthTokenDto kakaoOAuthTokenDto = oAuth2AuthorizationService.getKakaoAccessToken(accessToken);
+		OAuthTokenResDto oAuthTokenResDto = oAuth2AuthorizationService.getKakaoAccessToken(accessToken);
 
-		ResponseEntity<String> userInfoResponse = oAuth2AuthorizationService.requestKakaoUserInfo(kakaoOAuthTokenDto);
+		ResponseEntity<String> userInfoResponse = oAuth2AuthorizationService.requestKakaoUserInfo(oAuthTokenResDto);
 
 		return oAuth2AuthorizationService.getKakaoUserInfo(userInfoResponse);
 	}
 
 	public GoogleUserInfoResDto googleLogin(String code) {
 		ResponseEntity<String> accessToken = oAuth2AuthorizationService.requestGoogleAccessToken(code);
-		GoogleOAuthTokenDto googleOAuthTokenDto = oAuth2AuthorizationService.getGoogleAccessToken(accessToken);
+		OAuthTokenResDto OAuthTokenResDto = oAuth2AuthorizationService.getGoogleAccessToken(accessToken);
 
-		ResponseEntity<String> userInfoResponse = oAuth2AuthorizationService.requestGoogleUserInfo(googleOAuthTokenDto);
+		ResponseEntity<String> userInfoResponse = oAuth2AuthorizationService.requestGoogleUserInfo(OAuthTokenResDto);
 
 		return oAuth2AuthorizationService.getGoogleUserInfo(userInfoResponse);
 	}
