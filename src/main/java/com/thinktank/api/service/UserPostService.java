@@ -45,7 +45,12 @@ public class UserPostService {
 	private final UserCodeRepository userCodeRepository;
 	private final UserLikeService userLikeService;
 
-	public PagePostProfileResponseDto getProfilePosts(int page, int size, String value, Long userId, Long loginUserId) {
+	public PagePostProfileResponseDto getProfilePosts(int page, int size, String value, String userNickname,
+		Long loginUserId) {
+		Long userId = userRepository.findUserIdByNickname(userNickname);
+		if (userId == null) {
+			throw new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION);
+		}
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Post> postsWithProfile = postRepository.findAll(pageable);
 		String profileImage = null;
