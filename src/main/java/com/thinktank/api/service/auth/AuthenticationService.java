@@ -6,8 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.thinktank.api.dto.TokenReqDto;
-import com.thinktank.api.dto.TokenResDto;
+import com.thinktank.api.dto.auth.TokenReqDto;
+import com.thinktank.api.dto.auth.TokenResDto;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.response.LoginResDto;
 import com.thinktank.api.entity.User;

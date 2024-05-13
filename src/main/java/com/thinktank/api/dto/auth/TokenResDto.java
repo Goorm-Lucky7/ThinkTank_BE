@@ -1,4 +1,4 @@
-package com.thinktank.api.dto;
+package com.thinktank.api.dto.auth;
 
 import lombok.Builder;
 

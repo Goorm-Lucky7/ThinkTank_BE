@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thinktank.api.dto.TokenReqDto;
-import com.thinktank.api.dto.TokenResDto;
+import com.thinktank.api.dto.auth.TokenReqDto;
+import com.thinktank.api.dto.auth.TokenResDto;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.request.UserDeleteDto;
