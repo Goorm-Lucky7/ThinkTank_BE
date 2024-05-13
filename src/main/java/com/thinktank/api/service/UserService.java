@@ -4,11 +4,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.thinktank.api.dto.profileImage.response.ProfileImageResDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
-import com.thinktank.api.dto.user.request.UserDeleteDto;
 import com.thinktank.api.dto.user.request.UserUpdateDto;
-import com.thinktank.api.dto.user.response.UserResDto;
+import com.thinktank.api.dto.user.response.UserProfileResDto;
 import com.thinktank.api.entity.ProfileImage;
 import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.auth.AuthUser;
@@ -43,11 +41,11 @@ public class UserService {
 		profileImageRepository.save(profileImage);
 	}
 
-	public UserResDto getOwnProfileDetails(AuthUser authUser) {
+	public UserProfileResDto getOwnProfileDetails(AuthUser authUser) {
 		final User user = findUserByEmail(authUser.email());
 		final ProfileImage profileImage = findProfileImageByEmail(user.getEmail());
 
-		return convertToUserResDto(user, profileImage);
+		return convertToUserProfileResDto(user, profileImage);
 	}
 
 	@Transactional
@@ -62,9 +60,8 @@ public class UserService {
 	}
 
 	@Transactional
-	public void removeUser(AuthUser authUser, UserDeleteDto userDeleteDto) {
+	public void removeUser(AuthUser authUser) {
 		final User user = findUserByEmail(authUser.email());
-		validatePasswordMatch(userDeleteDto.password(), user.getPassword());
 
 		final ProfileImage profileImage = findProfileImageByEmail(user.getEmail());
 
@@ -72,14 +69,9 @@ public class UserService {
 		profileImageRepository.delete(profileImage);
 	}
 
-	private UserResDto convertToUserResDto(User user, ProfileImage profileImage) {
-		return new UserResDto(user.getEmail(), user.getNickname(), user.getGithub(), user.getBlog(),
-			user.getIntroduce(), convertToProfileImageResDto(profileImage));
-	}
-
-	private ProfileImageResDto convertToProfileImageResDto(ProfileImage profileImage) {
-		return new ProfileImageResDto(profileImage.getFileName(), profileImage.getFileUrl(),
-			profileImage.getOriginalFileName());
+	private UserProfileResDto convertToUserProfileResDto(User user, ProfileImage profileImage) {
+		return new UserProfileResDto(user.getEmail(), user.getNickname(), user.getGithub(), user.getBlog(),
+			user.getIntroduce(), profileImage.getProfileImage());
 	}
 
 	private ProfileImage findProfileImageByEmail(String email) {
@@ -106,12 +98,6 @@ public class UserService {
 
 	private void validatePasswordEquality(String rawPassword, String checkPassword) {
 		if (!rawPassword.equals(checkPassword)) {
-			throw new BadRequestException(ErrorCode.FAIL_WRONG_PASSWORD);
-		}
-	}
-
-	private void validatePasswordMatch(String rawPassword, String encodedPassword) {
-		if (passwordEncoder.matches(encodedPassword, rawPassword)) {
 			throw new BadRequestException(ErrorCode.FAIL_WRONG_PASSWORD);
 		}
 	}
