@@ -29,6 +29,7 @@ import com.thinktank.api.repository.UserCodeRepository;
 import com.thinktank.api.repository.UserLikeRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.BadRequestException;
+import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserPostService {
+
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
 	private final LikeRepository likeRepository;
@@ -49,7 +51,7 @@ public class UserPostService {
 		Long loginUserId) {
 		Long userId = userRepository.findUserIdByNickname(userNickname);
 		if (userId == null) {
-			throw new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION);
+			throw new NotFoundException(ErrorCode.FAIL_USER_NOT_FOUND);
 		}
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Post> postsWithProfile = postRepository.findAll(pageable);
@@ -72,13 +74,13 @@ public class UserPostService {
 				case LIKED -> processLikedProblems(userId, loginUserId);
 			};
 		} else {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_INVALID_REQUEST);
 		}
 	}
 
 	private List<? extends PostResponseDto> processCreatedProblems(Long userId, Long loginUserId) {
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_NOT_FOUND));
 		List<Post> createdPosts = postRepository.findByUser(user);
 		List<PostProfileResponseDto> createdPostDtos = new ArrayList<>();
 		for (Post post : createdPosts) {
@@ -90,7 +92,7 @@ public class UserPostService {
 
 	private List<? extends PostResponseDto> processSolvedProblems(Long userId) {
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_NOT_FOUND));
 		List<UserCode> userCodes = userCodeRepository.findByUser(user);
 		List<PostSolvedResponseDto> solvedPostDtos = new ArrayList<>();
 		for (UserCode userCode : userCodes) {
@@ -103,7 +105,7 @@ public class UserPostService {
 
 	private List<? extends PostResponseDto> processLikedProblems(Long userId, Long loginUserId) {
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_NOT_FOUND));
 		List<UserLike> userLikes = userLikeRepository.findByUserAndIsCheckTrue(user);
 		List<PostProfileResponseDto> likedPostDtos = new ArrayList<>();
 		for (UserLike userLike : userLikes) {
@@ -116,7 +118,7 @@ public class UserPostService {
 
 	private UserProfileResDto toUser(Long userId, String profileImage) {
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_NOT_FOUND));
 		return new UserProfileResDto(
 			user.getEmail(),
 			user.getNickname(),

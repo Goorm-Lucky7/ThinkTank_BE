@@ -22,7 +22,6 @@ import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.CommentRepository;
 import com.thinktank.api.repository.PostRepository;
 import com.thinktank.api.repository.UserRepository;
-import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
@@ -40,10 +39,10 @@ public class CommentService {
 	@Transactional
 	public void createComment(CommentCreateDto commentCreateDto, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
 
 		final Post post = postRepository.findById(commentCreateDto.postId())
-			.orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
 
 		Comment comment = Comment.create(commentCreateDto, user, post);
 		commentRepository.save(comment);
@@ -72,13 +71,13 @@ public class CommentService {
 	@Transactional
 	public void deleteComment(CommentDeleteDto commentDeleteDto, AuthUser authUser) {
 		Comment comment = commentRepository.findById(commentDeleteDto.commentId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_COMMENT_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_COMMENT_NOT_FOUND));
 
 		boolean isUserComment = isUserComment(comment, authUser.email());
 		boolean isCommentInUserPost = isCommentInUserPost(commentDeleteDto.postId(), authUser.email());
 
-		if(!isUserComment && !isCommentInUserPost) {
-			throw new UnauthorizedException(ErrorCode.DELETE_COMMENT_FORBIDDEN_EXCEPTION);
+		if (!isUserComment && !isCommentInUserPost) {
+			throw new UnauthorizedException(ErrorCode.FAIL_COMMENT_DELETION_FORBIDDEN);
 		}
 
 		commentRepository.delete(comment);
@@ -90,7 +89,7 @@ public class CommentService {
 
 	private boolean isCommentInUserPost(Long postId, String userEmail) {
 		Post post = postRepository.findById(postId)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
 
 		return post.getUser().getEmail().equals(userEmail);
 	}

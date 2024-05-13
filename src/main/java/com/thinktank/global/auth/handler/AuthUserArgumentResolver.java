@@ -51,7 +51,7 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
 		}
 
 		if (isAuthRequired) {
-			throw new UnauthorizedException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION);
+			throw new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED);
 		}
 
 		return null;

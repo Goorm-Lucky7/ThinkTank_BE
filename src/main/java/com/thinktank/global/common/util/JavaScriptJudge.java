@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JavaScriptJudge implements JudgeUtil {
+
 	@Override
 	public void executeCode(List<CustomTestCase> testCases, String code) {
 		final String uniqueDirName = UUID.randomUUID().toString();
@@ -31,7 +32,7 @@ public class JavaScriptJudge implements JudgeUtil {
 			createFile(directory, code, testCases.size());
 			runTestCases(testCases, directory);
 		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_INVALID_REQUEST);
 		} finally {
 			delete(directory);
 		}
@@ -63,19 +64,19 @@ public class JavaScriptJudge implements JudgeUtil {
 
 	private static void validateTimeOut(long currentTime, long startTime) {
 		if (currentTime - startTime > EXECUTION_TIME_LIMIT) {
-			throw new BadRequestException(ErrorCode.FAIL_TIME_OUT);
+			throw new BadRequestException(ErrorCode.FAIL_PROCESSING_TIME_EXCEEDED);
 		}
 	}
 
 	private static void validateJudge(String testCase, String output) {
 		if (!output.equals(testCase)) {
-			throw new BadRequestException(ErrorCode.FAIL_TESTCASES);
+			throw new BadRequestException(ErrorCode.FAIL_TESTCASE_NOT_PASSED);
 		}
 	}
 
 	private void validateExist(File tempDir) {
 		if (!tempDir.mkdirs()) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_INVALID_REQUEST);
 		}
 	}
 
@@ -86,7 +87,7 @@ public class JavaScriptJudge implements JudgeUtil {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
 			writer.write(codeWithLoop);
 		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_INVALID_REQUEST);
 		}
 	}
 

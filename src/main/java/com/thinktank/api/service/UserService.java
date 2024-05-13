@@ -14,6 +14,7 @@ import com.thinktank.api.repository.ProfileImageRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
+import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
@@ -76,12 +77,12 @@ public class UserService {
 
 	private ProfileImage findProfileImageByEmail(String email) {
 		return profileImageRepository.findByUserEmail(email)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_IMAGE_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_IMAGE_NOT_FOUND));
 	}
 
 	private User findUserByEmail(String email) {
 		return userRepository.findByEmail(email)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
 	}
 
 	private void validateEmailNotExists(String email) {
@@ -98,7 +99,7 @@ public class UserService {
 
 	private void validatePasswordEquality(String rawPassword, String checkPassword) {
 		if (!rawPassword.equals(checkPassword)) {
-			throw new BadRequestException(ErrorCode.FAIL_WRONG_PASSWORD);
+			throw new BadRequestException(ErrorCode.FAIL_INCORRECT_PASSWORD);
 		}
 	}
 }
