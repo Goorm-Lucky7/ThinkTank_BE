@@ -2,7 +2,7 @@ package com.thinktank.api.entity;
 
 import static com.thinktank.global.common.util.GlobalConstant.*;
 
-import com.thinktank.api.dto.profileImage.request.ProfileImageReqDto;
+import com.thinktank.api.dto.user.request.UserUpdateDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -58,9 +58,9 @@ public class ProfileImage {
 			.build();
 	}
 
-	public void updateProfileImage(ProfileImageReqDto profileImageReqDto) {
-		this.fileName = profileImageReqDto.fileName();
-		this.fileUrl = profileImageReqDto.fileUrl();
-		this.originalFileName = profileImageReqDto.originalFileName();
+	public void updateProfileImage(UserUpdateDto userUpdateDto) {
+		this.fileName = userUpdateDto.fileName();
+		this.fileUrl = userUpdateDto.fileUrl();
+		this.originalFileName = userUpdateDto.originalFileName();
 	}
 }
