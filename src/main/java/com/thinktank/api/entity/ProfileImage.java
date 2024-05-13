@@ -63,10 +63,4 @@ public class ProfileImage {
 		this.fileUrl = profileImageReqDto.fileUrl();
 		this.originalFileName = profileImageReqDto.originalFileName();
 	}
-
-	public void updateProfileImageToDefault() {
-		this.fileName = DEFAULT_FILE_NAME;
-		this.fileUrl = DEFAULT_FILE_URL;
-		this.originalFileName = DEFAULT_FILE_NAME;
-	}
 }
