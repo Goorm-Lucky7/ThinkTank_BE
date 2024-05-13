@@ -67,7 +67,7 @@ public class PostService {
 		final Post post = Post.create(postCreateDto, user);
 		final List<CustomTestCase> customTestCases = postCreateDto.testCases();
 
-		validateJudge(customTestCases, postCreateDto.answer(), postCreateDto.language());
+		// validateJudge(customTestCases, postCreateDto.answer(), postCreateDto.language());
 
 		final List<TestCase> testCases = customTestCases.stream()
 			.map(customTestCase -> TestCase.createTestCase(customTestCase, post))
