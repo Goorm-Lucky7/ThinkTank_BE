@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.thinktank.api.dto.page.response.PageInfoDto;
+import com.thinktank.api.dto.page.response.PageInfo;
 import com.thinktank.api.dto.post.request.PostCreateDto;
 import com.thinktank.api.dto.post.request.PostDeleteDto;
 import com.thinktank.api.dto.post.response.PagePostResponseDto;
@@ -86,7 +86,7 @@ public class PostService {
 		List<PostsResponseDto> posts = postPage.getContent().stream()
 			.map(post -> toPost(post, profileImage, optionalUser.map(User::getId).orElse(null)))
 			.toList();
-		PageInfoDto pageInfo = new PageInfoDto(
+		PageInfo pageInfo = new PageInfo(
 			postPage.getNumber(),
 			postPage.isLast()
 		);

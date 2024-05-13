@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.thinktank.api.dto.page.response.PageInfoDto;
+import com.thinktank.api.dto.page.response.PageInfo;
 import com.thinktank.api.dto.post.response.PagePostProfileResponseDto;
 import com.thinktank.api.dto.post.response.PostProfileResponseDto;
 import com.thinktank.api.dto.post.response.PostResponseDto;
@@ -56,7 +56,7 @@ public class UserPostService {
 		String profileImage = null;
 		List<? extends PostResponseDto> posts = processProblemType(value, userId, loginUserId);
 		UserProfileResDto user = toUser(userId, profileImage);
-		PageInfoDto pageInfo = new PageInfoDto(
+		PageInfo pageInfo = new PageInfo(
 			postsWithProfile.getNumber(),
 			postsWithProfile.isLast()
 		);
