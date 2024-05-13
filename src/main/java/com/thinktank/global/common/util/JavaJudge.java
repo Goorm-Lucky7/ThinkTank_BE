@@ -36,7 +36,7 @@ public class JavaJudge implements JudgeUtil {
 			throw new BadRequestException(ErrorCode.BAD_REQUEST);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new BadRequestException(ErrorCode.BAD_REQUEST_TIME_OUT);
+			throw new BadRequestException(ErrorCode.FAIL_TIME_OUT);
 		} finally {
 			delete(directory);
 		}
@@ -98,19 +98,19 @@ public class JavaJudge implements JudgeUtil {
 
 	private void validateCompile(Process compileProcess) throws InterruptedException {
 		if (compileProcess.waitFor() != ZERO) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST_COMPILE_ERROR);
+			throw new BadRequestException(ErrorCode.FAIL_COMPILE_ERROR);
 		}
 	}
 
 	private static void validateTimeOut(long currentTime, long startTime) {
 		if (currentTime - startTime > EXECUTION_TIME_LIMIT) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST_TIME_OUT);
+			throw new BadRequestException(ErrorCode.FAIL_TIME_OUT);
 		}
 	}
 
 	private static void validateJudge(String testCase, String output) {
 		if (!output.equals(testCase)) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST_FAIL);
+			throw new BadRequestException(ErrorCode.FAIL_TESTCASES);
 		}
 	}
 
