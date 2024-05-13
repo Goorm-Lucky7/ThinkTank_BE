@@ -16,10 +16,9 @@ import com.thinktank.api.dto.auth.TokenReqDto;
 import com.thinktank.api.dto.auth.TokenResDto;
 import com.thinktank.api.dto.user.request.LoginReqDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
-import com.thinktank.api.dto.user.request.UserDeleteDto;
 import com.thinktank.api.dto.user.request.UserUpdateDto;
 import com.thinktank.api.dto.user.response.LoginResDto;
-import com.thinktank.api.dto.user.response.UserResDto;
+import com.thinktank.api.dto.user.response.UserProfileResDto;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.UserService;
 import com.thinktank.api.service.auth.AuthenticationService;
@@ -59,7 +58,7 @@ public class UserController {
 
 	@GetMapping("/mypage/users")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<UserResDto> getOwnProfileDetails(@Auth AuthUser authUser) {
+	public ResponseEntity<UserProfileResDto> getOwnProfileDetails(@Auth AuthUser authUser) {
 		return ResponseEntity.ok(userService.getOwnProfileDetails(authUser));
 	}
 
@@ -72,11 +71,10 @@ public class UserController {
 		return ResponseEntity.ok("OK");
 	}
 
-	@DeleteMapping
+	@DeleteMapping("/mypage/users")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> removeUser(@Auth AuthUser authUser,
-		@RequestBody @Validated UserDeleteDto userDeleteDto) {
-		userService.removeUser(authUser, userDeleteDto);
+	public ResponseEntity<String> removeUser(@Auth AuthUser authUser) {
+		userService.removeUser(authUser);
 		return ResponseEntity.ok("OK");
 	}
 }
