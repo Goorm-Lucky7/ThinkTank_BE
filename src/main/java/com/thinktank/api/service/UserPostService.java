@@ -120,8 +120,10 @@ public class UserPostService {
 		return new UserProfileResDto(
 			user.getEmail(),
 			user.getNickname(),
-			profileImage,
-			user.getIntroduce()
+			user.getGithub(),
+			user.getBlog(),
+			user.getIntroduce(),
+			profileImage
 		);
 	}
 
