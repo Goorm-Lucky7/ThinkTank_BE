@@ -9,7 +9,15 @@ public record UserUpdateDto(
 	String nickname,
 
 	String github,
+
 	String blog,
-	String introduce
+
+	String introduce,
+
+	String fileName,
+
+	String fileUrl,
+
+	String originalFileName
 ) {
 }
