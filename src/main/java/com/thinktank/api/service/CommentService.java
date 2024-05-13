@@ -14,7 +14,7 @@ import com.thinktank.api.dto.comment.request.CommentDeleteDto;
 import com.thinktank.api.dto.comment.response.CommentResponseDto;
 import com.thinktank.api.dto.comment.response.CommentUserResponseDto;
 import com.thinktank.api.dto.comment.response.CommentsResponseDto;
-import com.thinktank.api.dto.page.response.PageInfoDto;
+import com.thinktank.api.dto.page.response.PageInfo;
 import com.thinktank.api.entity.Comment;
 import com.thinktank.api.entity.Post;
 import com.thinktank.api.entity.User;
@@ -64,9 +64,9 @@ public class CommentService {
 			))
 			.collect(Collectors.toList());
 
-		PageInfoDto pageInfoDto = new PageInfoDto(pageIndex, !page.hasNext());
+		PageInfo pageInfo = new PageInfo(pageIndex, !page.hasNext());
 
-		return new CommentsResponseDto(postId, comments, pageInfoDto);
+		return new CommentsResponseDto(postId, comments, pageInfo);
 	}
 
 	@Transactional
@@ -92,7 +92,6 @@ public class CommentService {
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
 
-		//return post.getUser().getEmail.equals(userEmail);
-		return true;
+		return post.getUser().getEmail().equals(userEmail);
 	}
 }
