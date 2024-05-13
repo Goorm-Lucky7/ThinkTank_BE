@@ -13,7 +13,6 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.auth.JwtProviderService;
 import com.thinktank.global.auth.AuthorizationThreadLocal;
-import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
@@ -43,11 +42,10 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 		@NotNull HttpServletResponse response,
 		@NotNull FilterChain filterChain
 	) {
+		String requestURI = request.getRequestURI();
 		String accessToken = jwtProviderService.extractToken(ACCESS_TOKEN_HEADER, request);
 
 		try {
-			String requestURI = request.getRequestURI();
-
 			if (!jwtProviderService.isUsable(accessToken) || "/api/reissue".equals(requestURI)) {
 				if ("/api/reissue".equals(requestURI)) {
 					filterChain.doFilter(request, response);
