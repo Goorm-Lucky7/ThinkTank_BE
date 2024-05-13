@@ -14,10 +14,6 @@ public record UserUpdateDto(
 
 	String introduce,
 
-	String fileName,
-
-	String fileUrl,
-
-	String originalFileName
+	String profileImage
 ) {
 }
