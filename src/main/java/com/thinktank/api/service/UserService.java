@@ -29,8 +29,6 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final ProfileImageRepository profileImageRepository;
 
-	private final UserProfileService userProfileService;
-
 	@Transactional
 	public void signUp(SignUpDto signUpDto) {
 		validateEmailNotExists(signUpDto.email());
@@ -39,10 +37,10 @@ public class UserService {
 
 		final String encodedPassword = passwordEncoder.encode(signUpDto.password());
 		final User user = User.signup(signUpDto, encodedPassword);
+		final ProfileImage profileImage = ProfileImage.createDefaultForUser(user);
 
 		userRepository.save(user);
-
-		userProfileService.createProfileImage(user);
+		profileImageRepository.save(profileImage);
 	}
 
 	public UserResDto getOwnProfileDetails(AuthUser authUser) {
@@ -55,9 +53,12 @@ public class UserService {
 	@Transactional
 	public void updateUserDetails(AuthUser authUser, UserUpdateDto userUpdateDto) {
 		final User user = findUserByEmail(authUser.email());
-
 		validateNicknameNotExists(userUpdateDto.nickname());
+
+		final ProfileImage profileImage = findProfileImageByEmail(user.getEmail());
+
 		user.updateUserProfile(userUpdateDto);
+		profileImage.updateProfileImage(userUpdateDto);
 	}
 
 	@Transactional
@@ -67,8 +68,8 @@ public class UserService {
 
 		final ProfileImage profileImage = findProfileImageByEmail(user.getEmail());
 
-		profileImageRepository.delete(profileImage);
 		userRepository.delete(user);
+		profileImageRepository.delete(profileImage);
 	}
 
 	private UserResDto convertToUserResDto(User user, ProfileImage profileImage) {
