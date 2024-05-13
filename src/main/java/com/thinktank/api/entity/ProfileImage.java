@@ -1,8 +1,6 @@
 package com.thinktank.api.entity;
 
-import static com.thinktank.global.common.util.GlobalConstant.*;
-
-import com.thinktank.api.dto.profileImage.request.ProfileImageReqDto;
+import com.thinktank.api.dto.user.request.UserUpdateDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,7 +18,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "tbl_profile_image")
+@Table(name = "tbl_profile_images")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProfileImage {
 	@Id
@@ -28,45 +26,27 @@ public class ProfileImage {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "file_name")
-	private String fileName;
-
-	@Column(name = "file_url")
-	private String fileUrl;
-
-	@Column(name = "original_file_name")
-	private String originalFileName;
+	@Column(name = "profile_image")
+	private String profileImage;
 
 	@OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "user_id")
 	private User user;
 
 	@Builder
-	private ProfileImage(String fileName, String fileUrl, String originalFileName, User user) {
-		this.fileName = fileName;
-		this.fileUrl = fileUrl;
-		this.originalFileName = originalFileName;
+	public ProfileImage(String profileImage, User user) {
+		this.profileImage = profileImage;
 		this.user = user;
 	}
 
 	public static ProfileImage createDefaultForUser(User user) {
 		return ProfileImage.builder()
-			.fileName(DEFAULT_FILE_NAME)
-			.fileUrl(DEFAULT_FILE_URL)
-			.originalFileName(DEFAULT_FILE_NAME)
+			.profileImage(null)
 			.user(user)
 			.build();
 	}
 
-	public void updateProfileImage(ProfileImageReqDto profileImageReqDto) {
-		this.fileName = profileImageReqDto.fileName();
-		this.fileUrl = profileImageReqDto.fileUrl();
-		this.originalFileName = profileImageReqDto.originalFileName();
-	}
-
-	public void updateProfileImageToDefault() {
-		this.fileName = DEFAULT_FILE_NAME;
-		this.fileUrl = DEFAULT_FILE_URL;
-		this.originalFileName = DEFAULT_FILE_NAME;
+	public void updateProfileImage(UserUpdateDto userUpdateDto) {
+		this.profileImage = userUpdateDto.profileImage();
 	}
 }

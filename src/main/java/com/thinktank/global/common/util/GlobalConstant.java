@@ -11,7 +11,5 @@ public class GlobalConstant {
 	public static final String JAVASCRIPT_CLASS_NAME = "script.js";
 	public static final int ZERO = 0;
 	public static final String BLANK = " ";
-	public static final String DEFAULT_FILE_NAME = "default";
-	public static final String DEFAULT_FILE_URL = "https://image/default.png";
 	public static final int THOUSAND = 1000;
 }

@@ -9,7 +9,11 @@ public record UserUpdateDto(
 	String nickname,
 
 	String github,
+
 	String blog,
-	String introduce
+
+	String introduce,
+
+	String profileImage
 ) {
 }
