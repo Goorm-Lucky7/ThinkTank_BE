@@ -28,7 +28,7 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: 1234
       SPRING_JWT_SECRET_ACCESS_KEY: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
-      SPRING_JWT_ACCESS_EXPIRE: 300_000
+      SPRING_JWT_ACCESS_EXPIRE: 86400000
     networks:
       - thinktank-mysql-net
 networks:
