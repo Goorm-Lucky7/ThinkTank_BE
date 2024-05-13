@@ -1,10 +1,11 @@
 package com.thinktank.global.auth.handler;
 
-import static com.thinktank.global.auth.AuthorizationThreadLocal.*;
-
 import java.util.Objects;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -12,6 +13,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.global.auth.annotation.Auth;
+import com.thinktank.global.error.exception.UnauthorizedException;
+import com.thinktank.global.error.model.ErrorCode;
 
 import jakarta.annotation.Nullable;
 
@@ -25,7 +28,32 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Override
 	public Object resolveArgument(@Nullable MethodParameter parameter, ModelAndViewContainer mavContainer,
-		@Nullable NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-		return getAuthUser();
+		@Nullable NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+
+		Auth auth = Objects.requireNonNull(parameter).getParameterAnnotation(Auth.class);
+		boolean isAuthRequired = Objects.requireNonNull(auth).required();
+
+		try {
+			return getAuthUser(isAuthRequired);
+		} catch (UnauthorizedException e) {
+			if (!isAuthRequired) {
+				return null;
+			}
+			throw e;
+		}
+	}
+
+	private AuthUser getAuthUser(boolean isAuthRequired) throws UnauthorizedException {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
+			return (AuthUser)authentication.getPrincipal();
+		}
+
+		if (isAuthRequired) {
+			throw new UnauthorizedException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION);
+		}
+
+		return null;
 	}
 }
