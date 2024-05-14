@@ -102,7 +102,6 @@ public class JwtProviderService {
 			log.warn("====== TOKEN EXPIRED ======");
 		} catch (IllegalArgumentException e) {
 			log.warn("====== EMPTIED TOKEN ======");
-			throw new NotFoundException(ErrorCode.FAIL_TOKEN_NOT_FOUND);
 		} catch (Exception e) {
 			log.warn("====== INVALID TOKEN ======");
 			throw new UnauthorizedException(ErrorCode.FAIL_INVALID_TOKEN);

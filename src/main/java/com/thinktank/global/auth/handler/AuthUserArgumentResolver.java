@@ -12,12 +12,15 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.thinktank.api.entity.auth.AuthUser;
+import com.thinktank.global.auth.AuthorizationThreadLocal;
 import com.thinktank.global.auth.annotation.Auth;
 import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import jakarta.annotation.Nullable;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Override
@@ -44,10 +47,14 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	private AuthUser getAuthUser(boolean isAuthRequired) throws UnauthorizedException {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		AuthUser authUser = AuthorizationThreadLocal.getAuthUser();
+		if (authUser != null) {
+			return authUser;
+		}
 
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-			return (AuthUser)authentication.getPrincipal();
+			return (AuthUser) authentication.getPrincipal();
 		}
 
 		if (isAuthRequired) {

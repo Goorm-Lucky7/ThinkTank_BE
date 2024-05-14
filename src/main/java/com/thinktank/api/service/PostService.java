@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +22,7 @@ import com.thinktank.api.dto.user.response.SimpleUserResDto;
 import com.thinktank.api.entity.Category;
 import com.thinktank.api.entity.Language;
 import com.thinktank.api.entity.Post;
+import com.thinktank.api.entity.ProfileImage;
 import com.thinktank.api.entity.TestCase;
 import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.UserLike;
@@ -30,6 +30,7 @@ import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.CommentRepository;
 import com.thinktank.api.repository.LikeRepository;
 import com.thinktank.api.repository.PostRepository;
+import com.thinktank.api.repository.ProfileImageRepository;
 import com.thinktank.api.repository.TestCaseRepository;
 import com.thinktank.api.repository.UserCodeRepository;
 import com.thinktank.api.repository.UserLikeRepository;
@@ -56,11 +57,11 @@ public class PostService {
 	private final TestCaseRepository testCaseRepository;
 	private final UserLikeRepository userLikeRepository;
 	private final UserCodeRepository userCodeRepository;
+	private final ProfileImageRepository profileImageRepository;
 	private final UserLikeService userLikeService;
 
 	public void createPost(PostCreateDto postCreateDto, AuthUser authUser) {
-		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
+		final User user = findUserByEmail(authUser.email());
 
 		validateCategory(postCreateDto.category());
 		validateLanguage(postCreateDto.language());
@@ -68,7 +69,7 @@ public class PostService {
 		final Post post = Post.create(postCreateDto, user);
 		final List<CustomTestCase> customTestCases = postCreateDto.testCases();
 
-		// validateJudge(customTestCases, postCreateDto.answer(), postCreateDto.language());
+		validateJudge(customTestCases, postCreateDto.code(), postCreateDto.language());
 
 		final List<TestCase> testCases = customTestCases.stream()
 			.map(customTestCase -> TestCase.createTestCase(customTestCase, post))
@@ -79,42 +80,36 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public PagePostResponseDto getAllPosts(int page, int size, Long userId) {
-		Optional<User> optionalUser = userId != null ? userRepository.findById(userId) : Optional.empty();
-		Pageable pageable = PageRequest.of(page, size);
-		Page<Post> postPage = postRepository.findAll(pageable);
-		String profileImage = null;
-		List<PostsResponseDto> posts = postPage.getContent().stream()
-			.map(post -> toPost(post, profileImage, optionalUser.map(User::getId).orElse(null)))
-			.toList();
-		PageInfo pageInfo = new PageInfo(
-			postPage.getNumber(),
-			postPage.isLast()
-		);
+	public PagePostResponseDto getAllPosts(int page, int size, AuthUser authUser) {
+		Page<Post> postPage = postRepository.findAll(PageRequest.of(page, size));
 
-		return new PagePostResponseDto(posts, pageInfo);
+		List<PostsResponseDto> postsResponseDtoList = convertPostListToDtoList(postPage.getContent(), authUser);
+
+		PageInfo pageInfo = new PageInfo(postPage.getNumber(), postPage.isLast());
+
+		return new PagePostResponseDto(postsResponseDtoList, pageInfo);
 	}
 
 	@Transactional(readOnly = true)
-	public PostDetailResponseDto getPostDetail(Long postId, Long userId) {
-		Optional<User> optionalUser = userId != null ? userRepository.findById(userId) : Optional.empty();
+	public PostDetailResponseDto getPostDetail(Long postId, AuthUser authUser) {
+		Optional<AuthUser> optionalAuthUser = Optional.ofNullable(authUser);
 
-		Post post = postRepository.findById(postId)
+		String userEmail = optionalAuthUser.map(AuthUser::email).orElse(null);
+
+		final Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
+
 		List<CustomTestCase> testCases = testCaseRepository.findByPostId(postId);
 
-		return mapToPostDetailResponseDto(post, testCases, optionalUser.map(User::getId).orElse(null));
+		return mapToPostDetailResponseDto(post, testCases, userEmail);
 	}
 
 	public void deletePost(PostDeleteDto postDeleteDto, AuthUser authUser) {
-		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
-		Post post = postRepository.findById(postDeleteDto.postId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
+		final User user = findUserByEmail(authUser.email());
+		final Post post = findPostById(postDeleteDto.postId());
 
-		if (!Objects.equals(user.getId(), post.getUser().getId())) {
-			throw new BadRequestException(ErrorCode.FAIL_POST_DELETION_FORBIDDEN);
-		}
+		validateUserOwnership(user, post);
+
 		userCodeRepository.deleteByPostId(postDeleteDto.postId());
 		commentRepository.deleteByPostId(postDeleteDto.postId());
 		testCaseRepository.deleteByPostId(postDeleteDto.postId());
@@ -124,35 +119,41 @@ public class PostService {
 		postRepository.delete(post);
 	}
 
-	private PostDetailResponseDto mapToPostDetailResponseDto(Post post, List<CustomTestCase> testCases, Long userId) {
-		int commentCount = commentRepository.countCommentsByPost(post);
-		int likeCount = likeRepository.findLikeCountByPost(post);
-		int answerCount = userCodeRepository.countUserCodeByPost(post);
-		boolean likeType = isPostLikedByUser(userId, post);
-		return new PostDetailResponseDto(
-			post.getId(),
-			post.getTitle(),
-			post.getCategory().toString(),
-			post.getCreatedAt(),
-			post.getContent(),
-			testCases,
-			post.getCondition(),
-			post.getUser().getId().equals(userId),
-			likeCount,
-			commentCount,
-			answerCount,
-			post.getLanguage().toString(),
-			likeType,
-			post.getAnswer()
-		);
+	private User findUserByEmail(String email) {
+		return userRepository.findByEmail(email)
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
 	}
 
-	private PostsResponseDto toPost(Post post, String profileImage, Long userId) {
-		SimpleUserResDto user = toUser(post.getUser(), profileImage);
-		int commentCount = commentRepository.countCommentsByPost(post);
-		int likeCount = likeRepository.findLikeCountByPost(post);
-		int answerCount = userCodeRepository.countUserCodeByPost(post);
-		boolean likeType = isPostLikedByUser(userId, post);
+	private Post findPostById(Long postId) {
+		return postRepository.findById(postId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
+	}
+
+	private List<PostsResponseDto> convertPostListToDtoList(List<Post> posts, AuthUser authUser) {
+		if (authUser == null) {
+			return posts.stream()
+				.map(post -> convertPostToResponseDto(post, null))
+				.toList();
+		}
+
+		return posts.stream()
+			.map(post -> convertPostToResponseDto(post, authUser.email()))
+			.toList();
+	}
+
+	private PostsResponseDto convertPostToResponseDto(Post post, String userEmail) {
+		final int commentCount = commentRepository.countCommentsByPost(post);
+		final int likeCount = likeRepository.findLikeCountByPost(post);
+		final int codeCount = userCodeRepository.countUserCodeByPost(post);
+		final boolean likeType = userLikeService.isPostLikedByUser(userEmail, post.getId());
+
+		SimpleUserResDto simpleUserResDto = createSimpleUserResDto(post);
+
+		return createPostsResponseDto(post, commentCount, likeCount, codeCount, likeType, simpleUserResDto);
+	}
+
+	private PostsResponseDto createPostsResponseDto(Post post, int commentCount, int likeCount, int codeCount,
+		boolean likeType, SimpleUserResDto simpleUserResDto) {
 
 		return new PostsResponseDto(
 			post.getId(),
@@ -163,21 +164,44 @@ public class PostService {
 			post.getContent(),
 			commentCount,
 			likeCount,
-			answerCount,
+			codeCount,
 			likeType,
-			user
+			simpleUserResDto);
+	}
+
+	private PostDetailResponseDto mapToPostDetailResponseDto(Post post, List<CustomTestCase> testCases,
+		String userEmail) {
+		int commentCount = commentRepository.countCommentsByPost(post);
+		int likeCount = likeRepository.findLikeCountByPost(post);
+		int codeCount = userCodeRepository.countUserCodeByPost(post);
+		boolean likeType = userLikeService.isPostLikedByUser(userEmail, post.getId());
+		boolean isOwner = post.getUser().getEmail().equals(userEmail);
+
+		return new PostDetailResponseDto(
+			post.getId(),
+			post.getTitle(),
+			post.getCategory().toString(),
+			post.getCreatedAt(),
+			post.getContent(),
+			testCases,
+			post.getCondition(),
+			isOwner,
+			likeCount,
+			commentCount,
+			codeCount,
+			post.getLanguage().toString(),
+			likeType,
+			post.getCode()
 		);
 	}
 
-	private SimpleUserResDto toUser(User user, String profileImage) {
-		return new SimpleUserResDto(
-			user.getNickname(),
-			profileImage
-		);
-	}
+	private SimpleUserResDto createSimpleUserResDto(Post post) {
+		final User user = findUserByEmail(post.getUser().getEmail());
 
-	private boolean isPostLikedByUser(Long userId, Post post) {
-		return userLikeService.isPostLikedByUser(userId, post.getId());
+		final ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_IMAGE_NOT_FOUND));
+
+		return new SimpleUserResDto(user.getNickname(), profileImage.getProfileImage());
 	}
 
 	private void validateCategory(String category) {
@@ -192,6 +216,12 @@ public class PostService {
 		}
 	}
 
+	private void validateUserOwnership(User user, Post post) {
+		if (!Objects.equals(user.getId(), post.getUser().getId())) {
+			throw new BadRequestException(ErrorCode.FAIL_POST_DELETION_FORBIDDEN);
+		}
+	}
+
 	private void validateJudge(List<CustomTestCase> testCases, String code, String language) {
 		final JudgeUtil judgeService;
 
@@ -200,7 +230,7 @@ public class PostService {
 		} else if (language.equals("javascript")) {
 			judgeService = new JavaScriptJudge();
 		} else {
-			throw new BadRequestException(ErrorCode.FAIL_POST_NOT_FOUND);
+			throw new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND);
 		}
 
 		judgeService.executeCode(testCases, code);
