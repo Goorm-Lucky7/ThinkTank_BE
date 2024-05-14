@@ -49,6 +49,7 @@ public class SecurityConfig {
 			.requestMatchers("/h2-console/**")
 			.requestMatchers("/api/signup")
 			.requestMatchers("/api/login")
+			.requestMatchers("/api/reissue")
 			.requestMatchers("/api/posts/*/comments")
 			.requestMatchers("/api/users/profile");
 	}
@@ -61,7 +62,8 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(STATELESS));
 
 		httpSecurity.authorizeHttpRequests((auth) -> auth
-			.anyRequest().permitAll()
+			.requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+			.anyRequest().authenticated()
 		);
 
 		httpSecurity.addFilterBefore(
