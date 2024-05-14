@@ -25,7 +25,7 @@ public class UserPostController {
 		@RequestParam(defaultValue = "10") int size,
 		@RequestParam String value,
 		@RequestParam String email,
-		@Auth AuthUser authUser) {
+		@Auth(required = false) AuthUser authUser) {
 		PagePostProfileResponseDto profilePosts = userPostService.getProfilePosts(page, size, value, email,
 			authUser);
 		return ResponseEntity.ok(profilePosts);

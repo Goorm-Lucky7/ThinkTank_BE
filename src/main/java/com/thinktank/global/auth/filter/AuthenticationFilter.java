@@ -4,7 +4,6 @@ import static com.thinktank.global.common.util.AuthConstants.*;
 import static com.thinktank.global.common.util.GlobalConstant.*;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthenticationFilter extends OncePerRequestFilter {
 
-	private static final String PATH_API_POSTS = "/api/posts";
 	private static final String PATH_API_TOKEN_REISSUE = "/api/reissue";
 
 	private final JwtProviderService jwtProviderService;
@@ -50,18 +48,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 		String accessToken = jwtProviderService.extractToken(ACCESS_TOKEN_HEADER, request);
 
 		try {
-			if (PATH_API_POSTS.equals(requestURI) && request.getMethod().equals(HttpMethod.GET.name())) {
-				if (jwtProviderService.isUsable(accessToken)) {
-					setAuthentication(accessToken);
-				} else {
-					log.info("Unauthenticated user accessing posts");
-					AuthorizationThreadLocal.setAuthUser(null);
-				}
-				filterChain.doFilter(request, response);
-
-				return;
-			}
-
 			if (!jwtProviderService.isUsable(accessToken) || PATH_API_TOKEN_REISSUE.equals(requestURI)) {
 				if (PATH_API_TOKEN_REISSUE.equals(requestURI)) {
 					filterChain.doFilter(request, response);
@@ -91,9 +77,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			handlerExceptionResolver.resolveException(request, response, null, e);
 		} finally {
-			if (!PATH_API_POSTS.equals(requestURI)) {
-				AuthorizationThreadLocal.remove();
-			}
+			AuthorizationThreadLocal.remove();
 		}
 	}
 

@@ -49,8 +49,7 @@ public class SecurityConfig {
 			.requestMatchers("/h2-console/**")
 			.requestMatchers("/api/signup")
 			.requestMatchers("/api/login")
-			.requestMatchers("/api/posts/*/comments")
-			.requestMatchers("/api/users/profile");
+			.requestMatchers("/api/reissue");
 	}
 
 	@Bean
@@ -61,7 +60,10 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(STATELESS));
 
 		httpSecurity.authorizeHttpRequests((auth) -> auth
-			.anyRequest().permitAll()
+			.requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+			.requestMatchers(HttpMethod.GET, "/api/users/profile").permitAll()
+			.requestMatchers(HttpMethod.GET, "/api/posts/*/comments").permitAll()
+			.anyRequest().authenticated()
 		);
 
 		httpSecurity.addFilterBefore(
