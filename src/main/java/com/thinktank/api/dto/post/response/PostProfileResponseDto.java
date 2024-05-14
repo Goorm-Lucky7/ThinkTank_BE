@@ -1,14 +1,18 @@
 package com.thinktank.api.dto.post.response;
 
+import java.time.LocalDateTime;
+
 public record PostProfileResponseDto(
 	Long postId,
 	Long postNumber,
 	String title,
 	String category,
+	LocalDateTime createdAt,
+	String content,
 	boolean likeType,
 	int commentCount,
 	int likeCount,
-	int answerCount
+	int codeCount
 ) implements PostResponseDto {
 	@Override
 	public Long getPostId() {
@@ -25,4 +29,3 @@ public record PostProfileResponseDto(
 		return title;
 	}
 }
-

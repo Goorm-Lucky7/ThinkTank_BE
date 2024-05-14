@@ -13,7 +13,7 @@ public record PostsResponseDto(
 	String content,
 	int commentCount,
 	int likeCount,
-	int answerCount,
+	int codeCount,
 	boolean likeType,
 	SimpleUserResDto user
 ) {

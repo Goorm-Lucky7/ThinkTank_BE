@@ -52,9 +52,9 @@ public class Post extends BaseTimeEntity {
 	@ColumnDefault("0")
 	private int commentCount = 0;
 
-	@Column(name = "answer_count", nullable = false)
+	@Column(name = "code_count", nullable = false)
 	@ColumnDefault("0")
-	private int answerCount = 0;
+	private int codeCount = 0;
 
 	@Column(name = "code", nullable = false)
 	private String code;
