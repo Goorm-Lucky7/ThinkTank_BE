@@ -31,34 +31,22 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Override
 	public Object resolveArgument(@Nullable MethodParameter parameter, ModelAndViewContainer mavContainer,
-		@Nullable NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-
+		@Nullable NativeWebRequest webRequest, WebDataBinderFactory binderFactory
+	) {
 		Auth auth = Objects.requireNonNull(parameter).getParameterAnnotation(Auth.class);
-		boolean isAuthRequired = Objects.requireNonNull(auth).required();
 
-		try {
-			return getAuthUser(isAuthRequired);
-		} catch (UnauthorizedException e) {
-			if (!isAuthRequired) {
-				return null;
-			}
-			throw e;
-		}
+		return getAuthUser(Objects.requireNonNull(auth).required());
 	}
 
 	private AuthUser getAuthUser(boolean isAuthRequired) throws UnauthorizedException {
-		AuthUser authUser = AuthorizationThreadLocal.getAuthUser();
-		if (authUser != null) {
-			return authUser;
-		}
-
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-			return (AuthUser) authentication.getPrincipal();
+			Object principal = authentication.getPrincipal();
+			if (principal instanceof AuthUser) return (AuthUser)principal;
 		}
 
 		if (isAuthRequired) {
-			throw new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED);
+			log.info("Unauthenticated User Access.");
 		}
 
 		return null;
