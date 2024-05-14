@@ -12,10 +12,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserLikeService {
+
 	private final UserLikeRepository userLikeRepository;
 
-	public boolean isPostLikedByUser(Long userId, Long postId) {
-		UserLike userLike = userLikeRepository.findByUserIdAndLikePostId(userId, postId);
+	public boolean isPostLikedByUser(String email, Long postId) {
+		UserLike userLike = userLikeRepository.findByUserEmailAndLikePostId(email, postId);
 		return userLike != null && userLike.isCheck();
 	}
 }
