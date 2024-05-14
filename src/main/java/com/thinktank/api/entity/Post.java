@@ -56,8 +56,8 @@ public class Post extends BaseTimeEntity {
 	@ColumnDefault("0")
 	private int answerCount = 0;
 
-	@Column(name = "answer", nullable = false)
-	private String answer;
+	@Column(name = "code", nullable = false)
+	private String code;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
@@ -70,7 +70,7 @@ public class Post extends BaseTimeEntity {
 		Language language,
 		String content,
 		String condition,
-		String answer,
+		String code,
 		User user
 	) {
 		this.title = title;
@@ -78,7 +78,7 @@ public class Post extends BaseTimeEntity {
 		this.language = language;
 		this.content = content;
 		this.condition = condition;
-		this.answer = answer;
+		this.code = code;
 		this.user = user;
 	}
 
@@ -90,7 +90,7 @@ public class Post extends BaseTimeEntity {
 			.language(Language.fromValue(postCreateDto.language()))
 			.content(postCreateDto.content())
 			.condition(postCreateDto.condition())
-			.answer(postCreateDto.answer())
+			.code(postCreateDto.code())
 			.user(user)
 			.build();
 	}
