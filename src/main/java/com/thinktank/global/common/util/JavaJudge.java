@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JavaJudge implements JudgeUtil {
+
 	@Override
 	public void executeCode(List<CustomTestCase> testCases, String code) {
 		final String uniqueDirName = UUID.randomUUID().toString();
@@ -33,10 +34,10 @@ public class JavaJudge implements JudgeUtil {
 
 			startCompile(sourceFile, testCases, directory);
 		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_INVALID_REQUEST);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new BadRequestException(ErrorCode.FAIL_TIME_OUT);
+			throw new BadRequestException(ErrorCode.FAIL_PROCESSING_TIME_EXCEEDED);
 		} finally {
 			delete(directory);
 		}
@@ -90,7 +91,7 @@ public class JavaJudge implements JudgeUtil {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
 			writer.write(codeWithLoop);
 		} catch (IOException e) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_INVALID_REQUEST);
 		}
 
 		return sourceFile;
@@ -98,25 +99,25 @@ public class JavaJudge implements JudgeUtil {
 
 	private void validateCompile(Process compileProcess) throws InterruptedException {
 		if (compileProcess.waitFor() != ZERO) {
-			throw new BadRequestException(ErrorCode.FAIL_COMPILE_ERROR);
+			throw new BadRequestException(ErrorCode.FAIL_CODE_COMPILATION_ERROR);
 		}
 	}
 
 	private static void validateTimeOut(long currentTime, long startTime) {
 		if (currentTime - startTime > EXECUTION_TIME_LIMIT) {
-			throw new BadRequestException(ErrorCode.FAIL_TIME_OUT);
+			throw new BadRequestException(ErrorCode.FAIL_PROCESSING_TIME_EXCEEDED);
 		}
 	}
 
 	private static void validateJudge(String testCase, String output) {
 		if (!output.equals(testCase)) {
-			throw new BadRequestException(ErrorCode.FAIL_TESTCASES);
+			throw new BadRequestException(ErrorCode.FAIL_TESTCASE_NOT_PASSED);
 		}
 	}
 
 	private void validateExist(File tempDir) {
 		if (!tempDir.mkdirs()) {
-			throw new BadRequestException(ErrorCode.BAD_REQUEST);
+			throw new BadRequestException(ErrorCode.FAIL_INVALID_REQUEST);
 		}
 	}
 

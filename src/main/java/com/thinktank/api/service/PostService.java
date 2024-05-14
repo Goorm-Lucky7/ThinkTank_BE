@@ -39,6 +39,7 @@ import com.thinktank.global.common.util.JavaScriptJudge;
 import com.thinktank.global.common.util.JudgeUtil;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
+import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
@@ -59,7 +60,7 @@ public class PostService {
 
 	public void createPost(PostCreateDto postCreateDto, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
 
 		validateCategory(postCreateDto.category());
 		validateLanguage(postCreateDto.language());
@@ -99,7 +100,7 @@ public class PostService {
 		Optional<User> optionalUser = userId != null ? userRepository.findById(userId) : Optional.empty();
 
 		Post post = postRepository.findById(postId)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
 		List<CustomTestCase> testCases = testCaseRepository.findByPostId(postId);
 
 		return mapToPostDetailResponseDto(post, testCases, optionalUser.map(User::getId).orElse(null));
@@ -107,12 +108,12 @@ public class PostService {
 
 	public void deletePost(PostDeleteDto postDeleteDto, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
 		Post post = postRepository.findById(postDeleteDto.postId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
 
 		if (!Objects.equals(user.getId(), post.getUser().getId())) {
-			throw new BadRequestException(ErrorCode.DELETE_POST_FORBIDDEN_EXCEPTION);
+			throw new BadRequestException(ErrorCode.FAIL_POST_DELETION_FORBIDDEN);
 		}
 		userCodeRepository.deleteByPostId(postDeleteDto.postId());
 		commentRepository.deleteByPostId(postDeleteDto.postId());
@@ -181,13 +182,13 @@ public class PostService {
 
 	private void validateCategory(String category) {
 		if (!Category.isValidCategory(category)) {
-			throw new BadRequestException(ErrorCode.FAIL_INVALID_CATEGORY);
+			throw new BadRequestException(ErrorCode.FAIL_CATEGORY_NOT_FOUND);
 		}
 	}
 
 	private void validateLanguage(String language) {
 		if (!Language.isValidLanguage(language)) {
-			throw new BadRequestException(ErrorCode.FAIL_INVALID_LANGUAGE);
+			throw new BadRequestException(ErrorCode.FAIL_UNSUPPORTED_LANGUAGE);
 		}
 	}
 
@@ -199,7 +200,7 @@ public class PostService {
 		} else if (language.equals("javascript")) {
 			judgeService = new JavaScriptJudge();
 		} else {
-			throw new BadRequestException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION);
+			throw new BadRequestException(ErrorCode.FAIL_POST_NOT_FOUND);
 		}
 
 		judgeService.executeCode(testCases, code);

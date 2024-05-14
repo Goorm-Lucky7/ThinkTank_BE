@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 @RequiredArgsConstructor
 public class JudgeService {
+
 	private final PostRepository postRepository;
 	private final TestCaseRepository testCaseRepository;
 	private final UserCodeRepository userCodeRepository;
@@ -36,9 +37,9 @@ public class JudgeService {
 
 	public void judge(JudgeDto dto, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
 		final Post post = postRepository.findById(dto.postId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
 		final List<CustomTestCase> testCases = testCaseRepository.findByPost(post)
 			.stream()
 			.map(testCase -> new CustomTestCase(testCase.getExample(), testCase.getResult()))
@@ -65,7 +66,7 @@ public class JudgeService {
 		} else if (language.equals("javascript")) {
 			judgeService = new JavaScriptJudge();
 		} else {
-			throw new BadRequestException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION);
+			throw new BadRequestException(ErrorCode.FAIL_POST_NOT_FOUND);
 		}
 
 		judgeService.executeCode(testCases, code);

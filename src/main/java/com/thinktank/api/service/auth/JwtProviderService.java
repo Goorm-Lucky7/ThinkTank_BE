@@ -66,7 +66,7 @@ public class JwtProviderService {
 		final Claims claims = getClaimsByToken(accessToken);
 		final String email = claims.get(EMAIL, String.class);
 		final User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_NOT_FOUND));
 
 		return generateToken(user.getEmail(), user.getNickname());
 	}
@@ -102,10 +102,10 @@ public class JwtProviderService {
 			log.warn("====== TOKEN EXPIRED ======");
 		} catch (IllegalArgumentException e) {
 			log.warn("====== EMPTIED TOKEN ======");
-			throw new NotFoundException(ErrorCode.FAIL_NOT_TOKEN_FOUND_EXCEPTION);
+			throw new NotFoundException(ErrorCode.FAIL_TOKEN_NOT_FOUND);
 		} catch (Exception e) {
 			log.warn("====== INVALID TOKEN ======");
-			throw new NotFoundException(ErrorCode.FAIL_INVALID_TOKEN_EXCEPTION);
+			throw new UnauthorizedException(ErrorCode.FAIL_INVALID_TOKEN);
 		}
 
 		return false;
@@ -130,7 +130,7 @@ public class JwtProviderService {
 		} catch (ExpiredJwtException e) {
 			return e.getClaims();
 		} catch (Exception e) {
-			throw new UnauthorizedException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
+			throw new UnauthorizedException(ErrorCode.FAIL_TOKEN_EXPIRED);
 		}
 	}
 }

@@ -62,7 +62,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 				return;
 			}
 
-			throw new UnauthorizedException(ErrorCode.FAIL_TOKEN_EXPIRED_EXCEPTION);
+			throw new UnauthorizedException(ErrorCode.FAIL_TOKEN_EXPIRED);
 		} catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			handlerExceptionResolver.resolveException(request, response, null, e);

@@ -52,12 +52,12 @@ public class AuthenticationService {
 
 	private User findByUserEmail(String email) {
 		return userRepository.findByEmail(email)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_NOT_FOUND));
 	}
 
 	private void validatePasswordMatch(String password, String encodedPassword) {
 		if (!passwordEncoder.matches(password, encodedPassword)) {
-			throw new BadRequestException(ErrorCode.FAIL_WRONG_PASSWORD);
+			throw new BadRequestException(ErrorCode.FAIL_INCORRECT_PASSWORD);
 		}
 	}
 }

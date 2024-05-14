@@ -15,6 +15,7 @@ import com.thinktank.api.repository.UserLikeRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
+import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional
 public class LikeService {
+
 	private final PostRepository postRepository;
 	private final LikeRepository likeRepository;
 	private final UserLikeRepository userLikeRepository;
@@ -30,9 +32,9 @@ public class LikeService {
 
 	public void handleLike(LikeCreateDto likeCreateDto, AuthUser authUser) {
 		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_UNAUTHORIZED_EXCEPTION));
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
 		Post post = postRepository.findById(likeCreateDto.postId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
 
 		Like like = likeRepository.findByPost(post).orElse(null);
 
@@ -48,7 +50,7 @@ public class LikeService {
 
 		if (isUserLiked) {
 			UserLike userLike = userLikeRepository.findByLikeIdAndUserId(like.getId(), user.getId())
-				.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_LIKE_FOUND_EXCEPTION));
+				.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_LIKE_NOT_FOUND));
 			if (userLike.isCheck()) {
 				cancelLike(like, user);
 			} else {
@@ -66,7 +68,7 @@ public class LikeService {
 
 	private void createLike(LikeCreateDto likeCreateDto, User user) {
 		Post post = postRepository.findById(likeCreateDto.postId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_POST_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
 		Like newLike = Like.builder()
 			.post(post)
 			.build();
@@ -78,14 +80,14 @@ public class LikeService {
 		like.decrementLikeCount();
 		likeRepository.save(like);
 		UserLike userLike = userLikeRepository.findByLikeIdAndUserId(like.getId(), user.getId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_LIKE_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_LIKE_NOT_FOUND));
 		userLike.deactivateLike();
 		userLikeRepository.save(userLike);
 	}
 
 	private void saveUserLike(Like like, User user) {
 		User userStatus = userRepository.findById(user.getId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_NOT_USER_FOUND_EXCEPTION));
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_NOT_FOUND));
 		UserLike userLike = UserLike.builder()
 			.user(userStatus)
 			.like(like)
