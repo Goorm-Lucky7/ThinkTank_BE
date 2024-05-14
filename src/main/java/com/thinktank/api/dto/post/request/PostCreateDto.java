@@ -28,6 +28,6 @@ public record PostCreateDto(
 	List<CustomTestCase> testCases,
 
 	@NotBlank(message = "[❎ ERROR] 정답 코드는 필수 입력값입니다.")
-	String answer
+	String code
 ) {
 }
