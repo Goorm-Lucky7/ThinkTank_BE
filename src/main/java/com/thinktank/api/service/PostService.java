@@ -92,9 +92,9 @@ public class PostService {
 
 	@Transactional(readOnly = true)
 	public PostDetailResponseDto getPostDetail(Long postId, AuthUser authUser) {
-		Optional<AuthUser> optionalAuthUser = Optional.ofNullable(authUser);
-
-		String userEmail = optionalAuthUser.map(AuthUser::email).orElse(null);
+		String userEmail = Optional.ofNullable(authUser)
+			.map(AuthUser::email)
+			.orElse(null);
 
 		final Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
