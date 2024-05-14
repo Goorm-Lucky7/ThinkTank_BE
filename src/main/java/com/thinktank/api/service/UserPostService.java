@@ -2,7 +2,6 @@ package com.thinktank.api.service;
 
 import static com.thinktank.global.common.util.GlobalConstant.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +31,7 @@ import com.thinktank.api.repository.UserCodeRepository;
 import com.thinktank.api.repository.UserLikeRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.BadRequestException;
+import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
@@ -52,81 +52,66 @@ public class UserPostService {
 
 	public PagePostProfileResponseDto getProfilePosts(int page, int size, String value, String email,
 		AuthUser authUser) {
-		Optional<AuthUser> optionalAuthUser = Optional.ofNullable(authUser);
-		String authUserEmail = optionalAuthUser.map(AuthUser::email).orElse(null);
-
-		Long userId = userRepository.findUserIdByEmail(email);
-		if (userId == null) {
-			throw new BadRequestException(ErrorCode.FAIL_USER_NOT_FOUND);
-		}
+		String userEmail = Optional.ofNullable(authUser)
+			.map(AuthUser::email)
+			.orElse(null);
+		final User user = findUserByEmail(email);
 
 		Pageable pageable = PageRequest.of(page, size);
-		Page<Post> postsWithProfile = postRepository.findAll(pageable);
+		Page<? extends PostResponseDto> postsPage = processProblemType(value, user.getEmail(), userEmail, pageable);
+		List<? extends PostResponseDto> posts = postsPage.getContent();
+		UserProfileResDto userRes = toUser(user.getEmail());
 
-		List<? extends PostResponseDto> posts = processProblemType(value, userId, authUserEmail);
-		UserProfileResDto userRes = toUser(userId);
 		PageInfo pageInfo = new PageInfo(
-			postsWithProfile.getNumber(),
-			postsWithProfile.isLast()
+			postsPage.getNumber(),
+			postsPage.isLast()
 		);
 		return new PagePostProfileResponseDto(userRes, posts, pageInfo);
 	}
 
-	public List<? extends PostResponseDto> processProblemType(String value, Long userId, String me) {
+	public Page<? extends PostResponseDto> processProblemType(String value, String email, String me,
+		Pageable pageable) {
 		ProblemType problemType = ProblemType.fromValue(value);
 		if (problemType != null) {
 			return switch (problemType) {
-				case CREATED -> processCreatedProblems(userId, me);
-				case SOLVED -> processSolvedProblems(userId);
-				case LIKED -> processLikedProblems(userId, me);
+				case CREATED -> processCreatedProblems(email, me, pageable);
+				case SOLVED -> processSolvedProblems(email, pageable);
+				case LIKED -> processLikedProblems(email, me, pageable);
 			};
 		} else {
-			throw new BadRequestException(ErrorCode.FAIL_LOGIN_REQUIRED);
+			throw new BadRequestException(ErrorCode.FAIL_INVALID_REQUEST);
 		}
 	}
 
-	private List<? extends PostResponseDto> processCreatedProblems(Long userId, String me) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_USER_NOT_FOUND));
-		List<Post> createdPosts = postRepository.findByUser(user);
-		List<PostProfileResponseDto> createdPostDtos = new ArrayList<>();
-		for (Post post : createdPosts) {
-			PostProfileResponseDto postDto = toPostNotSolved(post, me);
-			createdPostDtos.add(postDto);
-		}
-		return createdPostDtos;
+	private Page<? extends PostResponseDto> processCreatedProblems(String email, String me, Pageable pageable) {
+		final User user = findUserByEmail(email);
+		Page<Post> createdPostsPage = postRepository.findByUser(user, pageable);
+		return createdPostsPage.map(post -> toPostNotSolved(post, me));
 	}
 
-	private List<? extends PostResponseDto> processSolvedProblems(Long userId) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_USER_NOT_FOUND));
-		List<UserCode> userCodes = userCodeRepository.findByUser(user);
-		List<PostSolvedResponseDto> solvedPostDtos = new ArrayList<>();
-		for (UserCode userCode : userCodes) {
+	private Page<? extends PostResponseDto> processSolvedProblems(String email, Pageable pageable) {
+		final User user = findUserByEmail(email);
+		Page<? extends UserCode> userCodesPage = userCodeRepository.findByUser(user, pageable);
+
+		return userCodesPage.map(userCode -> {
 			Post post = userCode.getPost();
-			PostSolvedResponseDto postDto = toPostSolved(post);
-			solvedPostDtos.add(postDto);
-		}
-		return solvedPostDtos;
+			return toPostSolved(post);
+		});
 	}
 
-	private List<? extends PostResponseDto> processLikedProblems(Long userId, String me) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_USER_NOT_FOUND));
-		List<UserLike> userLikes = userLikeRepository.findByUserAndIsCheckTrue(user);
-		List<PostProfileResponseDto> likedPostDtos = new ArrayList<>();
-		for (UserLike userLike : userLikes) {
+	private Page<? extends PostResponseDto> processLikedProblems(String email, String me, Pageable pageable) {
+		final User user = findUserByEmail(email);
+		Page<UserLike> userLikesPage = userLikeRepository.findByUserAndIsCheckTrue(user, pageable);
+
+		return userLikesPage.map(userLike -> {
 			Post post = userLike.getLike().getPost();
-			PostProfileResponseDto postDto = toPostNotSolved(post, me);
-			likedPostDtos.add(postDto);
-		}
-		return likedPostDtos;
+			return toPostNotSolved(post, me);
+		});
 	}
 
-	private UserProfileResDto toUser(Long userId) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new BadRequestException(ErrorCode.FAIL_USER_NOT_FOUND));
-		String profileImage = profileImageRepository.findByUserId(userId);
+	private UserProfileResDto toUser(String email) {
+		User user = findUserByEmail(email);
+		String profileImage = profileImageRepository.findByUserId(user.getId());
 
 		return new UserProfileResDto(user.getEmail(), user.getNickname(), user.getGithub(), user.getBlog(),
 			user.getIntroduce(), profileImage
@@ -140,20 +125,22 @@ public class UserPostService {
 		boolean likeType = isPostLikedByUser(me, post);
 
 		return new PostProfileResponseDto(
-			post.getId(), post.getId() + THOUSAND, post.getTitle(), post.getCategory().toString(), likeType,
-			commentCount, likeCount, codeCount
+			post.getId(), post.getId() + THOUSAND, post.getTitle(), post.getCategory().toString(),
+			post.getCreatedAt(), post.getContent(), likeType, commentCount, likeCount, codeCount
 		);
 	}
 
 	private PostSolvedResponseDto toPostSolved(Post post) {
 		UserCode userCode = userCodeRepository.findByPostId(post.getId());
 		return new PostSolvedResponseDto(
-			post.getId(),
-			post.getId() + THOUSAND,
-			post.getLanguage().toString(),
-			post.getTitle(),
+			post.getId(), post.getId() + THOUSAND, post.getLanguage().toString(), post.getTitle(),
 			userCode.getCode()
 		);
+	}
+
+	private User findUserByEmail(String email) {
+		return userRepository.findByEmail(email)
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
 	}
 
 	private boolean isPostLikedByUser(String email, Post post) {

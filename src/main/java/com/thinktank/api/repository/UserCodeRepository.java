@@ -1,7 +1,7 @@
 package com.thinktank.api.repository;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,5 +20,5 @@ public interface UserCodeRepository extends JpaRepository<UserCode, Long> {
 
 	UserCode findByPostId(Long postId);
 
-	List<UserCode> findByUser(User user);
+	Page<UserCode> findByUser(User user, Pageable pageable);
 }
