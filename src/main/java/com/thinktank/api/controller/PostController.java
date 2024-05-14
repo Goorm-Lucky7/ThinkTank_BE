@@ -19,7 +19,6 @@ import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.PostService;
 import com.thinktank.global.auth.annotation.Auth;
 
-import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -30,7 +29,8 @@ public class PostController {
 
 	@PostMapping
 	public ResponseEntity<String> createPost(@RequestBody @Validated PostCreateDto postCreateDto,
-		@Auth AuthUser authUser) {
+		@Auth AuthUser authUser
+	) {
 		postService.createPost(postCreateDto, authUser);
 		return ResponseEntity.ok("OK");
 	}
@@ -39,24 +39,24 @@ public class PostController {
 	public ResponseEntity<PagePostResponseDto> getAllPosts(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
-		@RequestParam @Nullable Long userId
+		@Auth(required = false) AuthUser authUser
 	) {
-		PagePostResponseDto posts = postService.getAllPosts(page, size, userId);
-		return ResponseEntity.ok(posts);
+		return ResponseEntity.ok(postService.getAllPosts(page, size, authUser));
 	}
 
 	@GetMapping("/{post-id}")
 	public ResponseEntity<PostDetailResponseDto> getPostDetails(
 		@PathVariable("post-id") Long postId,
-		@RequestParam @Nullable Long userId) {
-		PostDetailResponseDto postDetailResponseDto = postService.getPostDetail(postId, userId);
-		return ResponseEntity.ok(postDetailResponseDto);
+		@Auth(required = false) AuthUser authUser
+	) {
+		return ResponseEntity.ok(postService.getPostDetail(postId, authUser));
 	}
 
 	@DeleteMapping
 	public ResponseEntity<String> deletePost(
 		@RequestBody @Validated PostDeleteDto postDeleteDto,
-		@Auth AuthUser authUser) {
+		@Auth AuthUser authUser
+	) {
 		postService.deletePost(postDeleteDto, authUser);
 		return ResponseEntity.ok("OK");
 	}
