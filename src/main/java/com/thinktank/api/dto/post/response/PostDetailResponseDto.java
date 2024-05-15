@@ -7,6 +7,7 @@ import com.thinktank.api.dto.testcase.custom.CustomTestCase;
 
 public record PostDetailResponseDto(
 	Long postId,
+	Long postNumber,
 	String title,
 	String category,
 	LocalDateTime createdAt,
@@ -16,9 +17,9 @@ public record PostDetailResponseDto(
 	boolean isAuthor,
 	int likeCount,
 	int commentCount,
-	int answerCount,
+	int codeCount,
 	String language,
 	boolean likeType,
-	String answer
+	String code
 ) {
 }

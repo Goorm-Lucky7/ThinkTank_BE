@@ -26,7 +26,7 @@ public class JavaJudge implements JudgeUtil {
 	@Override
 	public void executeCode(List<CustomTestCase> testCases, String code) {
 		final String uniqueDirName = UUID.randomUUID().toString();
-		final File directory = new File(uniqueDirName);
+		final File directory = new File("/tmp/" + uniqueDirName);
 
 		validateExist(directory);
 		try {

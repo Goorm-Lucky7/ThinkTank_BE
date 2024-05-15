@@ -13,27 +13,29 @@ import lombok.NoArgsConstructor;
 public class DockerCommand {
 	public static List<String> javaCommand(File directory) {
 		return Arrays.asList(
-			"docker", "run", "--rm", "-i",
-			"-v", directory.getAbsolutePath() + ":/app",
+			"docker", "run", "-i", "--rm",
+			"-v", "/home/ec2-user/IdeaProjects/ThinkTank_BE/tmp" + ":/app",
 			"openjdk:17",
-			"sh", "-c", "cd /app && java " + FULL_CLASS_NAME
+			"java", "-cp", "/app/" + directory.toString().replace("/tmp", ""), "Main"
 		);
 	}
 
 	public static List<String> javaScriptCommand(File directory) {
 		return Arrays.asList(
-			"docker", "run", "--rm", "-i",
-			"-v", directory.getAbsolutePath() + ":/app",
+			"docker", "run", "-i", "--rm",
+			"-v", "/home/ec2-user/IdeaProjects/ThinkTank_BE/tmp" + ":/app",
 			"node:alpine",
-			"node", "/app/" + JAVASCRIPT_CLASS_NAME
+			"node", "/app/" + directory.toString().replace("/tmp", "") + "/" + JAVASCRIPT_CLASS_NAME
 		);
 	}
 
 	public static List<String> compileCommand(File sourceFile, String tempDirPath) {
 		return Arrays.asList(
 			"docker", "run", "--rm",
-			"-v", tempDirPath + ":/usr/src/myapp",
-			"-w", "/usr/src/myapp",
+			"-v", "/home/ec2-user/IdeaProjects/ThinkTank_BE/tmp" + "/" +
+				tempDirPath.toString().replace("/tmp", "") +
+				":/app",
+			"-w", "/app",
 			"openjdk:17",
 			"javac", sourceFile.getName()
 		);

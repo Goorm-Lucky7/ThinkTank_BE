@@ -1,7 +1,7 @@
 jwt:
   secret:
     access-key: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
-  access-expire: 604800000
+  access-expire: 300000
 
 spring:
   config:
