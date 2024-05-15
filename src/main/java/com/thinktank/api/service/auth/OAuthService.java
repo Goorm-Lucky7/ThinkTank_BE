@@ -19,7 +19,6 @@ import com.thinktank.api.repository.ProfileImageRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.ConflictException;
 import com.thinktank.global.error.exception.NotFoundException;
-import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
@@ -73,10 +72,11 @@ public class OAuthService {
 		Map<String, Object> rawAttributes = oauth2User.getAttributes();
 		Map<String, String> extractedAttributes = new HashMap<>();
 
-		Map<String, Object> kakaoAccount = (Map<String, Object>)rawAttributes.get("kakao_account");
+		Map<String, Object> kakaoAccount, profile;
+		kakaoAccount = (Map<String, Object>)rawAttributes.get("kakao_account");
 		extractedAttributes.put("email", String.valueOf(kakaoAccount.get("email")));
 
-		Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+		profile = (Map<String, Object>) kakaoAccount.get("profile");
 		extractedAttributes.put("nickname", String.valueOf(profile.get("nickname")));
 		extractedAttributes.put("profile_image_url", String.valueOf(profile.get("profile_image_url")));
 
