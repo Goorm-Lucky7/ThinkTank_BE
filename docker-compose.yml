@@ -36,8 +36,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /home/ec2-user/IdeaProjects/ThinkTank_BE/tmp:/tmp
-      - /home/ec2-user/IdeaProjects/ThinkTank_BE/temp:/app
-
     networks:
       - thinktank-mysql-net
 
