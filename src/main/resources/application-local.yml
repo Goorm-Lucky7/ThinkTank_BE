@@ -14,16 +14,16 @@ spring:
         registration:
           kakao:
             provider: "kakao"
-            client-id: 8e3fe955d0f01098f124363e13f86ecd
-            client-secret: dJi2HBVb1Uk8ZJtCwssRmlszFixXTdxI
+            client-id:
+            client-secret:
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
             redirect-uri: "{baseUrl}/login/oauth2/kakao"
             scope: profile_nickname, profile_image, account_email
           google:
             provider: "google"
-            client-id: 354981658011-8sf0rrj5lf94gh2op0ci9iild5aeu3vl.apps.googleusercontent.com
-            client-secret: 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
+            client-id:
+            client-secret:
             redirect-uri: "{baseUrl}/login/oauth2/google"
             scope: profile, email
 
