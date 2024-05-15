@@ -1,4 +1,3 @@
-도커파일
 FROM amazoncorretto:17
 ## Open jdk 17
 
