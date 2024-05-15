@@ -2,7 +2,7 @@ package com.thinktank.api.dto.comment.response;
 
 import jakarta.validation.constraints.NotNull;
 
-public record CommentResponseDto(
+public record CommentResDto(
 	@NotNull
 	Long commentId,
 	@NotNull
@@ -11,6 +11,6 @@ public record CommentResponseDto(
 	String createdAt,
 	boolean isAuthor,
 	@NotNull
-	CommentUserResponseDto user
+	CommentUserResDto user
 ) {
 }
