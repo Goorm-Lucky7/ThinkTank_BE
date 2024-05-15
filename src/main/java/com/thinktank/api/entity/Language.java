@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum Language {
-	JAVA("자바", "java"),
-	JAVASCRIPT("자바스크립트", "javascript");
+	Java("자바", "java"),
+	Javascript("자바스크립트", "javascript");
 
 	private final String name;
 	private final String value;

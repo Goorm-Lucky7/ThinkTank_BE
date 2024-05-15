@@ -101,7 +101,7 @@ public class PostService {
 
 		List<CustomTestCase> testCases = testCaseRepository.findByPostId(postId);
 
-		return mapToPostDetailResponseDto(post, testCases, userEmail);
+		return convertPostToDetailResponseDto(post, testCases, userEmail);
 	}
 
 	public void deletePost(PostDeleteDto postDeleteDto, AuthUser authUser) {
@@ -156,20 +156,11 @@ public class PostService {
 		boolean likeType, SimpleUserResDto simpleUserResDto) {
 
 		return new PostsResponseDto(
-			post.getId(),
-			post.getId() + THOUSAND,
-			post.getTitle(),
-			post.getCategory().toString(),
-			post.getCreatedAt(),
-			post.getContent(),
-			commentCount,
-			likeCount,
-			codeCount,
-			likeType,
-			simpleUserResDto);
+			post.getId(), post.getId() + THOUSAND, post.getTitle(), post.getCategory().toString(),
+			post.getCreatedAt(), post.getContent(), commentCount, likeCount, codeCount, likeType, simpleUserResDto);
 	}
 
-	private PostDetailResponseDto mapToPostDetailResponseDto(Post post, List<CustomTestCase> testCases,
+	private PostDetailResponseDto convertPostToDetailResponseDto(Post post, List<CustomTestCase> testCases,
 		String userEmail) {
 		int commentCount = commentRepository.countCommentsByPost(post);
 		int likeCount = likeRepository.findLikeCountByPost(post);
@@ -177,22 +168,17 @@ public class PostService {
 		boolean likeType = userLikeService.isPostLikedByUser(userEmail, post.getId());
 		boolean isOwner = post.getUser().getEmail().equals(userEmail);
 
-		return new PostDetailResponseDto(
-			post.getId(),
-			post.getTitle(),
-			post.getCategory().toString(),
-			post.getCreatedAt(),
-			post.getContent(),
-			testCases,
-			post.getCondition(),
-			isOwner,
-			likeCount,
-			commentCount,
-			codeCount,
-			post.getLanguage().toString(),
-			likeType,
-			post.getCode()
+		return createPostDetailResponseDto(post, testCases, commentCount, likeCount, codeCount, likeType, isOwner);
+	}
+
+	private PostDetailResponseDto createPostDetailResponseDto(Post post, List<CustomTestCase> testCases,
+		int commentCount, int likeCount, int codeCount, boolean likeType, boolean isOwner) {
+		return new PostDetailResponseDto(post.getId(),
+			post.getId() + THOUSAND, post.getTitle(), post.getCategory().toString(), post.getCreatedAt(),
+			post.getContent(), testCases, post.getCondition(), isOwner, likeCount, commentCount, codeCount,
+			post.getLanguage().toString(), likeType, post.getCode()
 		);
+
 	}
 
 	private SimpleUserResDto createSimpleUserResDto(Post post) {
@@ -201,7 +187,7 @@ public class PostService {
 		final ProfileImage profileImage = profileImageRepository.findByUserEmail(user.getEmail())
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_IMAGE_NOT_FOUND));
 
-		return new SimpleUserResDto(user.getNickname(), profileImage.getProfileImage());
+		return new SimpleUserResDto(user.getEmail(), user.getNickname(), profileImage.getProfileImage());
 	}
 
 	private void validateCategory(String category) {

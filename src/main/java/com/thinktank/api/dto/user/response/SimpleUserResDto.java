@@ -1,7 +1,8 @@
 package com.thinktank.api.dto.user.response;
 
 public record SimpleUserResDto(
-	String nickName,
+	String email,
+	String nickname,
 	String profileImage
 ) {
 }
