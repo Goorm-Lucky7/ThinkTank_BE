@@ -7,16 +7,16 @@ import java.util.Map;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-public class CustomOAuth2User implements OAuth2User {
-	private OAuth2User oauth2User;
-	private String token;
-	private String oauthProvider;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-	public CustomOAuth2User(OAuth2User oauth2User, String oauthProvider, String token) {
-		this.oauth2User = oauth2User;
-		this.oauthProvider = oauthProvider;
-		this.token = token;
-	}
+@Getter
+@RequiredArgsConstructor
+public class CustomOAuth2User implements OAuth2User {
+
+	private final OAuth2User oauth2User;
+	private final String oauthProvider;
+	private final String token;
 
 	@Override
 	public Map<String, Object> getAttributes() {
@@ -34,9 +34,5 @@ public class CustomOAuth2User implements OAuth2User {
 	@Override
 	public String getName() {
 		return oauth2User.getName();
-	}
-
-	public String getToken() {
-		return token;
 	}
 }
