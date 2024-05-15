@@ -27,23 +27,28 @@ import com.thinktank.global.auth.handler.CustomAuthenticationSuccessHandler;
 @EnableWebSecurity
 public class SecurityConfig {
 
+	private final OAuthProperties oauthProperties;
+
 	private final JwtProviderService jwtProviderService;
 	private final CustomOAuth2UserService customOAuth2UserService;
+
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 	private final HandlerExceptionResolver handlerExceptionResolver;
 
 	public SecurityConfig(
-		JwtProviderService jwtProviderService, CustomOAuth2UserService customOAuth2UserService,
+		OAuthProperties oauthProperties,
+		JwtProviderService jwtProviderService,
+		CustomOAuth2UserService customOAuth2UserService,
 		CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
 		CustomAuthenticationFailureHandler customAuthenticationFailureHandler,
 		@Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver
 	) {
+		this.oauthProperties = oauthProperties;
 		this.jwtProviderService = jwtProviderService;
 		this.customOAuth2UserService = customOAuth2UserService;
 		this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
 		this.customAuthenticationFailureHandler = customAuthenticationFailureHandler;
-
 		this.handlerExceptionResolver = handlerExceptionResolver;
 	}
 

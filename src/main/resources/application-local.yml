@@ -14,16 +14,16 @@ spring:
         registration:
           kakao:
             provider: "kakao"
-            client-id:
-            client-secret:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_ID}
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
             redirect-uri: "{baseUrl}/login/oauth2/kakao"
             scope: profile_nickname, profile_image, account_email
           google:
             provider: "google"
-            client-id:
-            client-secret:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             redirect-uri: "{baseUrl}/login/oauth2/google"
             scope: profile, email
 
