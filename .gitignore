@@ -204,3 +204,5 @@ gradle-app.setting
 /db/*
 
 /k8s/secret.yaml
+
+/tmp
