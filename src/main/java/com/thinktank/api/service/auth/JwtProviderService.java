@@ -35,6 +35,7 @@ public class JwtProviderService {
 
 	private static final String EMAIL = "email";
 	private static final String NICKNAME = "nickname";
+	private static final String PROFILE_IMAGE_URL = "profileImageUrl";
 
 	@Value("${jwt.secret.access-key}")
 	private String secret;
@@ -58,6 +59,17 @@ public class JwtProviderService {
 		return buildJwt(issuedDate, expiredDate)
 			.claim(EMAIL, email)
 			.claim(NICKNAME, nickname)
+			.compact();
+	}
+
+	public String generateSocialToken(String email, String nickname, String profileImageUrl) {
+		final Date issuedDate = new Date();
+		final Date expiredDate = new Date(issuedDate.getTime() + accessTokenExpire);
+
+		return buildJwt(issuedDate, expiredDate)
+			.claim(EMAIL, email)
+			.claim(NICKNAME, nickname)
+			.claim(PROFILE_IMAGE_URL, profileImageUrl)
 			.compact();
 	}
 
