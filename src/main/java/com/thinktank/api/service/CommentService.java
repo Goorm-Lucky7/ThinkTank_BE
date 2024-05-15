@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.thinktank.api.dto.comment.request.CommentCreateDto;
 import com.thinktank.api.dto.comment.request.CommentDeleteDto;
-import com.thinktank.api.dto.comment.response.CommentResponseDto;
-import com.thinktank.api.dto.comment.response.CommentUserResponseDto;
-import com.thinktank.api.dto.comment.response.CommentsResponseDto;
+import com.thinktank.api.dto.comment.response.CommentResDto;
+import com.thinktank.api.dto.comment.response.CommentUserResDto;
+import com.thinktank.api.dto.comment.response.CommentsResDto;
 import com.thinktank.api.dto.page.response.PageInfo;
 import com.thinktank.api.entity.Comment;
 import com.thinktank.api.entity.Post;
@@ -21,6 +21,7 @@ import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.repository.CommentRepository;
 import com.thinktank.api.repository.PostRepository;
+import com.thinktank.api.repository.ProfileImageRepository;
 import com.thinktank.api.repository.UserRepository;
 import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.exception.UnauthorizedException;
@@ -35,52 +36,89 @@ public class CommentService {
 	private final CommentRepository commentRepository;
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
+	private final ProfileImageRepository profileImageRepository;
 
 	@Transactional
 	public void createComment(CommentCreateDto commentCreateDto, AuthUser authUser) {
-		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
+		final User user = findUserByEmail(authUser.email());
+		final Post post = findPostById(commentCreateDto.postId());
 
-		final Post post = postRepository.findById(commentCreateDto.postId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
-
-		Comment comment = Comment.create(commentCreateDto, user, post);
-		commentRepository.save(comment);
+		createComment(commentCreateDto, user, post);
 	}
 
 	@Transactional(readOnly = true)
-	public CommentsResponseDto getCommentsByPostId(Long postId, AuthUser authUser, int pageIndex, int pageSize) {
-		Pageable pageable = PageRequest.of(pageIndex, pageSize);
-		Page<Comment> page = commentRepository.findByPostId(postId, pageable);
+	public CommentsResDto getCommentsByPostId(Long postId, AuthUser authUser, int pageIndex, int pageSize) {
+		Pageable pageable = createPageable(pageIndex, pageSize);
+		Page<Comment> page = findCommentsByPostId(postId, pageable);
+		List<CommentResDto> comments = convertToCommentResDtoList(page, authUser);
 
-		List<CommentResponseDto> comments = page.getContent().stream()
-			.map(comment -> new CommentResponseDto(
-				comment.getId(),
-				comment.getContent(),
-				comment.getCreatedAt().toString(),
-				authUser != null && comment.getUser().getEmail().equals(authUser.email()),
-				new CommentUserResponseDto(comment.getUser().getNickname())
-			))
-			.collect(Collectors.toList());
+		PageInfo pageInfo = createPageInfo(page, pageIndex);
 
-		PageInfo pageInfo = new PageInfo(pageIndex, !page.hasNext());
-
-		return new CommentsResponseDto(postId, comments, pageInfo);
+		return new CommentsResDto(postId, comments, pageInfo);
 	}
 
 	@Transactional
 	public void deleteComment(CommentDeleteDto commentDeleteDto, AuthUser authUser) {
-		Comment comment = commentRepository.findById(commentDeleteDto.commentId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_COMMENT_NOT_FOUND));
+		Comment comment = findCommentById(commentDeleteDto.commentId());
 
-		boolean isUserComment = isUserComment(comment, authUser.email());
-		boolean isCommentInUserPost = isCommentInUserPost(commentDeleteDto.postId(), authUser.email());
-
-		if (!isUserComment && !isCommentInUserPost) {
-			throw new UnauthorizedException(ErrorCode.FAIL_COMMENT_DELETION_FORBIDDEN);
-		}
+		validateDeletionRights(comment, commentDeleteDto.postId(), authUser);
 
 		commentRepository.delete(comment);
+	}
+
+	private User findUserByEmail(String email) {
+		return userRepository.findByEmail(email)
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
+	}
+
+	private Post findPostById(Long id) {
+		return postRepository.findById(id)
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
+	}
+
+	private void createComment(CommentCreateDto commentCreateDto, User user, Post post) {
+		commentRepository.save(Comment.create(commentCreateDto, user, post));
+	}
+
+	private Pageable createPageable(int pageIndex, int pageSize) {
+		return PageRequest.of(pageIndex, pageSize);
+	}
+
+	private Page<Comment> findCommentsByPostId(Long id, Pageable pageable) {
+		return commentRepository.findByPostId(id, pageable);
+	}
+
+	private List<CommentResDto> convertToCommentResDtoList(Page<Comment> page, AuthUser authUser) {
+		return page.getContent().stream()
+			.map(comment -> convertToCommentResDto(authUser, comment))
+			.collect(Collectors.toList());
+	}
+
+	private CommentResDto convertToCommentResDto(AuthUser authUser, Comment comment) {
+		return new CommentResDto(
+			comment.getId(),
+			comment.getContent(),
+			comment.getCreatedAt().toString(),
+			isUserAuthor(authUser, comment),
+			new CommentUserResDto(findUserNicknameByComment(comment), findProfileImageByUserEmail(authUser.email())));
+	}
+
+	private boolean isUserAuthor(AuthUser authUser, Comment comment) {
+		return authUser != null && comment.getUser().getEmail().equals(authUser.email());
+	}
+
+	private String findUserNicknameByComment(Comment comment) {
+		return comment.getUser().getNickname();
+	}
+
+	private String findProfileImageByUserEmail(String email) {
+		 return profileImageRepository.findByUserEmail(email)
+			 .orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_IMAGE_NOT_FOUND))
+			 .getProfileImage();
+	}
+
+	private PageInfo createPageInfo(Page<Comment> page, int pageIndex) {
+		return new PageInfo(pageIndex, !page.hasNext());
 	}
 
 	private boolean isUserComment(Comment comment, String userEmail) {
@@ -92,5 +130,19 @@ public class CommentService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
 
 		return post.getUser().getEmail().equals(userEmail);
+	}
+
+	private Comment findCommentById(Long id) {
+		return commentRepository.findById(id)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_COMMENT_NOT_FOUND));
+	}
+
+	private void validateDeletionRights(Comment comment, Long postId, AuthUser authUser) {
+		boolean isUserComment = isUserComment(comment, authUser.email());
+		boolean isCommentInUserPost = isCommentInUserPost(postId, authUser.email());
+
+		if(!isUserComment && !isCommentInUserPost){
+			throw new UnauthorizedException(ErrorCode.FAIL_COMMENT_DELETION_FORBIDDEN);
+		}
 	}
 }
