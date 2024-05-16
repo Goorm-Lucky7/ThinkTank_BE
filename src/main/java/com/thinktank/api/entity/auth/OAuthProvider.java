@@ -4,8 +4,7 @@ import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.model.ErrorCode;
 
 public enum OAuthProvider {
-	KAKAO,
-	GOOGLE;
+	KAKAO;
 
 	public static OAuthProvider findByName(String name) {
 		for(OAuthProvider oauthProvider : values()) {

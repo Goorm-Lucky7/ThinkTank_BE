@@ -17,10 +17,4 @@ public class OAuthProperties {
 	@Value("kakao.client-secret")
 	private String kakaoClientSecret;
 
-	@Value("google.client-id")
-	private String googleClientId;
-
-	@Value("google.client-secret")
-	private String googleClientSecret;
-
 }

@@ -65,9 +65,7 @@ public class OAuthLoginService {
 		return userRepository.existsByEmailAndOauthProvider(email, OAuthProvider.findByName(providerName));
 	}
 	private Map<String, String> extractAttributesByProvider(OAuth2User oauth2User, String oauthProvider) {
-		if ("google".equals(oauthProvider)) {
-			return extractGoogleAttributes(oauth2User);
-		} else if ("kakao".equals(oauthProvider)) {
+		if ("kakao".equals(oauthProvider)) {
 			return extractKakaoAttributes(oauth2User);
 		} else {
 			throw new NotFoundException(ErrorCode.FAIL_REGISTRATION_NOT_FOUND);
@@ -85,22 +83,6 @@ public class OAuthLoginService {
 		profile = (Map<String, Object>) kakaoAccount.get("profile");
 		extractedAttributes.put("nickname", String.valueOf(profile.get("nickname")));
 		extractedAttributes.put("profile_image_url", String.valueOf(profile.get("profile_image_url")));
-
-		String rawPassword = generateRandomPassword();
-		String encodedPassword = passwordEncoder.encode(rawPassword);
-
-		extractedAttributes.put("password", encodedPassword);
-
-		return extractedAttributes;
-	}
-
-	private Map<String, String> extractGoogleAttributes(OAuth2User oauth2User) {
-		Map<String, Object> rawAttributes = oauth2User.getAttributes();
-		Map<String, String> extractedAttributes = new HashMap<>();
-
-		extractedAttributes.put("email", String.valueOf(rawAttributes.get("email")));
-		extractedAttributes.put("nickname", String.valueOf(rawAttributes.get("name")));
-		extractedAttributes.put("profile_image_url", String.valueOf(rawAttributes.get("picture")));
 
 		String rawPassword = generateRandomPassword();
 		String encodedPassword = passwordEncoder.encode(rawPassword);
