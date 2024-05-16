@@ -62,7 +62,7 @@ public class JwtProviderService {
 			.compact();
 	}
 
-	public String generateSocialToken(String email, String nickname, String profileImageUrl) {
+	public String generateSocialLoginToken(String email, String nickname, String profileImageUrl) {
 		final Date issuedDate = new Date();
 		final Date expiredDate = new Date(issuedDate.getTime() + accessTokenExpire);
 
