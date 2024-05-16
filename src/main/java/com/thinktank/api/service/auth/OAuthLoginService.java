@@ -98,8 +98,6 @@ public class OAuthLoginService {
 		Map<String, Object> rawAttributes = oauth2User.getAttributes();
 		Map<String, String> extractedAttributes = new HashMap<>();
 
-		System.out.println("\n\nattr:"+rawAttributes+"\n\n");
-
 		extractedAttributes.put("email", String.valueOf(rawAttributes.get("email")));
 		extractedAttributes.put("nickname", String.valueOf(rawAttributes.get("name")));
 		extractedAttributes.put("profile_image_url", String.valueOf(rawAttributes.get("picture")));
