@@ -17,6 +17,7 @@ public class CustomOAuth2User implements OAuth2User {
 	private final OAuth2User oauth2User;
 	private final String oauthProvider;
 	private final String token;
+	private final boolean isNewUser;
 
 	@Override
 	public Map<String, Object> getAttributes() {

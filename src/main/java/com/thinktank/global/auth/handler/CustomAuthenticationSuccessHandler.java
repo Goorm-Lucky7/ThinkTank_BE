@@ -32,6 +32,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().write(objectMapper.writeValueAsString(tokenResDto));
-		response.setStatus(HttpServletResponse.SC_OK);
+
+		if(customOAuth2User.isNewUser()) response.setStatus(HttpServletResponse.SC_CREATED);
+		else response.setStatus(HttpServletResponse.SC_OK);
 	}
 }

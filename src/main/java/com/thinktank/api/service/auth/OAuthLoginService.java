@@ -33,12 +33,13 @@ public class OAuthLoginService {
 	private final ProfileImageRepository profileImageRepository;
 
 	@Transactional
-	public String socialLogin(OAuth2User oauth2User, String oauthProvider) {
+	public Map<String, Object> socialLogin(OAuth2User oauth2User, String oauthProvider) {
 		Map<String, String> extractedAttributes = extractAttributesByProvider(oauth2User, oauthProvider);
 
 		String email = extractedAttributes.get("email");
 		String nickname = extractedAttributes.get("nickname");
 		String profileImageUrl = extractedAttributes.get("profileImageUrl");
+		boolean isNewUser = false;
 
 		if (isUserSignedUp(email)) {
 			if(!isUserSignedUpWithProvider(email, oauthProvider)){
@@ -46,9 +47,14 @@ public class OAuthLoginService {
 			}
 		} else {
 			signUp(email, nickname, profileImageUrl, oauthProvider);
+			isNewUser = true;
 		}
 
-		return jwtProviderService.generateSocialToken(email, nickname, profileImageUrl);
+		Map<String, Object> responseMap = new HashMap<>();
+		responseMap.put("isNewUser", isNewUser);
+		responseMap.put("token", jwtProviderService.generateSocialLoginToken(email, nickname, profileImageUrl));
+
+		return responseMap;
 	}
 
 	private boolean isUserSignedUp(String email) {
@@ -56,7 +62,7 @@ public class OAuthLoginService {
 	}
 
 	public boolean isUserSignedUpWithProvider(String email, String providerName) {
-		return userRepository.existsByEmailAndOauthProvider(email, OAuthProvider.valueOf(providerName));
+		return userRepository.existsByEmailAndOauthProvider(email, OAuthProvider.findByName(providerName));
 	}
 	private Map<String, String> extractAttributesByProvider(OAuth2User oauth2User, String oauthProvider) {
 		if ("google".equals(oauthProvider)) {

@@ -1,5 +1,7 @@
 package com.thinktank.api.service.auth;
 
+import java.util.Map;
+
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -23,8 +25,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 		OAuth2User oauth2User = delegate.loadUser(userRequest);
 		String oauthProvider = userRequest.getClientRegistration().getRegistrationId();
 
-		String token = oauthLoginService.socialLogin(oauth2User, oauthProvider);
+		Map<String, Object> loginResponse = oauthLoginService.socialLogin(oauth2User, oauthProvider);
+		String token = (String) loginResponse.get("token");
+		boolean isNewUser = (Boolean) loginResponse.get("isNewUser");
 
-		return new CustomOAuth2User(oauth2User, oauthProvider, token);
+		return new CustomOAuth2User(oauth2User, oauthProvider, token, isNewUser);
 	}
 }
