@@ -44,7 +44,10 @@ public enum ErrorCode {
 	FAIL_EMAIL_CONFLICT("[❎ ERROR] 이미 존재하는 이메일입니다."),
 	FAIL_NICKNAME_CONFLICT("[❎ ERROR] 이미 존재하는 닉네임입니다."),
 	FAIL_USER_LIKE_NOT_FOUND("[❎ ERROR] 좋아요를 누른 회원을 찾을 수 없습니다."),
-	FAIL_LIKE_NOT_FOUND("[❎ ERROR] 존재하지 않는 좋아요입니다.");
+	FAIL_LIKE_NOT_FOUND("[❎ ERROR] 존재하지 않는 좋아요입니다."),
+
+
+	FAIL_INTERNAL_SERVER_ERROR("[❎ ERROR] 서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
 
 	private String message;
 }
