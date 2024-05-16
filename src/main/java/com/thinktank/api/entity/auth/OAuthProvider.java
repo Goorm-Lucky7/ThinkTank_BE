@@ -1,10 +1,18 @@
 package com.thinktank.api.entity.auth;
 
-public enum OAuthProvider {
-	KAKAO, GOOGLE;
+import com.thinktank.global.error.exception.NotFoundException;
+import com.thinktank.global.error.model.ErrorCode;
 
-	@Override
-	public String toString() {
-		return this.name().toLowerCase();
+public enum OAuthProvider {
+	KAKAO,
+	GOOGLE;
+
+	public static OAuthProvider findByName(String name) {
+		for(OAuthProvider oauthProvider : values()) {
+			if(oauthProvider.name().equalsIgnoreCase(name)) {
+				return oauthProvider;
+			}
+		}
+		throw new NotFoundException(ErrorCode.FAIL_REGISTRATION_NOT_FOUND);
 	}
 }

@@ -86,6 +86,6 @@ public class User extends BaseTimeEntity {
 	}
 
 	public void updateOAuthProvider(OAuthProviderUpdateDto oauthProviderUpdateDto) {
-		this.oauthProvider = OAuthProvider.valueOf(oauthProviderUpdateDto.oauthProvider());
+		this.oauthProvider = OAuthProvider.findByName(oauthProviderUpdateDto.oauthProvider());
 	}
 }
