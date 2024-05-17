@@ -110,7 +110,7 @@ public class PostService {
 
 		validateUserOwnership(user, post);
 
-		deletePostData(postDeleteDto.postId());
+		deletePostData(post.getId());
 	}
 
 	private User findUserByEmail(String email) {
