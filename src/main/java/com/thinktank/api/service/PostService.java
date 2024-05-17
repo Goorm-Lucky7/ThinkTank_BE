@@ -105,12 +105,14 @@ public class PostService {
 
 		validateUserOwnership(user, post);
 
-		userCodeRepository.deleteByPostId(postDeleteDto.postId());
-		commentRepository.deleteByPostId(postDeleteDto.postId());
-		testCaseRepository.deleteByPostId(postDeleteDto.postId());
-		List<UserLike> userLikes = userLikeRepository.findByLikePostId(postDeleteDto.postId());
+		userCodeRepository.deleteByPost(post);
+		commentRepository.deleteByPost(post);
+		testCaseRepository.deleteByPost(post);
+
+		List<UserLike> userLikes = userLikeRepository.findByLikePost(post);
 		userLikeRepository.deleteAll(userLikes);
-		likeRepository.deleteByPostId(postDeleteDto.postId());
+
+		likeRepository.deleteByPost(post);
 		postRepository.delete(post);
 	}
 
@@ -122,16 +124,16 @@ public class PostService {
 		}
 
 		return posts.stream()
-			.map(post -> convertPostToResponseDto(post, authUser.email()))
+			.map(post -> convertPostToResponseDto(post, authUser))
 			.toList();
 	}
 
-	private PostsResponseDto convertPostToResponseDto(Post post, String userEmail) {
+	private PostsResponseDto convertPostToResponseDto(Post post, AuthUser authUser) {
 		int commentCount = commentRepository.countCommentsByPost(post);
 		int likeCount = likeRepository.findLikeCountByPost(post);
 		int codeCount = userCodeRepository.countUserCodeByPost(post);
 
-		boolean likeType = userLikeService.isPostLikedByUser(userEmail, post.getId());
+		boolean likeType = (authUser != null) && userLikeService.isPostLikedByUser(authUser.email(), post.getId());
 
 		SimpleUserResDto simpleUserResDto = createSimpleUserResDto(post);
 
@@ -161,8 +163,8 @@ public class PostService {
 		int likeCount = likeRepository.findLikeCountByPost(post);
 		int codeCount = userCodeRepository.countUserCodeByPost(post);
 
-		boolean likeType = userLikeService.isPostLikedByUser(authUser.email(), post.getId());
-		boolean isOwner = post.getUser().getEmail().equals(authUser.email());
+		boolean likeType = (authUser != null) && userLikeService.isPostLikedByUser(authUser.email(), post.getId());
+		boolean isOwner = (authUser != null) && post.getUser().getEmail().equals(authUser.email());
 
 		return createPostDetailResponseDto(post, testCases, commentCount, likeCount, codeCount, likeType, isOwner);
 	}
