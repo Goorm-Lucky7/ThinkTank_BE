@@ -79,10 +79,16 @@ public class User extends BaseTimeEntity {
 	}
 
 	public void updateUserProfile(UserUpdateDto userUpdateDto) {
-		this.nickname = userUpdateDto.nickname();
+		validateNicknameForUpdate(userUpdateDto.nickname());
 		this.github = userUpdateDto.github();
 		this.blog = userUpdateDto.blog();
 		this.introduce = userUpdateDto.introduce();
+	}
+
+	private void validateNicknameForUpdate(String nickname) {
+		if (nickname != null && !nickname.trim().isEmpty()) {
+			this.nickname = nickname;
+		}
 	}
 
 	public void updateOAuthProvider(OAuthProviderUpdateDto oauthProviderUpdateDto) {
