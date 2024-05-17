@@ -206,3 +206,5 @@ gradle-app.setting
 /k8s/secret.yaml
 
 /tmp
+
+/.env
