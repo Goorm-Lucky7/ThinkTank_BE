@@ -110,13 +110,7 @@ public class PostService {
 
 		validateUserOwnership(user, post);
 
-		userCodeRepository.deleteByPostId(postDeleteDto.postId());
-		commentRepository.deleteByPostId(postDeleteDto.postId());
-		testCaseRepository.deleteByPostId(postDeleteDto.postId());
-		List<UserLike> userLikes = userLikeRepository.findByLikePostId(postDeleteDto.postId());
-		userLikeRepository.deleteAll(userLikes);
-		likeRepository.deleteByPostId(postDeleteDto.postId());
-		postRepository.delete(post);
+		deletePostData(post.getId());
 	}
 
 	private User findUserByEmail(String email) {
@@ -162,11 +156,11 @@ public class PostService {
 
 	private PostDetailResponseDto convertPostToDetailResponseDto(Post post, List<CustomTestCase> testCases,
 		String userEmail) {
-		int commentCount = commentRepository.countCommentsByPost(post);
-		int likeCount = likeRepository.findLikeCountByPost(post);
-		int codeCount = userCodeRepository.countUserCodeByPost(post);
-		boolean likeType = userLikeService.isPostLikedByUser(userEmail, post.getId());
-		boolean isOwner = post.getUser().getEmail().equals(userEmail);
+		final int commentCount = commentRepository.countCommentsByPost(post);
+		final int likeCount = likeRepository.findLikeCountByPost(post);
+		final int codeCount = userCodeRepository.countUserCodeByPost(post);
+		final boolean likeType = userLikeService.isPostLikedByUser(userEmail, post.getId());
+		final boolean isOwner = post.getUser().getEmail().equals(userEmail);
 
 		return createPostDetailResponseDto(post, testCases, commentCount, likeCount, codeCount, likeType, isOwner);
 	}
@@ -188,6 +182,15 @@ public class PostService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_IMAGE_NOT_FOUND));
 
 		return new SimpleUserResDto(user.getEmail(), user.getNickname(), profileImage.getProfileImage());
+	}
+	private void deletePostData(Long postId) {
+		userCodeRepository.deleteByPostId(postId);
+		commentRepository.deleteByPostId(postId);
+		testCaseRepository.deleteByPostId(postId);
+		List<UserLike> userLikes = userLikeRepository.findByLikePostId(postId);
+		userLikeRepository.deleteAll(userLikes);
+		likeRepository.deleteByPostId(postId);
+		postRepository.deleteById(postId);
 	}
 
 	private void validateCategory(String category) {

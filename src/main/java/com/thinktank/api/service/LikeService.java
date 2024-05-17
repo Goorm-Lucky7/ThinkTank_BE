@@ -13,7 +13,6 @@ import com.thinktank.api.repository.LikeRepository;
 import com.thinktank.api.repository.PostRepository;
 import com.thinktank.api.repository.UserLikeRepository;
 import com.thinktank.api.repository.UserRepository;
-import com.thinktank.global.error.exception.BadRequestException;
 import com.thinktank.global.error.exception.NotFoundException;
 import com.thinktank.global.error.exception.UnauthorizedException;
 import com.thinktank.global.error.model.ErrorCode;
@@ -29,46 +28,36 @@ public class LikeService {
 	private final LikeRepository likeRepository;
 	private final UserLikeRepository userLikeRepository;
 	private final UserRepository userRepository;
-
 	public void handleLike(LikeCreateDto likeCreateDto, AuthUser authUser) {
-		final User user = userRepository.findByEmail(authUser.email())
-			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
-		Post post = postRepository.findById(likeCreateDto.postId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
+		final User user = findUserByEmail(authUser.email());
+		final Post post = findByPostId(likeCreateDto.postId());
 
-		Like like = likeRepository.findByPost(post).orElse(null);
-
-		if (like == null) {
-			createLike(likeCreateDto, user);
-		} else {
-			processLike(like, user);
-		}
+		likeRepository.findByPost(post)
+			.ifPresentOrElse(
+				existingLike -> processLike(existingLike, user),
+				() -> createLike(likeCreateDto, user)
+			);
 	}
 
 	private void processLike(Like like, User user) {
 		boolean isUserLiked = userLikeRepository.existsByLikeIdAndUserId(like.getId(), user.getId());
 
 		if (isUserLiked) {
-			UserLike userLike = userLikeRepository.findByLikeIdAndUserId(like.getId(), user.getId())
-				.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_LIKE_NOT_FOUND));
+			final UserLike userLike = findByLikeIdAndUserId(like.getId(), user.getId());
 			if (userLike.isCheck()) {
 				cancelLike(like, user);
 			} else {
 				userLike.activateLike();
-				userLikeRepository.save(userLike);
 				like.incrementLikeCount();
-				likeRepository.save(like);
 			}
 		} else {
 			like.incrementLikeCount();
-			likeRepository.save(like);
 			saveUserLike(like, user);
 		}
 	}
 
 	private void createLike(LikeCreateDto likeCreateDto, User user) {
-		Post post = postRepository.findById(likeCreateDto.postId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
+		final Post post = findByPostId(likeCreateDto.postId());
 		Like newLike = Like.builder()
 			.post(post)
 			.build();
@@ -78,21 +67,36 @@ public class LikeService {
 
 	private void cancelLike(Like like, User user) {
 		like.decrementLikeCount();
-		likeRepository.save(like);
-		UserLike userLike = userLikeRepository.findByLikeIdAndUserId(like.getId(), user.getId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_LIKE_NOT_FOUND));
+		final UserLike userLike = findByLikeIdAndUserId(like.getId(), user.getId());
 		userLike.deactivateLike();
-		userLikeRepository.save(userLike);
 	}
 
 	private void saveUserLike(Like like, User user) {
-		User userStatus = userRepository.findById(user.getId())
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_NOT_FOUND));
+		final User userStatus = checkUserLikeState(user.getId());
 		UserLike userLike = UserLike.builder()
 			.user(userStatus)
 			.like(like)
 			.isCheck(true)
 			.build();
 		userLikeRepository.save(userLike);
+	}
+	private User findUserByEmail(String email) {
+		return userRepository.findByEmail(email)
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
+	}
+
+	private Post findByPostId(Long postId) {
+		return postRepository.findById(postId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
+	}
+
+	private UserLike findByLikeIdAndUserId(Long likeId, Long userId) {
+		return userLikeRepository.findByLikeIdAndUserId(likeId, userId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_LIKE_NOT_FOUND));
+	}
+
+	private User checkUserLikeState(Long userId){
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_USER_NOT_FOUND));
 	}
 }
