@@ -1,12 +1,11 @@
 version: "3.3"
 services:
   database:
-    image: mysql:8.4
+    image: mysql:latest
     restart: always
     container_name: mysql-app
-    environment:
-      MYSQL_DATABASE: mysql
-      MYSQL_ROOT_PASSWORD: 1234
+    env_file:
+      - .env
     volumes:
       - ./db:/var/lib/mysql
     ports:
@@ -24,23 +23,16 @@ services:
     depends_on:
       - database
     container_name: thinktank-app
-
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/mysql?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 1234
-      SPRING_JWT_SECRET_ACCESS_KEY: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
-      SPRING_JWT_ACCESS_EXPIRE: 300000
-
+    env_file:
+      - .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /home/ec2-user/IdeaProjects/ThinkTank_BE/tmp:/tmp
-    #      - /Users/bagchangmin/IdeaProjects/thinktank/tmp:/tmp
     networks:
       - thinktank-mysql-net
 
 volumes:
-  code_volume: # 이미 있는 볼륨 설정을 활용
+  code_volume:
     driver: local
 
 networks:
