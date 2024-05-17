@@ -56,7 +56,7 @@ public class Post extends BaseTimeEntity {
 	@ColumnDefault("0")
 	private int codeCount = 0;
 
-	@Column(name = "code", nullable = false)
+	@Column(name = "code", nullable = false, length = 1000)
 	private String code;
 
 	@ManyToOne(fetch = FetchType.LAZY)

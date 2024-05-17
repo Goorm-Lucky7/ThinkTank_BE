@@ -7,11 +7,11 @@ import com.thinktank.api.dto.page.response.PageInfo;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
-public record CommentsResponseDto(
+public record CommentsResDto(
 	@NotNull
 	Long postId,
 	@Nullable
-	List<CommentResponseDto> comments,
+	List<CommentResDto> comments,
 	@NotNull
 	PageInfo pageInfo
 ) {

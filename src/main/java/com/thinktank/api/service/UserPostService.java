@@ -91,7 +91,7 @@ public class UserPostService {
 
 	private Page<? extends PostResponseDto> processSolvedProblems(String email, Pageable pageable) {
 		final User user = findUserByEmail(email);
-		Page<? extends UserCode> userCodesPage = userCodeRepository.findByUser(user, pageable);
+		Page<UserCode> userCodesPage = userCodeRepository.findByUser(user, pageable);
 
 		return userCodesPage.map(userCode -> {
 			Post post = userCode.getPost();
@@ -144,9 +144,8 @@ public class UserPostService {
 	}
 
 	private boolean isPostLikedByUser(String email, Post post) {
-		if (email == null) {
-			return false;
-		}
-		return userLikeService.isPostLikedByUser(email, post.getId());
+		return Optional.ofNullable(email)
+			.map(e -> userLikeService.isPostLikedByUser(e, post.getId()))
+			.orElse(false);
 	}
 }

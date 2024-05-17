@@ -1,11 +1,15 @@
 package com.thinktank.api.entity;
 
+import com.thinktank.api.dto.auth.OAuthProviderUpdateDto;
 import com.thinktank.api.dto.user.request.SignUpDto;
 import com.thinktank.api.dto.user.request.UserUpdateDto;
+import com.thinktank.api.entity.auth.OAuthProvider;
 import com.thinktank.global.common.entity.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,6 +48,10 @@ public class User extends BaseTimeEntity {
 	@Column(name = "introduce")
 	private String introduce;
 
+	@Column(name = "oauth_provider")
+	@Enumerated(EnumType.STRING)
+	private OAuthProvider oauthProvider;
+
 	@Builder
 	private User(String email,
 		String nickname,
@@ -75,5 +83,9 @@ public class User extends BaseTimeEntity {
 		this.github = userUpdateDto.github();
 		this.blog = userUpdateDto.blog();
 		this.introduce = userUpdateDto.introduce();
+	}
+
+	public void updateOAuthProvider(OAuthProviderUpdateDto oauthProviderUpdateDto) {
+		this.oauthProvider = OAuthProvider.findByName(oauthProviderUpdateDto.oauthProvider());
 	}
 }

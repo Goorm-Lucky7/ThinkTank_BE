@@ -2,9 +2,13 @@ package com.thinktank.api.dto.comment.response;
 
 import jakarta.validation.constraints.NotNull;
 
-public record CommentUserResponseDto(
+public record CommentUserResDto(
+	
 	@NotNull
-	String nickname
-	// String profileImage
+	String nickname,
+
+	@NotNull
+	String profileImage
+
 ) {
 }

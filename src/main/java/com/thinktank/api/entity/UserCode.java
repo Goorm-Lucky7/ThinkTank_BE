@@ -24,7 +24,7 @@ public class UserCode {
 	@Column(name = "id")
 	private Long id;
 
-	@Column(name = "code", nullable = false)
+	@Column(name = "code", nullable = false, length = 1000)
 	private String code;
 
 	@OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
