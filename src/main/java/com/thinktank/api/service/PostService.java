@@ -4,7 +4,6 @@ import static com.thinktank.global.common.util.GlobalConstant.*;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -92,16 +91,12 @@ public class PostService {
 
 	@Transactional(readOnly = true)
 	public PostDetailResponseDto getPostDetail(Long postId, AuthUser authUser) {
-		String userEmail = Optional.ofNullable(authUser)
-			.map(AuthUser::email)
-			.orElse(null);
-
 		final Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
 
 		List<CustomTestCase> testCases = testCaseRepository.findByPostId(postId);
 
-		return convertPostToDetailResponseDto(post, testCases, userEmail);
+		return convertPostDetailToDtoList(post, testCases, authUser);
 	}
 
 	public void deletePost(PostDeleteDto postDeleteDto, AuthUser authUser) {
@@ -119,16 +114,6 @@ public class PostService {
 		postRepository.delete(post);
 	}
 
-	private User findUserByEmail(String email) {
-		return userRepository.findByEmail(email)
-			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
-	}
-
-	private Post findPostById(Long postId) {
-		return postRepository.findById(postId)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
-	}
-
 	private List<PostsResponseDto> convertPostListToDtoList(List<Post> posts, AuthUser authUser) {
 		if (authUser == null) {
 			return posts.stream()
@@ -142,10 +127,11 @@ public class PostService {
 	}
 
 	private PostsResponseDto convertPostToResponseDto(Post post, String userEmail) {
-		final int commentCount = commentRepository.countCommentsByPost(post);
-		final int likeCount = likeRepository.findLikeCountByPost(post);
-		final int codeCount = userCodeRepository.countUserCodeByPost(post);
-		final boolean likeType = userLikeService.isPostLikedByUser(userEmail, post.getId());
+		int commentCount = commentRepository.countCommentsByPost(post);
+		int likeCount = likeRepository.findLikeCountByPost(post);
+		int codeCount = userCodeRepository.countUserCodeByPost(post);
+
+		boolean likeType = userLikeService.isPostLikedByUser(userEmail, post.getId());
 
 		SimpleUserResDto simpleUserResDto = createSimpleUserResDto(post);
 
@@ -160,25 +146,34 @@ public class PostService {
 			post.getCreatedAt(), post.getContent(), commentCount, likeCount, codeCount, likeType, simpleUserResDto);
 	}
 
+	private PostDetailResponseDto convertPostDetailToDtoList(Post post, List<CustomTestCase> testCases,
+		AuthUser authUser) {
+		if (authUser == null) {
+			return convertPostToDetailResponseDto(post, testCases, null);
+		}
+
+		return convertPostToDetailResponseDto(post, testCases, authUser);
+	}
+
 	private PostDetailResponseDto convertPostToDetailResponseDto(Post post, List<CustomTestCase> testCases,
-		String userEmail) {
+		AuthUser authUser) {
 		int commentCount = commentRepository.countCommentsByPost(post);
 		int likeCount = likeRepository.findLikeCountByPost(post);
 		int codeCount = userCodeRepository.countUserCodeByPost(post);
-		boolean likeType = userLikeService.isPostLikedByUser(userEmail, post.getId());
-		boolean isOwner = post.getUser().getEmail().equals(userEmail);
+
+		boolean likeType = userLikeService.isPostLikedByUser(authUser.email(), post.getId());
+		boolean isOwner = post.getUser().getEmail().equals(authUser.email());
 
 		return createPostDetailResponseDto(post, testCases, commentCount, likeCount, codeCount, likeType, isOwner);
 	}
 
 	private PostDetailResponseDto createPostDetailResponseDto(Post post, List<CustomTestCase> testCases,
 		int commentCount, int likeCount, int codeCount, boolean likeType, boolean isOwner) {
-		return new PostDetailResponseDto(post.getId(),
-			post.getId() + THOUSAND, post.getTitle(), post.getCategory().toString(), post.getCreatedAt(),
+		return new PostDetailResponseDto(
+			post.getId(), post.getId() + THOUSAND, post.getTitle(), post.getCategory().toString(), post.getCreatedAt(),
 			post.getContent(), testCases, post.getCondition(), isOwner, likeCount, commentCount, codeCount,
 			post.getLanguage().toString(), likeType, post.getCode()
 		);
-
 	}
 
 	private SimpleUserResDto createSimpleUserResDto(Post post) {
@@ -188,6 +183,16 @@ public class PostService {
 			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_IMAGE_NOT_FOUND));
 
 		return new SimpleUserResDto(user.getEmail(), user.getNickname(), profileImage.getProfileImage());
+	}
+
+	private User findUserByEmail(String email) {
+		return userRepository.findByEmail(email)
+			.orElseThrow(() -> new UnauthorizedException(ErrorCode.FAIL_LOGIN_REQUIRED));
+	}
+
+	private Post findPostById(Long postId) {
+		return postRepository.findById(postId)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_POST_NOT_FOUND));
 	}
 
 	private void validateCategory(String category) {
