@@ -10,7 +10,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record PostCreateDto(
-	@NotBlank @Length(max = 20, message = "[❎ ERROR] 제목은 최대 20자 입니다.")
+	@NotBlank
+	@Length(max = 20, message = "[❎ ERROR] 제목은 최대 20자 입니다.")
 	String title,
 
 	@NotBlank(message = "[❎ ERROR] 카테고리는 필수 입력값입니다.")
@@ -28,6 +29,7 @@ public record PostCreateDto(
 	List<CustomTestCase> testCases,
 
 	@NotBlank(message = "[❎ ERROR] 정답 코드는 필수 입력값입니다.")
+	@Length(max = 1000, message = "[❎ ERROR] 코드는 최대 1000자 입니다.")
 	String code
 ) {
 }
