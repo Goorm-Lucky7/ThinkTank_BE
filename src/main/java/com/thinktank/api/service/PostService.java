@@ -105,15 +105,7 @@ public class PostService {
 
 		validateUserOwnership(user, post);
 
-		userCodeRepository.deleteByPost(post);
-		commentRepository.deleteByPost(post);
-		testCaseRepository.deleteByPost(post);
-
-		List<UserLike> userLikes = userLikeRepository.findByLikePost(post);
-		userLikeRepository.deleteAll(userLikes);
-
-		likeRepository.deleteByPost(post);
-		postRepository.delete(post);
+		deletePostData(post);
 	}
 
 	private List<PostsResponseDto> convertPostListToDtoList(List<Post> posts, AuthUser authUser) {
@@ -213,6 +205,18 @@ public class PostService {
 		if (!Objects.equals(user.getId(), post.getUser().getId())) {
 			throw new BadRequestException(ErrorCode.FAIL_POST_DELETION_FORBIDDEN);
 		}
+	}
+
+	private void deletePostData(Post post) {
+		userCodeRepository.deleteByPost(post);
+		commentRepository.deleteByPost(post);
+		testCaseRepository.deleteByPost(post);
+
+		List<UserLike> userLikes = userLikeRepository.findByLikePost(post);
+		userLikeRepository.deleteAll(userLikes);
+
+		likeRepository.deleteByPost(post);
+		postRepository.delete(post);
 	}
 
 	private void validateJudge(List<CustomTestCase> testCases, String code, String language) {
