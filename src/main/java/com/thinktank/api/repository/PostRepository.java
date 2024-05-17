@@ -8,5 +8,6 @@ import com.thinktank.api.entity.Post;
 import com.thinktank.api.entity.User;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
+
 	Page<Post> findByUser(User user, Pageable pageable);
 }

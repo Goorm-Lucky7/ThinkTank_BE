@@ -11,12 +11,12 @@ import com.thinktank.api.entity.User;
 import com.thinktank.api.entity.UserCode;
 
 public interface UserCodeRepository extends JpaRepository<UserCode, Long> {
-	Boolean existsByUserAndPost(User user, Post post);
+	boolean existsByUserAndPost(User user, Post post);
 
 	@Query("SELECT COUNT(uc) FROM UserCode uc WHERE uc.post = :post")
 	int countUserCodeByPost(@Param("post") Post post);
 
-	void deleteByPostId(Long postId);
+	void deleteByPost(Post post);
 
 	UserCode findByPostId(Long postId);
 

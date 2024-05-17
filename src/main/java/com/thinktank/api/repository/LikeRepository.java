@@ -10,10 +10,11 @@ import com.thinktank.api.entity.Like;
 import com.thinktank.api.entity.Post;
 
 public interface LikeRepository extends JpaRepository<Like, Long> {
+
 	Optional<Like> findByPost(Post post);
 
 	@Query("SELECT COALESCE(SUM(l.likeCount), 0) FROM Like l WHERE l.post = :post")
 	int findLikeCountByPost(@Param("post") Post post);
 
-	void deleteByPostId(Long postId);
+	void deleteByPost(Post post);
 }
