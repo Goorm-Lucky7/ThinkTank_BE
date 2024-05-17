@@ -50,6 +50,9 @@ dependencies {
     // H2
     implementation 'com.h2database:h2'
 
+    // ENV
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
