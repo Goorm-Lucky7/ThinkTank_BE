@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.thinktank.api.dto.comment.request.CommentCreateDto;
 import com.thinktank.api.dto.comment.request.CommentDeleteDto;
-import com.thinktank.api.dto.comment.response.CommentsResponseDto;
+import com.thinktank.api.dto.comment.response.CommentsResDto;
 import com.thinktank.api.entity.auth.AuthUser;
 import com.thinktank.api.service.CommentService;
 import com.thinktank.global.auth.annotation.Auth;
@@ -35,12 +35,12 @@ public class CommentController {
 	}
 
 	@GetMapping("/posts/{post-id}/comments")
-	public ResponseEntity<CommentsResponseDto> getCommentsByPostId(
+	public ResponseEntity<CommentsResDto> getCommentsByPostId(
 												@PathVariable("post-id") Long postId,
 												@Auth(required = false) AuthUser authUser,
 												@RequestParam(defaultValue = "0") int pageIndex,
 												@RequestParam(defaultValue = "10") int pageSize) {
-		CommentsResponseDto comments = commentService.getCommentsByPostId(postId, authUser, pageIndex, pageSize);
+		CommentsResDto comments = commentService.getCommentsByPostId(postId, authUser, pageIndex, pageSize);
 
 		return ResponseEntity.ok(comments);
 	}
