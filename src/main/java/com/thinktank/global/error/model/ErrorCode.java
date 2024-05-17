@@ -38,12 +38,16 @@ public enum ErrorCode {
 	FAIL_TOKEN_NOT_FOUND("[❎ ERROR] 요청하신 토큰을 찾을 수 없습니다."),
 	FAIL_LANGUAGE_NOT_FOUND("[❎ ERROR] 요청하신 언어를 찾을 수 없습니다."),
 	FAIL_IMAGE_NOT_FOUND("[❎ ERROR] 요청하신 이미지를 찾을 수 없습니다."),
+	FAIL_REGISTRATION_NOT_FOUND("[❎ ERROR] 요청하신 서비스 제공자를 찾을 수 없습니다."),
 
 
 	FAIL_EMAIL_CONFLICT("[❎ ERROR] 이미 존재하는 이메일입니다."),
 	FAIL_NICKNAME_CONFLICT("[❎ ERROR] 이미 존재하는 닉네임입니다."),
 	FAIL_USER_LIKE_NOT_FOUND("[❎ ERROR] 좋아요를 누른 회원을 찾을 수 없습니다."),
-	FAIL_LIKE_NOT_FOUND("[❎ ERROR] 존재하지 않는 좋아요입니다.");
+	FAIL_LIKE_NOT_FOUND("[❎ ERROR] 존재하지 않는 좋아요입니다."),
+
+
+	FAIL_INTERNAL_SERVER_ERROR("[❎ ERROR] 서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
 
 	private String message;
 }
