@@ -52,7 +52,7 @@ public class UserService {
 	@Transactional
 	public void updateUserDetails(AuthUser authUser, UserUpdateDto userUpdateDto) {
 		final User user = findUserByEmail(authUser.email());
-		validateNicknameNotExists(userUpdateDto.nickname());
+		validateNicknameForUpdate(userUpdateDto.nickname());
 
 		final ProfileImage profileImage = findProfileImageByEmail(user.getEmail());
 
@@ -100,6 +100,12 @@ public class UserService {
 	private void validatePasswordEquality(String rawPassword, String checkPassword) {
 		if (!rawPassword.equals(checkPassword)) {
 			throw new BadRequestException(ErrorCode.FAIL_INCORRECT_PASSWORD);
+		}
+	}
+
+	private void validateNicknameForUpdate(String nickname) {
+		if (nickname != null && !nickname.trim().isEmpty()) {
+			validateNicknameNotExists(nickname);
 		}
 	}
 }
