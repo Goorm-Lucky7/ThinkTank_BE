@@ -9,16 +9,15 @@ import lombok.Getter;
 
 @Component
 @Getter
-@ConfigurationProperties(prefix = "jwt.security.oauth2.client.registration")
 public class OAuthProperties {
 
-	@Value("kakao.client-id")
+	@Value("${KAKAO_CLIENT_ID}")
 	private String kakaoClientId;
 
-	@Value("kakao.client-secret")
+	@Value("${KAKAO_CLIENT_SECRET}")
 	private String kakaoClientSecret;
 
-	@Value("kakao.redirect-uri")
+	@Value("${KAKAO_REDIRECT_URI}")
 	private String kakaoRedirectUri;
 
 	@PostConstruct
