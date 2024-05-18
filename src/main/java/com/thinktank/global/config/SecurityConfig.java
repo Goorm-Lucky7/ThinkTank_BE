@@ -57,6 +57,7 @@ public class SecurityConfig {
 		return web -> web.ignoring()
 			.requestMatchers(PathRequest.toStaticResources().atCommonLocations())
 			.requestMatchers("/h2-console/**")
+			.requestMatchers("/favicon.ico")
 			.requestMatchers("/api/signup")
 			.requestMatchers("/api/login")
 			.requestMatchers("/api/reissue");
@@ -75,6 +76,7 @@ public class SecurityConfig {
 			.requestMatchers(HttpMethod.GET, "/api/posts/*/comments").permitAll()
 			.requestMatchers(HttpMethod.GET,"/api/signup/*").permitAll()
 			.requestMatchers(HttpMethod.GET, "/api/login/oauth2/*").permitAll()
+			.requestMatchers("/favicon.ico").permitAll()
 			.anyRequest().authenticated()
 		);
 
