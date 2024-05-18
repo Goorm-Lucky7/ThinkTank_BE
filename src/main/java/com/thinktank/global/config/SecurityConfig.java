@@ -74,7 +74,6 @@ public class SecurityConfig {
 			.requestMatchers(HttpMethod.GET, "/api/users/profile").permitAll()
 			.requestMatchers(HttpMethod.GET, "/api/posts/*/comments").permitAll()
 			.requestMatchers(HttpMethod.GET,"/api/signup/*").permitAll()
-			.requestMatchers(HttpMethod.GET, "/api/login/oauth2/*").permitAll()
 			.anyRequest().authenticated()
 		);
 
@@ -84,7 +83,7 @@ public class SecurityConfig {
 				.baseUri("/oauth2/authorization")
 			)
 			.redirectionEndpoint(redirection -> redirection
-				.baseUri("/api/login/oauth2/kakao")
+				.baseUri("/login/oauth2/*")
 			)
 			.userInfoEndpoint(userInfo -> userInfo
 				.userService(customOAuth2UserService)

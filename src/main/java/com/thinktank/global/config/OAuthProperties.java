@@ -1,6 +1,7 @@
 package com.thinktank.global.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
@@ -8,15 +9,16 @@ import lombok.Getter;
 
 @Component
 @Getter
+@ConfigurationProperties(prefix = "jwt.security.oauth2.client.registration")
 public class OAuthProperties {
 
-	@Value("${KAKAO_CLIENT_ID}")
+	@Value("kakao.client-id")
 	private String kakaoClientId;
 
-	@Value("${KAKAO_CLIENT_SECRET}")
+	@Value("kakao.client-secret")
 	private String kakaoClientSecret;
 
-	@Value("${KAKAO_REDIRECT_URI}")
+	@Value("kakao.redirect-uri")
 	private String kakaoRedirectUri;
 
 	@PostConstruct
