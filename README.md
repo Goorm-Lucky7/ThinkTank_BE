@@ -4,7 +4,7 @@
 
 **프로젝트 기간** : 2024.04.25 ~ 2023.05.20
 
-🔗 [ThinkTank 서비스 둘러보기](https://d26i62iijbw0u2.cloudfront.net/) (데스크탑/태블릿 환경에서 이용 가능)
+🔗 [ThinkTank 서비스 둘러보기](http://d26i62iijbw0u2.cloudfront.net/) (데스크탑/태블릿 환경에서 이용 가능)
 
 🎬 [시연 영상 보러가기 ]()
 
