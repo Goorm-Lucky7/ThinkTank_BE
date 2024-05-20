@@ -58,12 +58,7 @@
 <br/><br/>
 
 ## ✔ 아키텍처
-<img width="833" alt="architecture" src="https://github.com/j2an777/ThinkTank_FE/assets/110087099/6623c7cb-e595-45b6-a970-df7e1d5cb0f9">
-
-<br/><br/>
-
-## 🐳🍫 배포환경
-<img src="readme-image/server.png" width="1000" height="600" alt="server.png"/>
+<img width="833" alt="architecture" src="https://github.com/Goorm-Lucky7/ThinkTank_BE/assets/110027004/58dd0592-d284-4367-b130-848faae7bc8f">
 
 <br/><br/>
 
