@@ -112,7 +112,7 @@ com.thinktank
 <br/><br/>
 
 ## 🗃️ ERD
-<img src="readme-image/erd.png" width="1000" height="600" alt="erd.png"/>
+<img src="https://github.com/Goorm-Lucky7/ThinkTank_BE/assets/110027004/10ce9d7a-1748-423d-a747-8e889f592e43" width="1000" height="600" alt="erd.png"/>
 
 <br/><br/>
 
