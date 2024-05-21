@@ -1,7 +1,6 @@
 package com.thinktank.api.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -89,22 +88,33 @@ public class CommentService {
 	}
 
 	private List<CommentResDto> convertToCommentResDtoList(Page<Comment> page, AuthUser authUser) {
+		if (authUser == null) {
+			return page.getContent().stream()
+				.map(comment -> convertToCommentResDto(null, comment))
+				.toList();
+		}
+
 		return page.getContent().stream()
 			.map(comment -> convertToCommentResDto(authUser, comment))
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	private CommentResDto convertToCommentResDto(AuthUser authUser, Comment comment) {
+		String profileImage = null;
+		if (authUser != null) {
+			profileImage = findProfileImageByUserEmail(authUser.email());
+		}
+
 		return new CommentResDto(
 			comment.getId(),
 			comment.getContent(),
 			comment.getCreatedAt().toString(),
 			isUserAuthor(authUser, comment),
-			new CommentUserResDto(findUserNicknameByComment(comment), findProfileImageByUserEmail(authUser.email())));
+			new CommentUserResDto(findUserNicknameByComment(comment), profileImage));
 	}
 
 	private boolean isUserAuthor(AuthUser authUser, Comment comment) {
-		return authUser != null && comment.getUser().getEmail().equals(authUser.email());
+		return (authUser != null) && comment.getUser().getEmail().equals(authUser.email());
 	}
 
 	private String findUserNicknameByComment(Comment comment) {
@@ -112,9 +122,9 @@ public class CommentService {
 	}
 
 	private String findProfileImageByUserEmail(String email) {
-		 return profileImageRepository.findByUserEmail(email)
-			 .orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_IMAGE_NOT_FOUND))
-			 .getProfileImage();
+		return profileImageRepository.findByUserEmail(email)
+			.orElseThrow(() -> new NotFoundException(ErrorCode.FAIL_IMAGE_NOT_FOUND))
+			.getProfileImage();
 	}
 
 	private PageInfo createPageInfo(Page<Comment> page, int pageIndex) {
@@ -141,7 +151,7 @@ public class CommentService {
 		boolean isUserComment = isUserComment(comment, authUser.email());
 		boolean isCommentInUserPost = isCommentInUserPost(postId, authUser.email());
 
-		if(!isUserComment && !isCommentInUserPost){
+		if (!isUserComment && !isCommentInUserPost) {
 			throw new UnauthorizedException(ErrorCode.FAIL_COMMENT_DELETION_FORBIDDEN);
 		}
 	}

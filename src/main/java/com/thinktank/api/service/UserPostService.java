@@ -95,7 +95,7 @@ public class UserPostService {
 
 		return userCodesPage.map(userCode -> {
 			Post post = userCode.getPost();
-			return toPostSolved(post);
+			return toPostSolved(post, user);
 		});
 	}
 
@@ -130,8 +130,9 @@ public class UserPostService {
 		);
 	}
 
-	private PostSolvedResponseDto toPostSolved(Post post) {
-		UserCode userCode = userCodeRepository.findByPostId(post.getId());
+	private PostSolvedResponseDto toPostSolved(Post post, User user) {
+		final UserCode userCode = userCodeRepository.findByPostAndUser(post, user);
+
 		return new PostSolvedResponseDto(
 			post.getId(), post.getId() + THOUSAND, post.getLanguage().toString(), post.getTitle(),
 			userCode.getCode()

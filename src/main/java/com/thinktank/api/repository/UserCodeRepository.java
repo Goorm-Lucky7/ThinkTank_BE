@@ -18,7 +18,7 @@ public interface UserCodeRepository extends JpaRepository<UserCode, Long> {
 
 	void deleteByPost(Post post);
 
-	UserCode findByPostId(Long postId);
+	UserCode findByPostAndUser(Post post, User user);
 
 	Page<UserCode> findByUser(User user, Pageable pageable);
 }
