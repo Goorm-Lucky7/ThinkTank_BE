@@ -36,16 +36,16 @@ spring:
 
         registration:
           kakao:
-            client-id: 684a5dde632a9f23877244e23ea8620c
-            client-secret: BSxiI8nSqy3Ja3e15Hw6r8ESmU9ULN35
+            client-id: { KAKAO_CLIENT_ID }
+            client-secret: { KAKAO_CLIENT_SECRET }
             redirect-uri: http://localhost:8080/oauth/authorize/kakao
             authorization-grant-type: authorization_code
             client-name: Kakao
             scope: profile_nickname, account_email
 
           google:
-            client-id: 864609368162-s04mmrh57da6mr27gugi7onts8u576d2.apps.googleusercontent.com
-            client-secret: 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
+            client-id: { GOOGLE_CLIENT_ID }
+            client-secret: { GOOGLE_CLIENT_SECRET }
             scope: email, profile
             redirect-uri: http://localhost:8080/oauth/authorize/google
             client-name: Google
